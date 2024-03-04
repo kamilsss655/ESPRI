@@ -14,15 +14,14 @@
  *     limitations under the License.
  */
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "esp_log.h"
+#include "freertos/semphr.h"
 
-#include "hardware/led.h"
-#include "hardware/button.h"
+#define BUTTON_GPIO_PIN 36
+#define BUTTON_TAG "BUTTON"
 
-void app_main() {
-    // Create LED_blink task
-    xTaskCreate(LED_blink, "LED_blink", 4096, NULL, 10, NULL);
-    // Create button monitor task
-    xTaskCreate(BUTTON_monitor, "BUTTON_monitor", 4096, NULL, 10, NULL);
-}
+void BUTTON_monitor(void *pvParameters);
