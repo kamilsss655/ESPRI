@@ -7,3 +7,6 @@ docker:
 
 flash:
 	./flash-with-esptool.sh
+
+run:
+	make docker && make flash
