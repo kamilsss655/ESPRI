@@ -17,9 +17,11 @@
 #include <driver/gpio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "esp_log.h"
 
 #define LED_PIN 2
 #define LED_DELAY_MS 2000
+#define LED_TAG "LED" 
 
 void led_blink(void *pvParams) {
     gpio_reset_pin(LED_PIN);
@@ -27,8 +29,10 @@ void led_blink(void *pvParams) {
 
     while (1) {
         gpio_set_level(LED_PIN, 1);
+        ESP_LOGI(LED_TAG, "Turning on the LED");  
         vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
         gpio_set_level(LED_PIN, 0);
+        ESP_LOGI(LED_TAG, "Turning off the LED");  
         vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
     }
 }
