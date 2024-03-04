@@ -1,7 +1,7 @@
 ---
-name: "[FEATURE] Please use a title that makes sense"
+name: Feature request
 about: Suggest an idea for this project
-title: ''
+title: "[FEATURE] Please use a title that makes sense"
 labels: enhancement
 assignees: ''
 
