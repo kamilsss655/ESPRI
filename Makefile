@@ -4,3 +4,6 @@ PROJECT_NAME := espri
 
 docker:
 	./compile-with-docker.sh
+
+flash:
+	./flash-with-esptool.sh

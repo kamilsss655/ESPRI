@@ -14,8 +14,25 @@
  *     limitations under the License.
  */
 
-#include <stdio.h>
+#include <driver/gpio.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
-void app_main(void)
-{
+#define LED_PIN 2
+#define LED_DELAY_MS 2000
+
+void led_blink(void *pvParams) {
+    gpio_reset_pin(LED_PIN);
+    gpio_set_direction (LED_PIN, GPIO_MODE_OUTPUT);
+
+    while (1) {
+        gpio_set_level(LED_PIN, 1);
+        vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
+        gpio_set_level(LED_PIN, 0);
+        vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
+    }
+}
+
+void app_main() {
+    xTaskCreate(led_blink, "led_blink", 4096, NULL, 10, NULL);
 }
