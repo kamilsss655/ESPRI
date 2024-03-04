@@ -17,6 +17,14 @@ The physicial inteface layer between the ESPRI and the host radio will be throug
 
 The audio input and output (for the means of time domain scrambling) would be through the Kenwood connector.
 
+## Building
+This project uses Docker to build binaries.
+
+1. To compile:
+```
+make docker
+```
+
 ## References
 
 - https://github.com/skuep/AIOC
