@@ -14,12 +14,22 @@
  *     limitations under the License.
  */
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include "led.h"
 
-#include "hardware/led.h"
+// Blinks LED
+void LED_blink(void *pvParameters)
+{
+    gpio_reset_pin(LED_PIN);
+    gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
 
-void app_main() {
-    // Create LED_blink task
-    xTaskCreate(LED_blink, "LED_blink", 4096, NULL, 10, NULL);
+    while (1)
+    {
+        ESP_LOGI(LED_TAG, "Turning on the LED");
+        gpio_set_level(LED_PIN, 1);
+        vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
+
+        ESP_LOGI(LED_TAG, "Turning off the LED");
+        gpio_set_level(LED_PIN, 0);
+        vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
+    }
 }

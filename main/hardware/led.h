@@ -14,12 +14,12 @@
  *     limitations under the License.
  */
 
+#include <driver/gpio.h>
 #include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include "esp_log.h"
 
-#include "hardware/led.h"
+#define LED_PIN 2
+#define LED_DELAY_MS 2000
+#define LED_TAG "LED" 
 
-void app_main() {
-    // Create LED_blink task
-    xTaskCreate(LED_blink, "LED_blink", 4096, NULL, 10, NULL);
-}
+void LED_blink(void *pvParameters);
