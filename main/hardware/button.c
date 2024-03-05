@@ -16,6 +16,8 @@
 
 #include "button.h"
 
+static const char* TAG = "BUTTON";
+
 SemaphoreHandle_t buttonSemaphore = NULL;
 
 // button pressed interrupt function
@@ -46,7 +48,7 @@ void BUTTON_monitor(void *pvParameters)
     { // if semaphore was set then the button was pressed
         if (xSemaphoreTake(buttonSemaphore, portMAX_DELAY) == pdTRUE)
         {
-            ESP_LOGI(BUTTON_TAG, "Button pressed.");
+            ESP_LOGI(TAG, "Button pressed.");
         }
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }

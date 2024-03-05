@@ -22,6 +22,5 @@
 #include "freertos/semphr.h"
 
 #define BUTTON_GPIO_PIN 36
-#define BUTTON_TAG "BUTTON"
 
 void BUTTON_monitor(void *pvParameters);

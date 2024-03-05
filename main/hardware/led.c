@@ -16,6 +16,8 @@
 
 #include "led.h"
 
+static const char* TAG = "LED";
+
 // Blinks LED
 void LED_blink(void *pvParameters)
 {
@@ -24,11 +26,11 @@ void LED_blink(void *pvParameters)
 
     while (1)
     {
-        ESP_LOGI(LED_TAG, "Turning on the LED");
+        ESP_LOGI(TAG, "Turning on the LED");
         gpio_set_level(LED_PIN, 1);
         vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
 
-        ESP_LOGI(LED_TAG, "Turning off the LED");
+        ESP_LOGI(TAG, "Turning off the LED");
         gpio_set_level(LED_PIN, 0);
         vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
     }
