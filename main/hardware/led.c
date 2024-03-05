@@ -16,7 +16,7 @@
 
 #include "led.h"
 
-static const char* TAG = "LED";
+static const char *TAG = "LED";
 
 // Blinks LED
 void LED_blink(void *pvParameters)
