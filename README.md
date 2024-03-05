@@ -75,7 +75,6 @@ Thank you for your interest in contributing to this project! Here are some of th
 * Record videos and post on other platforms
 * Spread the word about this project
 * Write and edit the documentation
-* Donate to the project using the "Sponsor" button
 
 ## References
 
