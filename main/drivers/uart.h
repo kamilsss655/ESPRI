@@ -25,4 +25,6 @@
 
 #define BUF_SIZE (1024)
 
-void UART_run(void);
+void UART_init(void);
+void UART_send(const void *src, size_t size);
+void UART_monitor(void *pvParameters);
