@@ -16,40 +16,45 @@
 
 #include "button.h"
 
-static const char* TAG = "BUTTON";
+static const char *TAG = "BUTTON";
 
-SemaphoreHandle_t buttonSemaphore = NULL;
+QueueHandle_t buttonQueue;
 
 // button pressed interrupt function
-void IRAM_ATTR BUTTON_isr_handler(void *arg)
+static void IRAM_ATTR BUTTON_isr_handler(void *arg)
 {
-    // give semaphore to indicate button was pressed
-    xSemaphoreGive(buttonSemaphore);
+    // pin number of the button pressed
+    int pinNumber = (uint8_t)arg;
+    // send button pressed event to the button queue
+    xQueueSendFromISR(buttonQueue, &pinNumber, NULL);
 }
 
 // initialize button handling
 void BUTTON_init()
 {
-    buttonSemaphore = xSemaphoreCreateBinary();
+    buttonQueue = xQueueCreate(10, sizeof(uint8_t));
 
     gpio_reset_pin(BUTTON_GPIO_PIN);
     gpio_set_direction(BUTTON_GPIO_PIN, GPIO_MODE_INPUT);
     gpio_set_intr_type(BUTTON_GPIO_PIN, GPIO_INTR_NEGEDGE);
     gpio_install_isr_service(0);
-    gpio_isr_handler_add(BUTTON_GPIO_PIN, BUTTON_isr_handler, NULL);
+    gpio_isr_handler_add(BUTTON_GPIO_PIN, BUTTON_isr_handler, (void *)BUTTON_GPIO_PIN);
 }
 
-// monitor button pressed semaphore
+// monitor button pressed queue
 void BUTTON_monitor(void *pvParameters)
 {
+    uint8_t pinNumber;
+
     BUTTON_init();
 
-    while (1)
-    { // if semaphore was set then the button was pressed
-        if (xSemaphoreTake(buttonSemaphore, portMAX_DELAY) == pdTRUE)
+    while (true)
+    {
+        if (xQueueReceive(buttonQueue, &pinNumber, portMAX_DELAY))
         {
-            ESP_LOGI(TAG, "Button pressed.");
+            ESP_LOGI(TAG, "GPIO %d was pressed.", pinNumber);
+
+            // TODO: Disable interrupt for a while to debounce
         }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
