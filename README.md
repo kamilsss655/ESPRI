@@ -44,7 +44,17 @@ make flash
 git clone --recursive https://github.com/espressif/esp-idf.git
 ```
 
-2. Update VS Code include PATH (file `c_cpp_properties.json`):
+2. Remove `examples` folder:
+```
+rm -rf esp-idf/examples
+```
+
+3. Remove `.git` folder:
+```
+rm -rf esp-idf/.git
+```
+
+4. Update VS Code include PATH (file `c_cpp_properties.json`):
 
 ```
  "includePath": [
