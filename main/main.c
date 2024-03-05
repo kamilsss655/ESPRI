@@ -15,7 +15,6 @@
  */
 
 #include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 
 #include "helper/rtos.h"
 #include "hardware/led.h"
