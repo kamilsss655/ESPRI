@@ -14,13 +14,6 @@
  *     limitations under the License.
  */
 
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/gpio.h"
-#include "esp_log.h"
-#include "freertos/semphr.h"
-
 #define BUTTON_GPIO_PIN 36
 
 void BUTTON_monitor(void *pvParameters);

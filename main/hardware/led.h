@@ -14,10 +14,6 @@
  *     limitations under the License.
  */
 
-#include <driver/gpio.h>
-#include <freertos/FreeRTOS.h>
-#include "esp_log.h"
-
 #define LED_PIN 2
 #define LED_DELAY_MS 2000
 

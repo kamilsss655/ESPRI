@@ -14,6 +14,12 @@
  *     limitations under the License.
  */
 
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "esp_log.h"
+#include "freertos/semphr.h"
 #include "led.h"
 
 static const char *TAG = "LED";
