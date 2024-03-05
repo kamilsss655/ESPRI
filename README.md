@@ -63,6 +63,20 @@ rm -rf esp-idf/.git
             ],
 ```
 
+## How to contribute
+
+Thank you for your interest in contributing to this project! Here are some of the many ways in which you can help:
+
+* Report bugs
+* Suggest improvements
+* Audit the source code
+* Submit PRs to fix bugs or implement features
+* Test new releases and updates
+* Record videos and post on other platforms
+* Spread the word about this project
+* Write and edit the documentation
+* Donate to the project using the "Sponsor" button
+
 ## References
 
 - https://github.com/skuep/AIOC
