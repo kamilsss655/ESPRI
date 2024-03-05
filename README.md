@@ -35,6 +35,24 @@ make docker
 make flash
 ```
 
+## Development
+
+To fix Visual Studio Code missing defintions to ESP-IDF functions:
+
+1. Download ESP-IDF library:
+```
+git clone --recursive https://github.com/espressif/esp-idf.git
+```
+
+2. Update VS Code include PATH (file `c_cpp_properties.json`):
+
+```
+ "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/esp-idf/components/**"
+            ],
+```
+
 ## References
 
 - https://github.com/skuep/AIOC
