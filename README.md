@@ -47,7 +47,7 @@ make flash
 
 ## License
 
-Modified work Copyright 2024 kamilsss655
+Copyright 2024 kamilsss655
 https://github.com/kamilsss655
 
 Licensed under the Apache License, Version 2.0 (the "License");
