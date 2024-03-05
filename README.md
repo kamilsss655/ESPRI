@@ -37,7 +37,7 @@ make flash
 
 ## Development
 
-To fix Visual Studio Code missing defintions to ESP-IDF functions:
+### To fix Visual Studio Code missing defintions to ESP-IDF functions:
 
 1. Download ESP-IDF library:
 ```
