@@ -17,12 +17,13 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include "helper/rtos.h"
 #include "hardware/led.h"
 #include "hardware/button.h"
 
 void app_main() {
     // Create LED_blink task
-    xTaskCreate(LED_blink, "LED_blink", 4096, NULL, 10, NULL);
+    xTaskCreate(LED_blink, "LED_blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
     // Create button monitor task
-    xTaskCreate(BUTTON_monitor, "BUTTON_monitor", 4096, NULL, 10, NULL);
+    xTaskCreate(BUTTON_monitor, "BUTTON_monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 }
