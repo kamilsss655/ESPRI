@@ -14,9 +14,6 @@
  *     limitations under the License.
  */
 
-// Fixes missing ../hal.h error
-#define __XTENSA__
-
 #include <freertos/FreeRTOS.h>
 
 #include "helper/rtos.h"
