@@ -28,7 +28,7 @@ QueueHandle_t buttonQueue;
 static void IRAM_ATTR BUTTON_isr_handler(void *arg)
 {
     // pin number of the button pressed
-    int pinNumber = (uint8_t)arg;
+    uint8_t pinNumber = (int)arg;
     // send button pressed event to the button queue
     xQueueSendFromISR(buttonQueue, &pinNumber, NULL);
 }
