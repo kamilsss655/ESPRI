@@ -26,7 +26,7 @@ static const char *TAG = "APP/BUTTON";
 void BUTTON_handle(BUTTON_Event_t buttonEvent)
 {
     // Send SMS
-    static const char *message = "SMS: Button \npressed on ESP.\n\r";
+    static const char *message = "SMS: Button pressed on \nESP.\n\r";
     UART_send((const char *)message, strlen(message));
     ESP_LOGI(TAG, "Sent: %s", message);
 }

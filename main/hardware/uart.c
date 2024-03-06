@@ -59,13 +59,13 @@ void UART_monitor(void *pvParameters)
     {
         // Read data from the UART
         int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
-        // UART_send((const char *)data, len);
+
         if (len)
         {
             data[len] = '\0';
             ESP_LOGI(TAG, "Received: %s", (char *)data);
 
-            //TODO: Have this call a separate UART_handle_receive function in app/uart.c
+            // TODO: Have this call a separate UART_handle_receive function in app/uart.c
             // to perform application specific logic
         }
     }
