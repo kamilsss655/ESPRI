@@ -14,6 +14,9 @@
  *     limitations under the License.
  */
 
+#ifndef HARDWARE_UART_H
+#define HARDWARE_UART_H
+
 #define ECHO_TEST_TXD 16
 #define ECHO_TEST_RXD 17
 #define ECHO_TEST_RTS 2
@@ -28,3 +31,5 @@
 void UART_init(void);
 void UART_send(const void *src, size_t size);
 void UART_monitor(void *pvParameters);
+
+#endif

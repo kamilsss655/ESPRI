@@ -19,7 +19,7 @@
 #include "helper/rtos.h"
 #include "hardware/led.h"
 #include "hardware/button.h"
-#include "drivers/uart.h"
+#include "hardware/uart.h"
 
 void app_main()
 {

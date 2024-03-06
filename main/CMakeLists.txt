@@ -1,9 +1,9 @@
 set(srcs
     "main.c"
     "app/button.c"
-    "drivers/uart.c"
-    "hardware/led.c"
     "hardware/button.c"
+    "hardware/led.c"
+    "hardware/uart.c"
 )
 
 idf_component_register(SRCS "${srcs}"

@@ -22,7 +22,7 @@
 
 #include "uart.h"
 
-static const char *TAG = "DRIVERS/UART";
+static const char *TAG = "HW/UART";
 
 // Initialize UART
 void UART_init(void)
@@ -67,8 +67,6 @@ void UART_monitor(void *pvParameters)
 
             //TODO: Have this call a separate UART_handle_receive function in app/uart.c
             // to perform application specific logic
-
-            // consider moving this to /hardware folder?
         }
     }
 }

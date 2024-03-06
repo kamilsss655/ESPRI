@@ -18,7 +18,7 @@
 #include <string.h>
 
 #include "button.h"
-#include "drivers/uart.h"
+#include "hardware/uart.h"
 
 static const char *TAG = "APP/BUTTON";
 
