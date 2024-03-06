@@ -17,27 +17,40 @@ The physicial inteface layer between the ESPRI and the host radio will be throug
 
 The audio input and output (for the means of time domain scrambling) would be through the Kenwood connector.
 
-## Prequisites
+## Dependencies
 
-1. Install docker.
-2. Install esptool:
-```
-pip3 install --user esptool
-```
-
-## Building
-1. To compile:
-```
-make docker
-```
-2. To flash:
-```
-make flash
-```
+This firmware uses:
+* Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
 
 ## Development
 
+### With Visual Studio Code and ESP-IDF extension
+
+This method will install ESP-IDF toolchain locally with the help of the `ESP-IDF` Visual Studio Code extension.
+
+PROS:
+* IntelliSense in Visual Studio Code will work and errors are linted live during development
+* Flashing, building, monitoring can be done directly from the Visual Studio Code
+
+CONS:
+* It will install toolchain locally
+
+STEPS:
+1. Install Visual Studio Code.
+2. Install ESP-IDF Visual Studio extension.
+3. Perform `EXPRESS` configuration and select correct ESP-IDF version
+
+### With Docker
+
 #### To fix Visual Studio Code missing defintions to ESP-IDF functions:
+
+This method will perform build within the Docker container.
+
+PROS:
+* Clean install.
+
+CONS:
+* IntelliSense in Visual Studio Code will not work (due to weird ESP-IDF structure and dynamic file inclusion)
 
 1. Download ESP-IDF library:
 ```
@@ -61,6 +74,21 @@ rm -rf esp-idf/.git
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/esp-idf/components/**"
             ],
+```
+
+5. Install esptool:
+```
+pip3 install --user esptool
+```
+
+6. Build:
+```
+make docker
+```
+
+7. Flash:
+```
+make flash
 ```
 
 ## How to contribute
