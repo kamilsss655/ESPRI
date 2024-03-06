@@ -46,7 +46,7 @@ void UART_init(void)
 // Send data over UART
 void UART_send(const void *src, size_t size)
 {
-    uart_write_bytes(ECHO_UART_PORT_NUM, (const char *)src, size);
+    uart_write_bytes_with_break(ECHO_UART_PORT_NUM, (const char *)src, size, 100);
 }
 
 // Monitor UART for incoming data

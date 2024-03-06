@@ -15,10 +15,11 @@
  */
 
 #include <esp_log.h>
-#include <string.h>
+#include <stdio.h> 
 
 #include "button.h"
 #include "hardware/uart.h"
+#include "external/printf/printf.h"
 
 static const char *TAG = "APP/BUTTON";
 
@@ -26,7 +27,8 @@ static const char *TAG = "APP/BUTTON";
 void BUTTON_handle(BUTTON_Event_t buttonEvent)
 {
     // Send SMS
-    static const char *message = "SMS: Button pressed on \nESP.\n\r";
-    UART_send((const char *)message, strlen(message));
-    ESP_LOGI(TAG, "Sent: %s", message);
+    char String[40];
+    snprintf(String, sizeof(String), "SMS: Button %d pressed on ESP.\n", buttonEvent.pin_number);
+    UART_send((const char *)String, sizeof(String));
+    ESP_LOGI(TAG, "Sent: %s", String);
 }
