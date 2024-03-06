@@ -13,14 +13,14 @@
  *     See the License for the specific language governing permissions and
  *     limitations under the License.
  */
-#include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <driver/gpio.h>
 #include <esp_log.h>
 
 #include "button.h"
+#include "app/button.h"
 
-static const char *TAG = "BUTTON";
+static const char *TAG = "HW/BUTTON";
 
 QueueHandle_t buttonQueue;
 
@@ -48,17 +48,22 @@ void BUTTON_init()
 // monitor button pressed queue
 void BUTTON_monitor(void *pvParameters)
 {
-    uint8_t pinNumber;
+    BUTTON_Event_t buttonEvent;
 
     BUTTON_init();
 
     while (true)
     {
-        if (xQueueReceive(buttonQueue, &pinNumber, portMAX_DELAY))
+        if (xQueueReceive(buttonQueue, &buttonEvent.pin_number, portMAX_DELAY))
         {
-            ESP_LOGI(TAG, "GPIO %d was pressed.", pinNumber);
+            buttonEvent.type = BUTTON_PRESSED;
+
+            ESP_LOGI(TAG, "GPIO %d was pressed.", buttonEvent.pin_number);
 
             // TODO: Disable interrupt for a while to debounce
+
+            // Handle button event
+            BUTTON_handle(buttonEvent);
         }
     }
 }

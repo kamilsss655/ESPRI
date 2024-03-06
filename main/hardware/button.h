@@ -14,6 +14,25 @@
  *     limitations under the License.
  */
 
+#ifndef HARDWARE_BUTTON_H
+#define HARDWARE_BUTTON_H
+
 #define BUTTON_GPIO_PIN 36
 
+// Button event type
+typedef enum
+{
+    BUTTON_PRESSED,
+    BUTTON_HELD
+} BUTTON_EventType_t;
+
+// Button event
+typedef struct
+{
+    BUTTON_EventType_t type;
+    uint8_t            pin_number;
+} BUTTON_Event_t;
+
 void BUTTON_monitor(void *pvParameters);
+
+#endif

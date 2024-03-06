@@ -14,7 +14,6 @@
  *     limitations under the License.
  */
 
-#include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <driver/uart.h>
@@ -23,7 +22,7 @@
 
 #include "uart.h"
 
-static const char *TAG = "UART";
+static const char *TAG = "DRIVERS/UART";
 
 // Initialize UART
 void UART_init(void)
@@ -65,6 +64,11 @@ void UART_monitor(void *pvParameters)
         {
             data[len] = '\0';
             ESP_LOGI(TAG, "Received: %s", (char *)data);
+
+            //TODO: Have this call a separate UART_handle_receive function in app/uart.c
+            // to perform application specific logic
+
+            // consider moving this to /hardware folder?
         }
     }
 }

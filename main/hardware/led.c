@@ -14,14 +14,13 @@
  *     limitations under the License.
  */
 
-#include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <driver/gpio.h>
 #include <esp_log.h>
 
 #include "led.h"
 
-static const char *TAG = "LED";
+static const char *TAG = "HW/LED";
 
 // Blinks LED
 void LED_blink(void *pvParameters)

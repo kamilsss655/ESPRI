@@ -14,17 +14,11 @@
  *     limitations under the License.
  */
 
-#ifndef HELPER_RTOS_H
-#define HELPER_RTOS_H
+#ifndef APP_BUTTON_H
+#define APP_BUTTON_H
 
-// Task priorities
-enum
-{
-    RTOS_PRIORITY_IDLE,
-    RTOS_PRIORITY_LOW,
-    RTOS_PRIORITY_MEDIUM,
-    RTOS_PRIORITY_HIGH,
-    RTOS_PRIORITY_HIGHEST
-};
+#include "hardware/button.h"
+
+void BUTTON_handle(BUTTON_Event_t buttonEvent);
 
 #endif

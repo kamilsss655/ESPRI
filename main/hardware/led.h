@@ -14,7 +14,12 @@
  *     limitations under the License.
  */
 
+#ifndef HARDWARE_LED_H
+#define HARDWARE_LED_H
+
 #define LED_PIN 2
 #define LED_DELAY_MS 2000
 
 void LED_blink(void *pvParameters);
+
+#endif

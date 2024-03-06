@@ -14,17 +14,19 @@
  *     limitations under the License.
  */
 
-#ifndef HELPER_RTOS_H
-#define HELPER_RTOS_H
+#include <esp_log.h>
+#include <string.h>
 
-// Task priorities
-enum
+#include "button.h"
+#include "drivers/uart.h"
+
+static const char *TAG = "APP/BUTTON";
+
+// Button event handler
+void BUTTON_handle(BUTTON_Event_t buttonEvent)
 {
-    RTOS_PRIORITY_IDLE,
-    RTOS_PRIORITY_LOW,
-    RTOS_PRIORITY_MEDIUM,
-    RTOS_PRIORITY_HIGH,
-    RTOS_PRIORITY_HIGHEST
-};
-
-#endif
+    // Send SMS
+    static const char *message = "SMS: Button \npressed on ESP.\n\r";
+    UART_send((const char *)message, strlen(message));
+    ESP_LOGI(TAG, "Sent: %s", message);
+}

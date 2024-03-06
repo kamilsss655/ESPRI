@@ -1,5 +1,6 @@
 set(srcs
     "main.c"
+    "app/button.c"
     "drivers/uart.c"
     "hardware/led.c"
     "hardware/button.c"
