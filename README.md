@@ -42,8 +42,6 @@ STEPS:
 
 ### With Docker
 
-#### To fix Visual Studio Code missing defintions to ESP-IDF functions:
-
 This method will perform build within the Docker container.
 
 PROS:
@@ -52,6 +50,7 @@ PROS:
 CONS:
 * IntelliSense in Visual Studio Code will not work (due to weird ESP-IDF structure and dynamic file inclusion)
 
+STEPS:
 1. Download ESP-IDF library:
 ```
 git clone --recursive https://github.com/espressif/esp-idf.git
