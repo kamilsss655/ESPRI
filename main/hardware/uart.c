@@ -46,7 +46,7 @@ void UART_init(void)
 // Send data over UART
 void UART_send(const void *src, size_t size)
 {
-    uart_write_bytes_with_break(ECHO_UART_PORT_NUM, (const char *)src, size, 100);
+    uart_write_bytes(ECHO_UART_PORT_NUM, (const char *)src, size);
 }
 
 // Monitor UART for incoming data
@@ -58,7 +58,7 @@ void UART_monitor(void *pvParameters)
     while (1)
     {
         // Read data from the UART
-        int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
+        int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1), 100 / portTICK_PERIOD_MS);
 
         if (len)
         {
