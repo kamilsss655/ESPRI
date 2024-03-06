@@ -109,3 +109,7 @@ XUNIT_RESULT*.xml
 
 # ESP-IDF development source code files
 esp-idf
+
+# .sdkconfig
+sdkconfig
+sdkconfig.old
