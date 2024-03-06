@@ -5,6 +5,7 @@ set(srcs
     "hardware/button.c"
     "hardware/led.c"
     "hardware/uart.c"
+    "hardware/wifi.c"
 )
 
 idf_component_register(SRCS "${srcs}"

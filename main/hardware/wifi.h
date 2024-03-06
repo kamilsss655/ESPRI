@@ -14,25 +14,9 @@
  *     limitations under the License.
  */
 
-#include <freertos/FreeRTOS.h>
+#ifndef HARDWARE_WIFI_H
+#define HARDWARE_WIFI_H
 
-#include "helper/rtos.h"
-#include "hardware/led.h"
-#include "hardware/button.h"
-#include "hardware/uart.h"
-#include "hardware/wifi.h"
+void WIFI_init(void);
 
-void app_main()
-{
-    // Create LED_blink task
-    xTaskCreate(LED_blink, "LED_blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
-    // Create button monitor task
-    xTaskCreate(BUTTON_monitor, "BUTTON_monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
-    
-    // Initialize UART
-    UART_init();
-    // Create UART monitor task
-    xTaskCreate(UART_monitor, "UART_monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
-    // Initialize WIFI
-    WIFI_init();
-}
+#endif
