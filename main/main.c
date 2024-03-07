@@ -16,30 +16,27 @@
 
 #include <freertos/FreeRTOS.h>
 
+#include "board.h"
 #include "helper/rtos.h"
 #include "hardware/led.h"
 #include "hardware/button.h"
 #include "hardware/uart.h"
-#include "hardware/wifi.h"
 
 void app_main()
 {
-    // TODO: Reorganize code as such:
     // Init board
-    // BOARD_init();
+    BOARD_init();
 
+    // TODO: Reorganize code as such:
     // Init tasks
     // TASKS_init();
 
     // Create LED_blink task
     xTaskCreate(LED_blink, "LED_blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+
     // Create button monitor task
     xTaskCreate(BUTTON_monitor, "BUTTON_monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
-    
-    // Initialize UART
-    UART_init();
+
     // Create UART monitor task
     xTaskCreate(UART_monitor, "UART_monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
-    // Initialize WIFI
-    WIFI_init();
 }

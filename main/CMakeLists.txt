@@ -1,5 +1,6 @@
 # include source files
 set(srcs
+    "board.c"
     "main.c"
     "app/button.c"
     "external/printf/printf.c"
