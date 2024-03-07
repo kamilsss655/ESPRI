@@ -14,14 +14,11 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_HTTP_SERVER_H
-#define HARDWARE_HTTP_SERVER_H
+#ifndef ROUTER_H
+#define ROUTER_H
 
-#include <esp_err.h>
+#include "helper/http.h"
 
-/* Scratch buffer size */
-#define SCRATCH_BUFSIZE 8192
-
-esp_err_t HTTP_SERVER_init(const char *base_path);
+void ROUTER_init(file_server_data *server_data, httpd_handle_t *server);
 
 #endif

@@ -14,14 +14,23 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_HTTP_SERVER_H
-#define HARDWARE_HTTP_SERVER_H
-
+#include <stdio.h>
+#include <string.h>
+#include <sys/param.h>
+#include <sys/unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
 #include <esp_err.h>
+#include <esp_log.h>
+#include <esp_vfs.h>
+#include <esp_spiffs.h>
+#include <esp_http_server.h>
 
-/* Scratch buffer size */
-#define SCRATCH_BUFSIZE 8192
-
-esp_err_t HTTP_SERVER_init(const char *base_path);
-
-#endif
+// Redirect / requests to /index.html file
+esp_err_t index_html_get_handler(httpd_req_t *req)
+{
+    httpd_resp_set_status(req, "307 Temporary Redirect");
+    httpd_resp_set_hdr(req, "Location", "/index.html");
+    httpd_resp_send(req, NULL, 0); // Response body can be empty
+    return ESP_OK;
+}

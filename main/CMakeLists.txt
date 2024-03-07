@@ -10,6 +10,10 @@ set(srcs
     "hardware/uart.c"
     "hardware/wifi.c"
     "hardware/spiffs.c"
+    "web/router.c"
+    "web/handlers/root_handler.c"
+    "web/handlers/static_files_handler.c"
+    "web/handlers/api/event_handler.c"
 )
 
 idf_component_register(SRCS "${srcs}"

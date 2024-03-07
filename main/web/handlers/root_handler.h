@@ -14,14 +14,13 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_HTTP_SERVER_H
-#define HARDWARE_HTTP_SERVER_H
+#ifndef ROOT_HANDLER_H
+#define ROOT_HANDLER_H
 
 #include <esp_err.h>
+#include <esp_http_server.h>
 
-/* Scratch buffer size */
-#define SCRATCH_BUFSIZE 8192
-
-esp_err_t HTTP_SERVER_init(const char *base_path);
+// Redirect / requests to /index.html file
+esp_err_t index_html_get_handler(httpd_req_t *req);
 
 #endif

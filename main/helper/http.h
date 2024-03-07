@@ -14,14 +14,19 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_HTTP_SERVER_H
-#define HARDWARE_HTTP_SERVER_H
+#ifndef HELPER_HTTP_H
+#define HELPER_HTTP_H
 
-#include <esp_err.h>
+#include <esp_vfs.h>
+#include "hardware/http_server.h"
 
-/* Scratch buffer size */
-#define SCRATCH_BUFSIZE 8192
+typedef struct
+{
+    // Base path of file storage
+    char base_path[ESP_VFS_PATH_MAX + 1];
 
-esp_err_t HTTP_SERVER_init(const char *base_path);
+    // Scratch buffer for temporary storage during file transfer
+    char scratch[SCRATCH_BUFSIZE];
+} file_server_data;
 
 #endif
