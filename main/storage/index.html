@@ -1,1 +1,87 @@
-<h1>Hello world!</h1>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESPRI - ESP Radio Interface</title>
+    <!-- TODO: -->
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"> -->
+    <link rel="stylesheet" href="materialize.min.css">
+    <!-- <style>
+        body {
+          background-color: #3f51b5;
+          /* color: #fff; */
+        }
+    </style> -->
+</head>
+
+<body class="blue-grey">
+    <div>
+        <nav class="nav-extended indigo darken-4">
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">ESPRI - ESP Radio Interface</a>
+                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li class="tab"><a href="#settings">Settings</a></li>
+                    <li class="tab"><a href="#about">About</a></li>
+                </ul>
+            </div>
+            <div class="nav-content">
+                <ul class="tabs tabs-transparent">
+                    <li class="tab col s3"><a href="#tab1" class="blue-text">Messenger</a></li>
+                    <li class="tab col s3"><a href="#tab2">Buttons</a></li>
+                    <li class="tab col s3"><a href="#tab3">Other</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <ul class="sidenav" id="mobile-demo">
+            <li class="tab"><a href="#settings">Settings</a></li>
+            <li class="tab"><a href="#about">About</a></li>
+        </ul>
+
+        <div class="row">
+
+            <div id="tab1" class="container">
+                <div class="card-panel">
+                    <div class="scrollable-textbox">
+                        <ul class="collection">
+                            <li class="collection-item indigo lighten-4">You can add as much text as you want here</li>
+                            <li class="collection-item">Ok, thanks for the information</li>
+                            <li class="collection-item">No problem</li>
+                            <li class="collection-item">Hello?</li>
+                        </ul>
+                    </div>
+                    <div class="input-field">
+                        <input id="userInput" type="text">
+                        <button class="btn waves-effect waves-light" type="submit" name="action">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab2" class="container">
+                <div class="card-panel">
+                    <p>Send message with a button</p>
+                    <button class="btn waves-effect waves-light" onclick="makeGetRequest()">Send</button>
+                </div>
+            </div>
+
+            <div id="tab3" class="container">
+                <div class="card-panel">
+                    <p>ESPRI (ESP Radio Interface) project providing extended functionalities to ham radios.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tabs = document.querySelectorAll('.tabs');
+            var instances = M.Tabs.init(tabs);
+        });
+    </script>
+</body>
+
+</html>

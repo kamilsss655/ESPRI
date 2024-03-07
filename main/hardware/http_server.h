@@ -19,6 +19,12 @@
 
 #include <esp_err.h>
 
+/* Max length a file path can have on storage */
+#define FILE_PATH_MAX (ESP_VFS_PATH_MAX + CONFIG_SPIFFS_OBJ_NAME_LEN)
+
+/* Scratch buffer size */
+#define SCRATCH_BUFSIZE 8192
+
 esp_err_t HTTP_SERVER_init(const char *base_path);
 
 #endif
