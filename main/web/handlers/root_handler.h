@@ -17,7 +17,6 @@
 #ifndef ROOT_HANDLER_H
 #define ROOT_HANDLER_H
 
-#include <esp_err.h>
 #include <esp_http_server.h>
 
 // Redirect / requests to /index.html file
