@@ -16,10 +16,14 @@
 
 #include "hardware/uart.h"
 #include "hardware/wifi.h"
+#include "hardware/spiffs.h"
 
 // Initialize the board
 void BOARD_init(void)
 {
+    // Initialize SPIFFS
+    const char *base_path = "/storage";
+    SPIFFS_init(base_path);
     // Initialize UART
     UART_init();
     // Initialize WIFI

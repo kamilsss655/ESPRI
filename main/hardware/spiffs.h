@@ -14,25 +14,11 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_UART_H
-#define HARDWARE_UART_H
+#ifndef HARDWARE_SPIFFS_H
+#define HARDWARE_SPIFFS_H
 
-#include <stddef.h>
+#include <esp_err.h>
 
-#define ECHO_TEST_TXD 16
-#define ECHO_TEST_RXD 17
-#define ECHO_TEST_RTS 2
-#define ECHO_TEST_CTS 4
-
-#define ECHO_UART_PORT_NUM   1
-// For some reason 240000 works better than target 250000 baud
-#define ECHO_UART_BAUD_RATE  240000
-#define ECHO_TASK_STACK_SIZE 2048
-
-#define BUF_SIZE (1024)
-
-void UART_init(void);
-void UART_send(const void *src, size_t size);
-void UART_monitor(void *pvParameters);
+esp_err_t SPIFFS_init(const char *base_path);
 
 #endif
