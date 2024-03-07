@@ -26,6 +26,7 @@
 #include <esp_spiffs.h>
 #include <esp_http_server.h>
 
+#include "hardware/uart.h"
 #include "http_server.h"
 
 struct file_server_data
@@ -45,6 +46,21 @@ static esp_err_t index_html_get_handler(httpd_req_t *req)
     httpd_resp_set_status(req, "307 Temporary Redirect");
     httpd_resp_set_hdr(req, "Location", "/index.html");
     httpd_resp_send(req, NULL, 0); // Response body can be empty
+    return ESP_OK;
+}
+
+// Redirect / requests to /index.html file
+static esp_err_t api_action_post_handler(httpd_req_t *req)
+{
+    httpd_resp_set_status(req, "200 OK");
+    httpd_resp_send(req, NULL, 0); // Response body can be empty
+    ESP_LOGI(TAG, "Received API ACTION request.");
+
+    char String[40];
+    snprintf(String, sizeof(String), "SMS: Action by WEB API.\n");
+    UART_send((const char *)String, sizeof(String));
+    ESP_LOGI(TAG, "Sent: %s", String);
+
     return ESP_OK;
 }
 
@@ -233,13 +249,22 @@ esp_err_t HTTP_SERVER_init(const char *base_path)
     }
 
     /* URI handler for /  address */
-    httpd_uri_t index = {
+    httpd_uri_t index_uri = {
         .uri = "/",
         .method = HTTP_GET,
         .handler = index_html_get_handler,
         .user_ctx = server_data // Pass server data as context
     };
-    httpd_register_uri_handler(server, &index);
+    httpd_register_uri_handler(server, &index_uri);
+
+    /* URI handler for /api/action address */
+    httpd_uri_t api_action_uri = {
+        .uri = "/api/action",
+        .method = HTTP_POST,
+        .handler = api_action_post_handler,
+        .user_ctx = server_data // Pass server data as context
+    };
+    httpd_register_uri_handler(server, &api_action_uri);
 
     /* URI handler for getting uploaded files */
     httpd_uri_t file_download = {
