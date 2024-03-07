@@ -18,17 +18,17 @@
 #include "hardware/uart.h"
 #include "hardware/wifi.h"
 #include "hardware/spiffs.h"
+#include "board.h"
 
 // Initialize the board
 void BOARD_init(void)
 {
     // Initialize SPIFFS
-    const char *base_path = "/storage";
-    SPIFFS_init(base_path);
+    SPIFFS_init(BOARD_BASE_PATH);
     // Initialize UART
     UART_init();
     // Initialize WIFI
     WIFI_init();
     //Initialize HTTP Server
-    example_start_file_server(base_path);
+    HTTP_SERVER_init(BOARD_BASE_PATH);
 }

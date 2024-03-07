@@ -17,6 +17,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#define BOARD_BASE_PATH "/storage"
+
 // Initialize the board
 void BOARD_init(void);
 
