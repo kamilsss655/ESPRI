@@ -26,27 +26,28 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
-#define ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
-#define ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
-#define MAX_STA_CONN       CONFIG_ESP_MAX_STA_CONN
+#define ESP_WIFI_SSID    CONFIG_ESP_WIFI_SSID
+#define ESP_WIFI_PASS    CONFIG_ESP_WIFI_PASSWORD
+#define ESP_WIFI_CHANNEL CONFIG_ESP_WIFI_CHANNEL
+#define MAX_STA_CONN     CONFIG_ESP_MAX_STA_CONN
 
 static const char *TAG = "HW/WIFI";
 
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
 {
-    if (event_id == WIFI_EVENT_AP_STACONNECTED)
+    switch (event_id)
     {
-        wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *)event_data;
+    case WIFI_EVENT_AP_STACONNECTED:
+        wifi_event_ap_staconnected_t *connectedEvent = (wifi_event_ap_staconnected_t *)event_data;
         ESP_LOGI(TAG, "station " MACSTR " join, AID=%d",
-                 MAC2STR(event->mac), event->aid);
-    }
-    else if (event_id == WIFI_EVENT_AP_STADISCONNECTED)
-    {
-        wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *)event_data;
+                 MAC2STR(connectedEvent->mac), connectedEvent->aid);
+        break;
+    case WIFI_EVENT_AP_STADISCONNECTED:
+        wifi_event_ap_stadisconnected_t *disconnectedEvent = (wifi_event_ap_stadisconnected_t *)event_data;
         ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d",
-                 MAC2STR(event->mac), event->aid);
+                 MAC2STR(disconnectedEvent->mac), disconnectedEvent->aid);
+        break;
     }
 }
 

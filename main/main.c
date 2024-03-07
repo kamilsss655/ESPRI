@@ -24,6 +24,13 @@
 
 void app_main()
 {
+    // TODO: Reorganize code as such:
+    // Init board
+    // BOARD_init();
+
+    // Init tasks
+    // TASKS_init();
+
     // Create LED_blink task
     xTaskCreate(LED_blink, "LED_blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
     // Create button monitor task
