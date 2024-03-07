@@ -42,13 +42,13 @@ void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
     };
     httpd_register_uri_handler(server, &index_uri);
 
-    httpd_uri_t api_action_uri = {
+    httpd_uri_t api_event_uri = {
         .uri = "/api/event",
         .method = HTTP_POST,
         .handler = api_event_handler,
         .user_ctx = server_data // Pass server data as context
     };
-    httpd_register_uri_handler(server, &api_action_uri);
+    httpd_register_uri_handler(server, &api_event_uri);
 
     httpd_uri_t file_download = {
         .uri = "/*", // Match all URIs of type /path/to/file
