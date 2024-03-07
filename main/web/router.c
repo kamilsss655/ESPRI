@@ -34,13 +34,13 @@
 // Initialize rounting for web requests
 void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
 {
-    httpd_uri_t index_uri = {
+    httpd_uri_t root_uri = {
         .uri = "/",
         .method = HTTP_GET,
-        .handler = index_html_get_handler,
+        .handler = root_handler,
         .user_ctx = server_data // Pass server data as context
     };
-    httpd_register_uri_handler(server, &index_uri);
+    httpd_register_uri_handler(server, &root_uri);
 
     httpd_uri_t api_event_uri = {
         .uri = "/api/event",
