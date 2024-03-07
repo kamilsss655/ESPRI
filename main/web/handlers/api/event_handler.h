@@ -20,6 +20,6 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-esp_err_t api_action_post_handler(httpd_req_t *req);
+esp_err_t api_event_handler(httpd_req_t *req);
 
 #endif

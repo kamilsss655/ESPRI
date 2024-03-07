@@ -30,8 +30,7 @@
 
 static const char *TAG = "WEB/API/EVENT_HANDLER";
 
-// Redirect / requests to /index.html file
-esp_err_t api_action_post_handler(httpd_req_t *req)
+esp_err_t api_event_handler(httpd_req_t *req)
 {
     httpd_resp_set_status(req, "200 OK");
     httpd_resp_send(req, NULL, 0); // Response body can be empty

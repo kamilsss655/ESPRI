@@ -31,9 +31,9 @@
 #include "web/handlers/static_files_handler.h"
 #include "web/handlers/api/event_handler.h"
 
+// Initialize rounting for web requests
 void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
 {
-    /* URI handler for /  address */
     httpd_uri_t index_uri = {
         .uri = "/",
         .method = HTTP_GET,
@@ -42,16 +42,14 @@ void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
     };
     httpd_register_uri_handler(server, &index_uri);
 
-    /* URI handler for /api/action address */
     httpd_uri_t api_action_uri = {
         .uri = "/api/event",
         .method = HTTP_POST,
-        .handler = api_action_post_handler,
+        .handler = api_event_handler,
         .user_ctx = server_data // Pass server data as context
     };
     httpd_register_uri_handler(server, &api_action_uri);
 
-    /* URI handler for getting uploaded files */
     httpd_uri_t file_download = {
         .uri = "/*", // Match all URIs of type /path/to/file
         .method = HTTP_GET,
