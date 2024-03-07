@@ -6,6 +6,7 @@ set(srcs
     "external/printf/printf.c"
     "hardware/button.c"
     "hardware/led.c"
+    "hardware/http_server.c"
     "hardware/uart.c"
     "hardware/wifi.c"
     "hardware/spiffs.c"

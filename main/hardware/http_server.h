@@ -14,21 +14,11 @@
  *     limitations under the License.
  */
 
-#include "hardware/http_server.h"
-#include "hardware/uart.h"
-#include "hardware/wifi.h"
-#include "hardware/spiffs.h"
+#ifndef HARDWARE_HTTP_SERVER_H
+#define HARDWARE_HTTP_SERVER_H
 
-// Initialize the board
-void BOARD_init(void)
-{
-    // Initialize SPIFFS
-    const char *base_path = "/storage";
-    SPIFFS_init(base_path);
-    // Initialize UART
-    UART_init();
-    // Initialize WIFI
-    WIFI_init();
-    //Initialize HTTP Server
-    example_start_file_server(base_path);
-}
+#include <esp_err.h>
+
+esp_err_t example_start_file_server(const char *base_path);
+
+#endif
