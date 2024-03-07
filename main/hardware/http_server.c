@@ -39,105 +39,19 @@ struct file_server_data
 
 static const char *TAG = "HW/HTTP_SERVER";
 
-/* Handler to redirect incoming GET request for /index.html to /
- * This can be overridden by uploading file with same name */
+// Redirect / requests to /index.html file
 static esp_err_t index_html_get_handler(httpd_req_t *req)
 {
     httpd_resp_set_status(req, "307 Temporary Redirect");
-    httpd_resp_set_hdr(req, "Location", "/");
+    httpd_resp_set_hdr(req, "Location", "/index.html");
     httpd_resp_send(req, NULL, 0); // Response body can be empty
-    return ESP_OK;
-}
-
-/* Send HTTP response with a run-time generated html consisting of
- * a list of all files and folders under the requested path.
- * In case of SPIFFS this returns empty list when path is any
- * string other than '/', since SPIFFS doesn't support directories */
-static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
-{
-    char entrypath[FILE_PATH_MAX];
-    char entrysize[16];
-    const char *entrytype;
-
-    struct dirent *entry;
-    struct stat entry_stat;
-
-    DIR *dir = opendir(dirpath);
-    const size_t dirpath_len = strlen(dirpath);
-
-    /* Retrieve the base path of file storage to construct the full path */
-    strlcpy(entrypath, dirpath, sizeof(entrypath));
-
-    if (!dir)
-    {
-        ESP_LOGE(TAG, "Failed to stat dir : %s", dirpath);
-        /* Respond with 404 Not Found */
-        httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Directory does not exist");
-        return ESP_FAIL;
-    }
-
-    /* Send HTML file header */
-    httpd_resp_sendstr_chunk(req, "<!DOCTYPE html><html><body>");
-
-    /* Send file-list table definition and column labels */
-    httpd_resp_sendstr_chunk(req,
-                             "<table class=\"fixed\" border=\"1\">"
-                             "<col width=\"800px\" /><col width=\"300px\" /><col width=\"300px\" /><col width=\"100px\" />"
-                             "<thead><tr><th>Name</th><th>Type</th><th>Size (Bytes)</th><th>Delete</th></tr></thead>"
-                             "<tbody>");
-
-    /* Iterate over all files / folders and fetch their names and sizes */
-    while ((entry = readdir(dir)) != NULL)
-    {
-        entrytype = (entry->d_type == DT_DIR ? "directory" : "file");
-
-        strlcpy(entrypath + dirpath_len, entry->d_name, sizeof(entrypath) - dirpath_len);
-        if (stat(entrypath, &entry_stat) == -1)
-        {
-            ESP_LOGE(TAG, "Failed to stat %s : %s", entrytype, entry->d_name);
-            continue;
-        }
-        sprintf(entrysize, "%ld", entry_stat.st_size);
-        ESP_LOGI(TAG, "Found %s : %s (%s bytes)", entrytype, entry->d_name, entrysize);
-
-        /* Send chunk of HTML file containing table entries with file name and size */
-        httpd_resp_sendstr_chunk(req, "<tr><td><a href=\"");
-        httpd_resp_sendstr_chunk(req, req->uri);
-        httpd_resp_sendstr_chunk(req, entry->d_name);
-        if (entry->d_type == DT_DIR)
-        {
-            httpd_resp_sendstr_chunk(req, "/");
-        }
-        httpd_resp_sendstr_chunk(req, "\">");
-        httpd_resp_sendstr_chunk(req, entry->d_name);
-        httpd_resp_sendstr_chunk(req, "</a></td><td>");
-        httpd_resp_sendstr_chunk(req, entrytype);
-        httpd_resp_sendstr_chunk(req, "</td><td>");
-        httpd_resp_sendstr_chunk(req, entrysize);
-        httpd_resp_sendstr_chunk(req, "</td><td>");
-        httpd_resp_sendstr_chunk(req, "<form method=\"post\" action=\"/delete");
-        httpd_resp_sendstr_chunk(req, req->uri);
-        httpd_resp_sendstr_chunk(req, entry->d_name);
-        httpd_resp_sendstr_chunk(req, "\"><button type=\"submit\">Delete</button></form>");
-        httpd_resp_sendstr_chunk(req, "</td></tr>\n");
-    }
-    closedir(dir);
-
-    /* Finish the file list table */
-    httpd_resp_sendstr_chunk(req, "</tbody></table>");
-
-    /* Send remaining chunk of HTML file to complete it */
-    httpd_resp_sendstr_chunk(req, "</body></html>");
-
-    /* Send empty chunk to signal HTTP response completion */
-    httpd_resp_sendstr_chunk(req, NULL);
     return ESP_OK;
 }
 
 #define IS_FILE_EXT(filename, ext) \
     (strcasecmp(&filename[strlen(filename) - sizeof(ext) + 1], ext) == 0)
 
-/* Set HTTP response content type according to file extension */
+// Set HTTP response content type according to file extension
 static esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filename)
 {
     if (IS_FILE_EXT(filename, ".pdf"))
@@ -216,12 +130,6 @@ static esp_err_t download_get_handler(httpd_req_t *req)
         /* Respond with 500 Internal Server Error */
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
         return ESP_FAIL;
-    }
-
-    /* If name has trailing '/', respond with directory contents */
-    if (filename[strlen(filename) - 1] == '/')
-    {
-        return http_resp_dir_html(req, filepath);
     }
 
     if (stat(filepath, &file_stat) == -1)
@@ -323,6 +231,15 @@ esp_err_t HTTP_SERVER_init(const char *base_path)
         ESP_LOGE(TAG, "Failed to start file server!");
         return ESP_FAIL;
     }
+
+    /* URI handler for /  address */
+    httpd_uri_t index = {
+        .uri = "/",
+        .method = HTTP_GET,
+        .handler = index_html_get_handler,
+        .user_ctx = server_data // Pass server data as context
+    };
+    httpd_register_uri_handler(server, &index);
 
     /* URI handler for getting uploaded files */
     httpd_uri_t file_download = {
