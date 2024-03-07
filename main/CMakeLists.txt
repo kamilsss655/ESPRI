@@ -1,3 +1,4 @@
+# include source files
 set(srcs
     "main.c"
     "app/button.c"
@@ -10,3 +11,6 @@ set(srcs
 
 idf_component_register(SRCS "${srcs}"
                     INCLUDE_DIRS ".")
+
+# mount /storage folder at /storage partition
+spiffs_create_partition_image(storage storage FLASH_IN_PROJECT)
