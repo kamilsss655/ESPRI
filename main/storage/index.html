@@ -8,16 +8,21 @@
     <!-- TODO: -->
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"> -->
     <link rel="stylesheet" href="materialize.min.css">
-    <!-- <style>
+    <style>
         body {
-          background-color: #3f51b5;
-          /* color: #fff; */
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
         }
-    </style> -->
+
+        main {
+            flex: 1 0 auto;
+        }
+    </style>
 </head>
 
 <body class="grey darken-3">
-    <div>
+    <header>
         <nav class="nav-extended grey darken-4">
             <div class="nav-wrapper">
                 <a href="#" class="brand-logo">ESPRI - ESP Radio Interface</a>
@@ -29,20 +34,21 @@
             </div>
             <div class="nav-content">
                 <ul class="tabs tabs-transparent">
-                    <li class="tab col s3"><a href="#tab1">Messenger</a></li>
-                    <li class="tab col s3"><a href="#tab2">Buttons</a></li>
+                    <li class="tab col s3"><a href="#tab1">UV-K5 Messenger</a></li>
+                    <li class="tab col s3"><a href="#tab2">Actions</a></li>
                     <li class="tab col s3"><a href="#tab3">Other</a></li>
                 </ul>
             </div>
         </nav>
+    </header>
 
+    <main>
         <ul class="sidenav" id="mobile-demo">
             <li class="tab"><a href="#settings">Settings</a></li>
             <li class="tab"><a href="#about">About</a></li>
         </ul>
 
         <div class="row">
-
             <div id="tab1" class="container">
                 <div class="card-panel">
                     <div class="scrollable-textbox">
@@ -63,19 +69,58 @@
 
             <div id="tab2" class="container">
                 <div class="card-panel">
-                    <p>Send message with a button</p>
-                    <button id="apiActionSendButton" class="btn waves-effect waves-light grey darken-4" type="submit" name="action">Send POST Request</button>
+                    <p>Perform actions on the device:</p>
+                    <button id="apiActionSendButton" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 1</button>
+                    <button id="apiActionSendButton2" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 2</button>
+                    <button id="apiActionSendButton3" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 3</button>
+                    <button id="apiActionSendButton4" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 4</button>
+                    <button id="apiActionSendButton5" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 5</button>
+                    <button id="apiActionSendButton6" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 6</button>
+                    <button id="apiActionSendButton7" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 7</button>
+                    <button id="apiActionSendButton8" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 9</button>
+                    <button id="apiActionSendButton9" class="btn waves-effect waves-light grey darken-4" type="submit"
+                        name="action">Event 10</button>
                 </div>
             </div>
 
             <div id="tab3" class="container">
                 <div class="card-panel">
+                    <h5>About</h5>
                     <p>ESPRI (ESP Radio Interface) project providing extended functionalities to ham radios.</p>
+
+                    <h5>UV-K5 Messenger</h5>
+                    <p>The UV-K5 Messenger works over serial UART connection:</p>
+                    <ul>
+                        <li>Baud: 250000</li>
+                        <li>TX GPIO: 16</li>
+                        <li>RX GPIO: 17</li>
+                    </ul>
                 </div>
             </div>
 
         </div>
-    </div>
+    </main>
+
+    <footer class="page-footer grey darken-2">
+        <div class="footer-copyright">
+            <div class="container">
+                <span class="right">
+                    ESPRI - ESP Radio Interface by <a class="white-text"
+                        href="https://github.com/kamilsss655/ESPRI">kamilsss655</a>
+                </span>
+                <!-- <a class="grey-text text-lighten-4 right" href="#!">More Links</a> -->
+            </div>
+        </div>
+    </footer>
+
     <script src="materialize.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -93,15 +138,15 @@
             })
                 .then(response => {
                     if (response.ok) {
-                        M.toast({html: 'Request successful.', classes: 'green'});
+                        M.toast({ html: 'Request successful.', classes: 'green' });
                         console.log('POST request successful');
                     } else {
-                        M.toast({html: 'Request failed.', classes: 'red'});
+                        M.toast({ html: 'Request failed.', classes: 'red' });
                         console.error('POST request failed');
                     }
                 })
                 .catch(error => {
-                    M.toast({html: 'Request failed.', classes: 'red'});
+                    M.toast({ html: 'Request failed.', classes: 'red' });
                     console.error('Error:', error);
                 });
         });
