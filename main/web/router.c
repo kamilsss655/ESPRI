@@ -38,7 +38,7 @@ void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
         .uri = "/",
         .method = HTTP_GET,
         .handler = root_handler,
-        .user_ctx = server_data // Pass server data as context
+        .user_ctx = server_data
     };
     httpd_register_uri_handler(server, &root_uri);
 
@@ -46,15 +46,15 @@ void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
         .uri = "/api/event",
         .method = HTTP_POST,
         .handler = api_event_handler,
-        .user_ctx = server_data // Pass server data as context
+        .user_ctx = server_data
     };
     httpd_register_uri_handler(server, &api_event_uri);
 
-    httpd_uri_t file_download = {
-        .uri = "/*", // Match all URIs of type /path/to/file
+    httpd_uri_t static_file_uri = {
+        .uri = "/*", // Match all other URIs
         .method = HTTP_GET,
-        .handler = download_get_handler,
-        .user_ctx = server_data // Pass server data as context
+        .handler = static_file_handler,
+        .user_ctx = server_data
     };
-    httpd_register_uri_handler(server, &file_download);
+    httpd_register_uri_handler(server, &static_file_uri);
 }

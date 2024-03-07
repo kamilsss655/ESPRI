@@ -23,7 +23,7 @@
 /* Max length a file path can have on storage */
 #define FILE_PATH_MAX (ESP_VFS_PATH_MAX + CONFIG_SPIFFS_OBJ_NAME_LEN)
 
-esp_err_t download_get_handler(httpd_req_t *req);
+esp_err_t static_file_handler(httpd_req_t *req);
 const char *get_path_from_uri(char *dest, const char *base_path, const char *uri, size_t destsize);
 esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filename);
 
