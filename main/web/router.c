@@ -44,7 +44,7 @@ void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
 
     /* URI handler for /api/action address */
     httpd_uri_t api_action_uri = {
-        .uri = "/api/action",
+        .uri = "/api/event",
         .method = HTTP_POST,
         .handler = api_action_post_handler,
         .user_ctx = server_data // Pass server data as context
