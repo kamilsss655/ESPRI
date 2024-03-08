@@ -1,5 +1,11 @@
 menu "ESPRI Configuration"
 
+    config ESP_WIFI_AP_MODE_ENABLED
+        bool "Access point mode"
+        default y
+        help
+            Run in access point mode. Disable to run in station mode.
+
     config ESP_WIFI_SSID
         string "WiFi SSID"
         default "NOKIA-3K9N4H1"

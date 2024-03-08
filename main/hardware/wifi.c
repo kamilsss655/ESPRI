@@ -29,22 +29,10 @@
 
 #include "wifi.h"
 
-#define ESP_WIFI_SSID    CONFIG_ESP_WIFI_SSID
-#define ESP_WIFI_PASS    CONFIG_ESP_WIFI_PASSWORD
-#define ESP_WIFI_CHANNEL CONFIG_ESP_WIFI_CHANNEL
-#define MAX_STA_CONN     CONFIG_ESP_MAX_STA_CONN
-
 static const char *TAG = "HW/WIFI";
 
 // FreeRTOS event group to signal when we are connected
 static EventGroupHandle_t s_wifi_event_group;
-
-/* The event group allows multiple bits for each event, but we only care about two events:
- * - we are connected to the AP with an IP
- * - we failed to connect after the maximum amount of retries */
-#define WIFI_CONNECTED_BIT     BIT0
-#define WIFI_FAIL_BIT          BIT1
-#define WIFI_CONNECT_MAX_RETRY 5
 
 static void WIFI_ap_event_handler();
 static void WIFI_sta_event_handler();
@@ -60,9 +48,14 @@ void WIFI_init(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
-    // wifi_init_softap();
-    wifi_init_sta();
+    // configurable in idf.py menuconfig
+    #ifdef ESP_WIFI_AP_MODE_ENABLED
+        ESP_LOGI(TAG, "Initializing in AP mode.");
+        wifi_init_ap();
+    #else
+        ESP_LOGI(TAG, "Initializing in STA mode.");
+        wifi_init_sta();
+    #endif
 }
 
 void wifi_init_sta(void)

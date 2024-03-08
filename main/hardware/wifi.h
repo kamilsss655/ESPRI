@@ -17,6 +17,22 @@
 #ifndef HARDWARE_WIFI_H
 #define HARDWARE_WIFI_H
 
+  
+#ifdef CONFIG_ESP_WIFI_AP_MODE_ENABLED
+    #define ESP_WIFI_AP_MODE_ENABLED
+#endif
+#define ESP_WIFI_SSID             CONFIG_ESP_WIFI_SSID
+#define ESP_WIFI_PASS             CONFIG_ESP_WIFI_PASSWORD
+#define ESP_WIFI_CHANNEL          CONFIG_ESP_WIFI_CHANNEL
+#define MAX_STA_CONN              CONFIG_ESP_MAX_STA_CONN
+
+/* The event group allows multiple bits for each event, but we only care about two events:
+ * - we are connected to the AP with an IP
+ * - we failed to connect after the maximum amount of retries */
+#define WIFI_CONNECTED_BIT     BIT0
+#define WIFI_FAIL_BIT          BIT1
+#define WIFI_CONNECT_MAX_RETRY 5
+
 void WIFI_init(void);
 void wifi_init_sta(void);
 void wifi_init_ap(void);
