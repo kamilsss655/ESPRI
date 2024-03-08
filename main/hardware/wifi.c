@@ -48,7 +48,7 @@ static EventGroupHandle_t s_wifi_event_group;
 
 static uint8_t s_retry_num = 0;
 
-static void wifi_event_handler(void *arg, esp_event_base_t event_base,
+static void WIFI_ap_event_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
 {
     switch (event_id)
@@ -182,7 +182,7 @@ void wifi_init_ap(void)
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
-                                                        &wifi_event_handler,
+                                                        &WIFI_ap_event_handler,
                                                         NULL,
                                                         NULL));
 
