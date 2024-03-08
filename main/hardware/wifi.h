@@ -18,5 +18,7 @@
 #define HARDWARE_WIFI_H
 
 void WIFI_init(void);
+void wifi_init_sta(void);
+void wifi_init_ap(void);
 
 #endif
