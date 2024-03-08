@@ -46,8 +46,6 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_FAIL_BIT          BIT1
 #define WIFI_CONNECT_MAX_RETRY 5
 
-static uint8_t s_retry_num = 0;
-
 static void WIFI_ap_event_handler();
 static void WIFI_sta_event_handler();
 
@@ -200,6 +198,8 @@ static void WIFI_ap_event_handler(void *arg, esp_event_base_t event_base,
 static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
 {
+    static uint8_t s_retry_num = 0;
+
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
