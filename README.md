@@ -12,6 +12,7 @@ As such following features would be enabled:
     - could be served as webpage by the esp chip itself
     - or have a mobile client as Meshtastic 
 - wireless UART connection to the radio
+- turning any radio into IoT device via JSON API served from the ESP
 
 The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
 
