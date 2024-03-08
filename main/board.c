@@ -24,8 +24,6 @@
 // Initialize the board
 void BOARD_init(void)
 {
-    // Initialize button
-    BUTTON_init();
     // Initialize SPIFFS
     SPIFFS_init(BOARD_BASE_PATH);
     // Initialize UART
@@ -34,4 +32,6 @@ void BOARD_init(void)
     WIFI_init();
     //Initialize HTTP Server
     HTTP_SERVER_init(BOARD_BASE_PATH);
+    // Initialize button
+    BUTTON_init();
 }
