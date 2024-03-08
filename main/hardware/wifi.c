@@ -48,46 +48,8 @@ static EventGroupHandle_t s_wifi_event_group;
 
 static uint8_t s_retry_num = 0;
 
-static void WIFI_ap_event_handler(void *arg, esp_event_base_t event_base,
-                               int32_t event_id, void *event_data)
-{
-    switch (event_id)
-    {
-    case WIFI_EVENT_AP_STACONNECTED:
-        wifi_event_ap_staconnected_t *connectedEvent = (wifi_event_ap_staconnected_t *)event_data;
-        ESP_LOGI(TAG, "station " MACSTR " join, AID=%d",
-                 MAC2STR(connectedEvent->mac), connectedEvent->aid);
-        break;
-    case WIFI_EVENT_AP_STADISCONNECTED:
-        wifi_event_ap_stadisconnected_t *disconnectedEvent = (wifi_event_ap_stadisconnected_t *)event_data;
-        ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d",
-                 MAC2STR(disconnectedEvent->mac), disconnectedEvent->aid);
-        break;
-    }
-}
-
-static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
-                                int32_t event_id, void* event_data)
-{
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        esp_wifi_connect();
-    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < WIFI_CONNECT_MAX_RETRY) {
-            // vTaskDelay(5000 / portTICK_PERIOD_MS);
-            esp_wifi_connect();
-            s_retry_num++;
-            ESP_LOGI(TAG, "%d/%d retry to connect to the AP", s_retry_num, WIFI_CONNECT_MAX_RETRY);
-        } else {
-            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-        }
-        ESP_LOGI(TAG,"connect to the AP fail");
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-        s_retry_num = 0;
-        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
-    }
-}
+static void WIFI_ap_event_handler();
+static void WIFI_sta_event_handler();
 
 void WIFI_init(void)
 {
@@ -215,4 +177,45 @@ void wifi_init_ap(void)
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
              ESP_WIFI_SSID, ESP_WIFI_PASS, ESP_WIFI_CHANNEL);
+}
+
+static void WIFI_ap_event_handler(void *arg, esp_event_base_t event_base,
+                               int32_t event_id, void *event_data)
+{
+    switch (event_id)
+    {
+    case WIFI_EVENT_AP_STACONNECTED:
+        wifi_event_ap_staconnected_t *connectedEvent = (wifi_event_ap_staconnected_t *)event_data;
+        ESP_LOGI(TAG, "station " MACSTR " join, AID=%d",
+                 MAC2STR(connectedEvent->mac), connectedEvent->aid);
+        break;
+    case WIFI_EVENT_AP_STADISCONNECTED:
+        wifi_event_ap_stadisconnected_t *disconnectedEvent = (wifi_event_ap_stadisconnected_t *)event_data;
+        ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d",
+                 MAC2STR(disconnectedEvent->mac), disconnectedEvent->aid);
+        break;
+    }
+}
+
+static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
+                                int32_t event_id, void* event_data)
+{
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+        esp_wifi_connect();
+    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        if (s_retry_num < WIFI_CONNECT_MAX_RETRY) {
+            // vTaskDelay(5000 / portTICK_PERIOD_MS);
+            esp_wifi_connect();
+            s_retry_num++;
+            ESP_LOGI(TAG, "%d/%d retry to connect to the AP", s_retry_num, WIFI_CONNECT_MAX_RETRY);
+        } else {
+            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+        }
+        ESP_LOGI(TAG,"connect to the AP fail");
+    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+        s_retry_num = 0;
+        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+    }
 }
