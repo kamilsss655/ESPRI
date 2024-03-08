@@ -1,7 +1,7 @@
 # ESPRI
 ESPRI (ESP Radio Interface) project providing extended functionalities to ham radios.
 
-![high-level-diagram-3](https://github.com/kamilsss655/ESPRI/assets/8842065/868cc9b6-6143-4308-a15c-6a4fdc008033)
+![high-level-diagram-4](https://github.com/kamilsss655/ESPRI/assets/8842065/813055e7-6729-47e8-8912-1e9155d7ca6d)
 
 The main goal of this project is to extend functionalities of ham radios with addition of a small PCB board that contains ESP32 microcontroller.
 
