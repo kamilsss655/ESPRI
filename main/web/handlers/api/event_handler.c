@@ -17,21 +17,87 @@
 #include <esp_err.h>
 #include <esp_log.h>
 #include <esp_http_server.h>
+#include <esp_log.h>
+#include <cJSON.h>
 
+#include "helper/http.h"
 #include "hardware/uart.h"
 
 static const char *TAG = "WEB/API/EVENT_HANDLER";
 
+/*
+Handles JSON requests and sends SMS with event ID, to test:
+
+    curl --header "Content-Type: application/json" \
+                   --request POST \
+                   --data '{"id":231}' \
+                   http://192.168.4.1/api/event
+*/
 esp_err_t api_event_handler(httpd_req_t *req)
 {
-    httpd_resp_set_status(req, "200 OK");
-    httpd_resp_send(req, NULL, 0); // Response body can be empty
-    ESP_LOGI(TAG, "Received API ACTION request.");
+    int total_len = req->content_len;
+    int cur_len = 0;
+    char *buf = ((file_server_data *)(req->user_ctx))->scratch;
+    int received = 0;
 
+    // TODO: below should probably be set at some higher level protection
+    //  if (total_len >= SCRATCH_BUFSIZE) {
+    //      /* Respond with 500 Internal Server Error */
+    //      httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "content too long");
+    //      return ESP_FAIL;
+    //  }
+
+    // Read request content
+    while (cur_len < total_len)
+    {
+        received = httpd_req_recv(req, buf + cur_len, total_len);
+        if (received <= 0)
+        {
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to process request");
+            return ESP_FAIL;
+        }
+        cur_len += received;
+    }
+    buf[total_len] = '\0';
+
+    // Parse JSON
+    cJSON *root = cJSON_ParseWithLength(buf, total_len);
+
+    // Handle invalid JSON
+    if (root == NULL)
+    {
+        ESP_LOGE(TAG, "Invalid JSON received");
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid JSON received");
+        // Free memory
+        cJSON_Delete(root);
+        return ESP_FAIL;
+    }
+
+    // Handle invalid attr
+    cJSON *attr = cJSON_GetObjectItem(root, "id");
+    if (attr == NULL)
+    {
+        ESP_LOGE(TAG, "No \"id\" attr found in JSON");
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No \"id\" attr found in JSON");
+        // Free memory, it handles both root and attr
+        cJSON_Delete(root);
+        return ESP_FAIL;
+    }
+
+    int event_id = attr->valueint;
+    // Free memory, it handles both root and attr
+    cJSON_Delete(root);
+
+    ESP_LOGI(TAG, "Event id:%d received", event_id);
+
+    // Send SMS
+    // TODO: should be separate function and separate file
     char String[40];
-    snprintf(String, sizeof(String), "SMS: Action by WEB API.\n");
+    snprintf(String, sizeof(String), "SMS: API event: %d received.\n", event_id);
     UART_send((const char *)String, sizeof(String));
     ESP_LOGI(TAG, "Sent: %s", String);
+
+    httpd_resp_sendstr(req, "Event received");
 
     return ESP_OK;
 }
