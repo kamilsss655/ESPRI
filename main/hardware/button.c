@@ -50,8 +50,6 @@ void BUTTON_monitor(void *pvParameters)
 {
     BUTTON_Event_t buttonEvent;
 
-    BUTTON_init();
-
     while (true)
     {
         if (xQueueReceive(buttonQueue, &buttonEvent.pin_number, portMAX_DELAY))

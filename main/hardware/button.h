@@ -34,5 +34,6 @@ typedef struct
 } BUTTON_Event_t;
 
 void BUTTON_monitor(void *pvParameters);
+void BUTTON_init();
 
 #endif

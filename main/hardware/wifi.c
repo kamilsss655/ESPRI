@@ -129,6 +129,10 @@ void wifi_init_sta(void)
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
+
+    // This is workaround to prevent constant interrupt flood on button pin GPIO 36
+    // if the the GPIO 36 is not used this can be removed
+    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 }
 
 void wifi_init_ap(void)

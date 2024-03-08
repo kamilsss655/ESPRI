@@ -17,12 +17,15 @@
 #include "hardware/http_server.h"
 #include "hardware/uart.h"
 #include "hardware/wifi.h"
+#include "hardware/button.h"
 #include "hardware/spiffs.h"
 #include "board.h"
 
 // Initialize the board
 void BOARD_init(void)
 {
+    // Initialize button
+    BUTTON_init();
     // Initialize SPIFFS
     SPIFFS_init(BOARD_BASE_PATH);
     // Initialize UART
