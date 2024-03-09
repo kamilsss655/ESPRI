@@ -21,7 +21,7 @@
 #include <cJSON.h>
 
 #include "helper/http.h"
-#include "hardware/uart.h"
+#include "app/uvk5.h"
 
 static const char *TAG = "WEB/API/EVENT_HANDLER";
 
@@ -91,12 +91,11 @@ esp_err_t api_event_handler(httpd_req_t *req)
     ESP_LOGI(TAG, "Event id:%d received", event_id);
 
     // Send SMS
-    // TODO: should be separate function and separate file
-    char String[40];
-    snprintf(String, sizeof(String), "SMS: API event: %d received.\n", event_id);
-    UART_send((const char *)String, sizeof(String));
+    char String[30];
+    snprintf(String, sizeof(String), "API event: %d received.", event_id);
+    UVK5_sendMessage(String, sizeof(String));
     ESP_LOGI(TAG, "Sent: %s", String);
-
+    
     httpd_resp_sendstr(req, "Event received");
 
     return ESP_OK;

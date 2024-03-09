@@ -14,17 +14,20 @@
  *     limitations under the License.
  */
 
-#include "button.h"
-#include "app/uvk5.h"
+#include <stddef.h>
+#include <esp_log.h>
+
+#include "hardware/uart.h"
 #include "external/printf/printf.h"
 
-static const char *TAG = "APP/BUTTON";
+static const char *TAG = "APP/UVK5";
 
-// Button event handler
-void BUTTON_handle(BUTTON_Event_t buttonEvent)
+// Send message
+void UVK5_sendMessage(char *message, size_t size)
 {
-    // Send SMS
-    char String[30];
-    snprintf(String, sizeof(String), "Button %d pressed on ESP.", buttonEvent.pin_number);
-    UVK5_sendMessage(String, sizeof(String));
+    char buffer[size + 7];
+
+    snprintf(buffer, sizeof(buffer), "SMS: %s\n", message);
+    UART_send((const char *)buffer, sizeof(buffer));
+    ESP_LOGI(TAG, "Sent message: %s", message);
 }

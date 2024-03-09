@@ -14,17 +14,11 @@
  *     limitations under the License.
  */
 
-#include "button.h"
-#include "app/uvk5.h"
-#include "external/printf/printf.h"
+#ifndef APP_UVK5_H
+#define APP_UVK5_H
 
-static const char *TAG = "APP/BUTTON";
+#include <stddef.h>
 
-// Button event handler
-void BUTTON_handle(BUTTON_Event_t buttonEvent)
-{
-    // Send SMS
-    char String[30];
-    snprintf(String, sizeof(String), "Button %d pressed on ESP.", buttonEvent.pin_number);
-    UVK5_sendMessage(String, sizeof(String));
-}
+void UVK5_sendMessage(char *message, size_t size);
+
+#endif

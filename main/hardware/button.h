@@ -17,6 +17,8 @@
 #ifndef HARDWARE_BUTTON_H
 #define HARDWARE_BUTTON_H
 
+#include <stdint.h>
+
 #define BUTTON_GPIO_PIN 36
 
 // Button event type
