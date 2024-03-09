@@ -18,8 +18,6 @@
 #include "app/uvk5.h"
 #include "external/printf/printf.h"
 
-static const char *TAG = "APP/BUTTON";
-
 // Button event handler
 void BUTTON_Handle(BUTTON_Event_t buttonEvent)
 {
