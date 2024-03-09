@@ -14,12 +14,12 @@
  *     limitations under the License.
  */
 
-#ifndef ROOT_HANDLER_H
-#define ROOT_HANDLER_H
+#ifndef ROOT_H
+#define ROOT_H
 
 #include <esp_http_server.h>
 
 // Redirect / requests to /index.html file
-esp_err_t root_handler(httpd_req_t *req);
+esp_err_t ROOT_Handle(httpd_req_t *req);
 
 #endif

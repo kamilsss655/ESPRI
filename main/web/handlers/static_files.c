@@ -17,13 +17,13 @@
 #include <sys/param.h>
 #include <esp_log.h>
 
-#include "static_files_handler.h"
+#include "static_files.h"
 #include "helper/http.h"
 
-static const char *TAG = "WEB/STATIC_FILE_HANDLER";
+static const char *TAG = "WEB/STATIC_FILES";
 
 /* Handler to download a file kept on the server */
-esp_err_t static_file_handler(httpd_req_t *req)
+esp_err_t STATIC_FILES_Handle(httpd_req_t *req)
 {
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;

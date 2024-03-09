@@ -15,9 +15,9 @@
  */
 
 #include "helper/http.h"
-#include "web/handlers/root_handler.h"
-#include "web/handlers/static_files_handler.h"
-#include "web/handlers/api/event_handler.h"
+#include "web/handlers/root.h"
+#include "web/handlers/static_files.h"
+#include "web/handlers/api/event.h"
 
 // Initialize rounting for web requests
 void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
@@ -25,7 +25,7 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     httpd_uri_t root_uri = {
         .uri = "/",
         .method = HTTP_GET,
-        .handler = root_handler,
+        .handler = ROOT_Handle,
         .user_ctx = server_data
     };
     httpd_register_uri_handler(server, &root_uri);
@@ -33,7 +33,7 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     httpd_uri_t api_event_uri = {
         .uri = "/api/event",
         .method = HTTP_POST,
-        .handler = api_event_handler,
+        .handler = API_EVENT_Handle,
         .user_ctx = server_data
     };
     httpd_register_uri_handler(server, &api_event_uri);
@@ -41,7 +41,7 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     httpd_uri_t static_file_uri = {
         .uri = "/*", // Match all other URIs
         .method = HTTP_GET,
-        .handler = static_file_handler,
+        .handler = STATIC_FILES_Handle,
         .user_ctx = server_data
     };
     httpd_register_uri_handler(server, &static_file_uri);

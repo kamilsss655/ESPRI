@@ -17,7 +17,7 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-esp_err_t root_handler(httpd_req_t *req)
+esp_err_t ROOT_Handle(httpd_req_t *req)
 {
     httpd_resp_set_status(req, "307 Temporary Redirect");
     httpd_resp_set_hdr(req, "Location", "/index.html");

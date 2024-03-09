@@ -23,7 +23,7 @@
 #include "helper/http.h"
 #include "app/uvk5.h"
 
-static const char *TAG = "WEB/API/EVENT_HANDLER";
+static const char *TAG = "WEB/API/EVENT";
 
 /*
 Handles JSON requests and sends SMS with event ID, to test:
@@ -33,7 +33,7 @@ Handles JSON requests and sends SMS with event ID, to test:
                    --data '{"id":231}' \
                    http://192.168.4.1/api/event
 */
-esp_err_t api_event_handler(httpd_req_t *req)
+esp_err_t API_EVENT_Handle(httpd_req_t *req)
 {
     int total_len = req->content_len;
     int cur_len = 0;

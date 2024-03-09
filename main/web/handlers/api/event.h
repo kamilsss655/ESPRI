@@ -14,12 +14,12 @@
  *     limitations under the License.
  */
 
-#ifndef API_EVENT_HANDLER_H
-#define API_EVENT_HANDLER_H
+#ifndef API_EVENT_H
+#define API_EVENT_H
 
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-esp_err_t api_event_handler(httpd_req_t *req);
+esp_err_t API_EVENT_Handle(httpd_req_t *req);
 
 #endif
