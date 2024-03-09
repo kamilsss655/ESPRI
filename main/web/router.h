@@ -19,6 +19,6 @@
 
 #include "helper/http.h"
 
-void ROUTER_init(file_server_data *server_data, httpd_handle_t *server);
+void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server);
 
 #endif

@@ -25,7 +25,7 @@
 void app_main()
 {
     // Init board
-    BOARD_init();
+    BOARD_Init();
 
     // TODO: Reorganize code as such:
     // Init tasks

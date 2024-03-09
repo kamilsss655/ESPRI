@@ -20,7 +20,7 @@
 #include "web/handlers/api/event_handler.h"
 
 // Initialize rounting for web requests
-void ROUTER_init(file_server_data *server_data, httpd_handle_t *server)
+void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
 {
     httpd_uri_t root_uri = {
         .uri = "/",

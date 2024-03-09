@@ -60,7 +60,7 @@ esp_err_t HTTP_SERVER_Init(const char *base_path)
     }
 
     // Initalize router
-    ROUTER_init(server_data, server);
+    ROUTER_Init(server_data, server);
 
     return ESP_OK;
 }

@@ -22,7 +22,7 @@
 #include "board.h"
 
 // Initialize the board
-void BOARD_init(void)
+void BOARD_Init(void)
 {
     // Initialize SPIFFS
     SPIFFS_Init(BOARD_BASE_PATH);

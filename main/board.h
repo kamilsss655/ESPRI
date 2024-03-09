@@ -20,6 +20,6 @@
 #define BOARD_BASE_PATH "/storage"
 
 // Initialize the board
-void BOARD_init(void);
+void BOARD_Init(void);
 
 #endif
