@@ -93,7 +93,7 @@ esp_err_t api_event_handler(httpd_req_t *req)
     // Send SMS
     char String[30];
     snprintf(String, sizeof(String), "API event: %d received.", event_id);
-    UVK5_sendMessage(String, sizeof(String));
+    UVK5_SendMessage(String, sizeof(String));
     ESP_LOGI(TAG, "Sent: %s", String);
     
     httpd_resp_sendstr(req, "Event received");

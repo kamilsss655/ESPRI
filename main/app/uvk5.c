@@ -23,7 +23,7 @@
 static const char *TAG = "APP/UVK5";
 
 // Send message
-void UVK5_sendMessage(char *message, size_t size)
+void UVK5_SendMessage(char *message, size_t size)
 {
     char buffer[size + 7];
 
