@@ -22,6 +22,6 @@
 /* Scratch buffer size */
 #define SCRATCH_BUFSIZE 8192
 
-esp_err_t HTTP_SERVER_init(const char *base_path);
+esp_err_t HTTP_SERVER_Init(const char *base_path);
 
 #endif

@@ -24,7 +24,7 @@
 static const char *TAG = "HW/HTTP_SERVER";
 
 /* Function to start the file server */
-esp_err_t HTTP_SERVER_init(const char *base_path)
+esp_err_t HTTP_SERVER_Init(const char *base_path)
 {
     static file_server_data *server_data = NULL;
 

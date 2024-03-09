@@ -31,7 +31,7 @@ void BOARD_init(void)
     // Initialize WIFI
     WIFI_init();
     //Initialize HTTP Server
-    HTTP_SERVER_init(BOARD_BASE_PATH);
+    HTTP_SERVER_Init(BOARD_BASE_PATH);
     // Initialize button
     BUTTON_Init();
 }
