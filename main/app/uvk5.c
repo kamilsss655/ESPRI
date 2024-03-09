@@ -28,6 +28,6 @@ void UVK5_SendMessage(char *message, size_t size)
     char buffer[size + 7];
 
     snprintf(buffer, sizeof(buffer), "SMS: %s\n", message);
-    UART_send((const char *)buffer, sizeof(buffer));
+    UART_Send((const char *)buffer, sizeof(buffer));
     ESP_LOGI(TAG, "Sent message: %s", message);
 }

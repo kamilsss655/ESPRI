@@ -25,9 +25,9 @@
 void BOARD_init(void)
 {
     // Initialize SPIFFS
-    SPIFFS_init(BOARD_BASE_PATH);
+    SPIFFS_Init(BOARD_BASE_PATH);
     // Initialize UART
-    UART_init();
+    UART_Init();
     // Initialize WIFI
     WIFI_init();
     //Initialize HTTP Server

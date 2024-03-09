@@ -22,7 +22,7 @@
 static const char *TAG = "HW/SPIFFS";
 
 // Init SPIFFS
-esp_err_t SPIFFS_init(const char *base_path)
+esp_err_t SPIFFS_Init(const char *base_path)
 {
     ESP_LOGI(TAG, "Initializing SPIFFS");
 

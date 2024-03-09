@@ -25,7 +25,7 @@
 static const char *TAG = "HW/UART";
 
 // Initialize UART
-void UART_init(void)
+void UART_Init(void)
 {
     uart_config_t uart_config = {
         .baud_rate = ECHO_UART_BAUD_RATE,
@@ -44,13 +44,13 @@ void UART_init(void)
 }
 
 // Send data over UART
-void UART_send(const void *src, size_t size)
+void UART_Send(const void *src, size_t size)
 {
     uart_write_bytes(ECHO_UART_PORT_NUM, (const char *)src, size);
 }
 
 // Monitor UART for incoming data
-void UART_monitor(void *pvParameters)
+void UART_Monitor(void *pvParameters)
 {
     // Configure a temporary buffer for the incoming data
     uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
