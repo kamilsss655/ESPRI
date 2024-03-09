@@ -20,6 +20,6 @@
 #define LED_PIN 2
 #define LED_DELAY_MS 2000
 
-void LED_blink(void *pvParameters);
+void LED_Blink(void *pvParameters);
 
 #endif

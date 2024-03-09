@@ -23,7 +23,7 @@
 static const char *TAG = "HW/LED";
 
 // Blinks LED
-void LED_blink(void *pvParameters)
+void LED_Blink(void *pvParameters)
 {
     gpio_reset_pin(LED_PIN);
     gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);

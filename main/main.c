@@ -31,8 +31,8 @@ void app_main()
     // Init tasks
     // TASKS_init();
 
-    // Create LED_blink task
-    xTaskCreate(LED_blink, "LED_blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+    // Create LED_Blink task
+    xTaskCreate(LED_Blink, "LED_Blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Create button monitor task
     xTaskCreate(BUTTON_Monitor, "BUTTON_Monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
