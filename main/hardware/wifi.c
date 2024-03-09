@@ -37,7 +37,7 @@ static EventGroupHandle_t s_wifi_event_group;
 static void WIFI_ap_event_handler();
 static void WIFI_sta_event_handler();
 
-void WIFI_init(void)
+void WIFI_Init(void)
 {
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
@@ -51,14 +51,15 @@ void WIFI_init(void)
     // configurable in idf.py menuconfig
     #ifdef ESP_WIFI_AP_MODE_ENABLED
         ESP_LOGI(TAG, "Initializing in AP mode.");
-        wifi_init_ap();
+        WIFI_InitAp();
     #else
         ESP_LOGI(TAG, "Initializing in STA mode.");
-        wifi_init_sta();
+        WIFI_InitSta();
     #endif
 }
 
-void wifi_init_sta(void)
+// Initialize in Station mode
+void WIFI_InitSta(void)
 {
     s_wifi_event_group = xEventGroupCreate();
 
@@ -101,7 +102,7 @@ void wifi_init_sta(void)
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
 
-    ESP_LOGI(TAG, "wifi_init_sta finished.");
+    ESP_LOGI(TAG, "WIFI_InitSta finished.");
 
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
@@ -128,7 +129,8 @@ void wifi_init_sta(void)
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 }
 
-void wifi_init_ap(void)
+// Initialize in Access Point mode
+void WIFI_InitAp(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());

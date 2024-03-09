@@ -29,7 +29,7 @@ void BOARD_init(void)
     // Initialize UART
     UART_Init();
     // Initialize WIFI
-    WIFI_init();
+    WIFI_Init();
     //Initialize HTTP Server
     HTTP_SERVER_Init(BOARD_BASE_PATH);
     // Initialize button

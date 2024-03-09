@@ -33,8 +33,8 @@
 #define WIFI_FAIL_BIT          BIT1
 #define WIFI_CONNECT_MAX_RETRY 5
 
-void WIFI_init(void);
-void wifi_init_sta(void);
-void wifi_init_ap(void);
+void WIFI_Init(void);
+void WIFI_InitSta(void);
+void WIFI_InitAp(void);
 
 #endif
