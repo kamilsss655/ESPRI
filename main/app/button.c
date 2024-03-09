@@ -21,7 +21,7 @@
 static const char *TAG = "APP/BUTTON";
 
 // Button event handler
-void BUTTON_handle(BUTTON_Event_t buttonEvent)
+void BUTTON_Handle(BUTTON_Event_t buttonEvent)
 {
     // Send SMS
     char String[30];

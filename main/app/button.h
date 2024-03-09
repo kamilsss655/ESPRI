@@ -19,6 +19,6 @@
 
 #include "hardware/button.h"
 
-void BUTTON_handle(BUTTON_Event_t buttonEvent);
+void BUTTON_Handle(BUTTON_Event_t buttonEvent);
 
 #endif

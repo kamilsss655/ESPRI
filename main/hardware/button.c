@@ -61,7 +61,7 @@ void BUTTON_monitor(void *pvParameters)
             // TODO: Disable interrupt for a while to debounce
 
             // Handle button event
-            BUTTON_handle(buttonEvent);
+            BUTTON_Handle(buttonEvent);
         }
     }
 }
