@@ -35,7 +35,7 @@
             <div class="nav-content">
                 <ul class="tabs tabs-transparent">
                     <li class="tab col s3"><a href="#tab1">UV-K5 Messenger</a></li>
-                    <li class="tab col s3"><a href="#tab2">Actions</a></li>
+                    <li class="tab col s3"><a href="#tab2">Event API</a></li>
                     <li class="tab col s3"><a href="#tab3">Other</a></li>
                 </ul>
             </div>
@@ -69,25 +69,26 @@
 
             <div id="tab2" class="container">
                 <div class="card-panel">
-                    <p>Perform actions on the device:</p>
-                    <button id="apiActionSendButton" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 1</button>
-                    <button id="apiActionSendButton2" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 2</button>
-                    <button id="apiActionSendButton3" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 3</button>
-                    <button id="apiActionSendButton4" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 4</button>
-                    <button id="apiActionSendButton5" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 5</button>
-                    <button id="apiActionSendButton6" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 6</button>
-                    <button id="apiActionSendButton7" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 7</button>
-                    <button id="apiActionSendButton8" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 9</button>
-                    <button id="apiActionSendButton9" class="btn waves-effect waves-light grey darken-4" type="submit"
-                        name="action">Event 10</button>
+                    <h5 class="center">Event API</h5>
+                    <p>Make JSON requests to Event API:</p>
+                    <button data-event-id="1" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 1</button>
+                    <button data-event-id="2" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 2</button>
+                    <button data-event-id="3" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 3</button>
+                    <button data-event-id="4" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 4</button>
+                    <button data-event-id="5" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 5</button>
+                    <button data-event-id="6" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 6</button>
+                    <button data-event-id="7" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 7</button>
+                    <button data-event-id="8" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 8</button>
+                    <button data-event-id="9" class="btn waves-effect waves-light grey darken-4 btn-event-id"
+                        type="submit" name="action">Event 9</button>
                 </div>
             </div>
 
@@ -123,33 +124,49 @@
 
     <script src="materialize.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var tabs = document.querySelectorAll('.tabs');
-            var instances = M.Tabs.init(tabs);
-        });
+        // Materialize tabs
+        function materializeTabs() {
+            document.addEventListener('DOMContentLoaded', function () {
+                var tabs = document.querySelectorAll('.tabs');
+                var instances = M.Tabs.init(tabs);
+            });
+        }
 
-        document.getElementById('apiActionSendButton').addEventListener('click', function () {
-            fetch('/api/event', {
-                method: 'POST',
-                body: JSON.stringify({}),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        M.toast({ html: 'Request successful.', classes: 'green' });
-                        console.log('POST request successful');
-                    } else {
+        function addButtonEventIdListener() {
+            const buttons = document.querySelectorAll('.btn-event-id');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const eventId = parseInt(button.getAttribute('data-event-id'));
+                    try {
+                        const response = await fetch('api/event', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ id: eventId }),
+                            timeout: 1000
+                        });
+
+                        if (response.ok) {
+                            M.toast({ html: 'Request successful.', classes: 'green' });
+                            console.log('Response was ok');
+                        } else {
+                            M.toast({ html: 'Request failed.', classes: 'red' });
+                            const errorData = await response.json();
+                            console.log('Error response:', errorData);
+                        }
+                    } catch (error) {
                         M.toast({ html: 'Request failed.', classes: 'red' });
-                        console.error('POST request failed');
+                        console.log('Error:', error.message);
                     }
-                })
-                .catch(error => {
-                    M.toast({ html: 'Request failed.', classes: 'red' });
-                    console.error('Error:', error);
                 });
-        });
+            });
+        }
+
+        // Init
+        materializeTabs();
+        addButtonEventIdListener();
     </script>
 </body>
 
