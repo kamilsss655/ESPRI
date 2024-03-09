@@ -23,8 +23,19 @@ The audio input and output (for the means of time domain scrambling) would be th
 Here is a screenshot of a web control panel being served from the ESP:
 ![message-window-www](https://github.com/kamilsss655/ESPRI/assets/8842065/0478f4c3-85f4-4aac-aab7-82b697b748a1)
 
+Screenshot of Event JSON API front-end with error and success handling:
+![event-api-frontend-ok](https://github.com/kamilsss655/ESPRI/assets/8842065/993e34b2-8f03-4c26-aff8-68e81cc8996b)
+
+ESP Log:
+```
+I (8732) WEB/API/EVENT_HANDLER: Event id:3 received
+I (8732) WEB/API/EVENT_HANDLER: Sent: SMS: API event: 3 received.
+```
+
 
 ## Dependencies
+Hardware:
+* ESP32 or ESP32 S3 (i.e ESP32-S3-Zero)
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
