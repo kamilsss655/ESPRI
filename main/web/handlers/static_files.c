@@ -89,10 +89,6 @@ esp_err_t STATIC_FILES_Handle(httpd_req_t *req)
     fclose(fd);
     ESP_LOGI(TAG, "File sending complete");
 
-    /* Respond with an empty chunk to signal HTTP response completion */
-#ifdef CONFIG_EXAMPLE_HTTPD_CONN_CLOSE_HEADER
-    httpd_resp_set_hdr(req, "Connection", "close");
-#endif
     httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
 }

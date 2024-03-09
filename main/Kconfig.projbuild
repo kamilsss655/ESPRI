@@ -1,31 +1,31 @@
 menu "ESPRI Configuration"
 
-    config ESP_WIFI_AP_MODE_ENABLED
+    config WIFI_AP_MODE_ENABLED
         bool "Access point mode"
         default y
         help
             Run in access point mode. Disable to run in station mode.
 
-    config ESP_WIFI_SSID
+    config WIFI_SSID
         string "WiFi SSID"
         default "NOKIA-3K9N4H1"
         help
             SSID (network name) for the example to connect to.
         
-    config ESP_WIFI_PASSWORD
+    config WIFI_PASSWORD
         string "WiFi Password"
         default "mypassword"
         help
             WiFi password (WPA or WPA2) for the example to use.
         
-    config ESP_WIFI_CHANNEL
+    config WIFI_CHANNEL
         int "WiFi Channel"
         range 1 13
         default 1
         help
             WiFi channel (network channel) for the example to use.
     
-    config ESP_MAX_STA_CONN
+    config MAX_STA_CONN
         int "Maximal STA connections"
         default 4
         help
