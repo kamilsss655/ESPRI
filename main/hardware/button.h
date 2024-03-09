@@ -35,7 +35,7 @@ typedef struct
     uint8_t            pin_number;
 } BUTTON_Event_t;
 
-void BUTTON_monitor(void *pvParameters);
-void BUTTON_init();
+void BUTTON_Monitor(void *pvParameters);
+void BUTTON_Init();
 
 #endif

@@ -33,5 +33,5 @@ void BOARD_init(void)
     //Initialize HTTP Server
     HTTP_SERVER_init(BOARD_BASE_PATH);
     // Initialize button
-    BUTTON_init();
+    BUTTON_Init();
 }

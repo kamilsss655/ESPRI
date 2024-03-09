@@ -34,7 +34,7 @@ static void IRAM_ATTR BUTTON_isr_handler(void *arg)
 }
 
 // initialize button handling
-void BUTTON_init()
+void BUTTON_Init()
 {
     buttonQueue = xQueueCreate(10, sizeof(uint8_t));
 
@@ -46,7 +46,7 @@ void BUTTON_init()
 }
 
 // monitor button pressed queue
-void BUTTON_monitor(void *pvParameters)
+void BUTTON_Monitor(void *pvParameters)
 {
     BUTTON_Event_t buttonEvent;
 

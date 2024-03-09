@@ -35,7 +35,7 @@ void app_main()
     xTaskCreate(LED_blink, "LED_blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Create button monitor task
-    xTaskCreate(BUTTON_monitor, "BUTTON_monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+    xTaskCreate(BUTTON_Monitor, "BUTTON_Monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Create UART monitor task
     xTaskCreate(UART_monitor, "UART_monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
