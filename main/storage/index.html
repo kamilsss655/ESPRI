@@ -61,7 +61,7 @@
                     </div>
                     <div class="input-field">
                         <input id="userInput" type="text">
-                        <button class="btn waves-effect waves-light grey darken-4" type="submit"
+                        <button id="sendMessageButton" class="btn waves-effect waves-light grey darken-4" type="submit"
                             name="action">Send</button>
                     </div>
                 </div>
@@ -232,9 +232,48 @@
             });
         }
 
+        function sendUVK5Message() {
+            let messageInput = document.getElementById('userInput');
+            const data = { content: messageInput.value };
+            fetch('/api/uvk5_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data),
+                timeout: 1000
+            })
+                .then(response => {
+                    if (response.ok) {
+                        M.toast({ html: 'Request successful.', classes: 'green' });
+                        console.log('Message sent successfully');
+                        messageInput.value = "";
+                    } else {
+                        M.toast({ html: 'Request failed.', classes: 'red' });
+                        console.error('Failed to send message');
+                    }
+                })
+                .catch(error => {
+                    M.toast({ html: 'Request failed.', classes: 'red' });
+                    console.error('Error:', error);
+                });
+        }
+
+        function addUVK5MessageSendButtonListener() {
+
+            document.getElementById('sendMessageButton').addEventListener('click', sendUVK5Message);
+            document.getElementById('userInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendUVK5Message();
+                }
+            });
+        }
+
+
         // Init
         materializeTabs();
         addButtonEventIdListener();
+        addUVK5MessageSendButtonListener();
     </script>
 </body>
 
