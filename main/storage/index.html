@@ -56,11 +56,11 @@
                     </div>
                     <div class="input-field">
                         <div class="row">
-                            <div class="col s12 m10">
-                                <input id="userInput" type="text">
+                            <div class="col s12 m9">
+                                <input id="uvk5MessengerInput" type="text" placeholder="Type your message here">
                             </div>
-                            <div class="col s12 m2">
-                                <button id="sendMessageButton" style="width: 100%;"
+                            <div class="col s12 m3">
+                                <button id="uvk5MessengerSendMessageButton" style="width: 100%;"
                                     class="btn waves-effect waves-light grey darken-4" type="submit"
                                     name="action">Send</button>
                             </div>
@@ -237,7 +237,7 @@
         }
 
         function sendUVK5Message() {
-            let messageInput = document.getElementById('userInput');
+            let messageInput = document.getElementById('uvk5MessengerInput');
             const data = { content: messageInput.value };
             fetch('/api/uvk5_message', {
                 method: 'POST',
@@ -265,8 +265,8 @@
 
         function addUVK5MessageSendButtonListener() {
 
-            document.getElementById('sendMessageButton').addEventListener('click', sendUVK5Message);
-            document.getElementById('userInput').addEventListener('keypress', function (e) {
+            document.getElementById('uvk5MessengerSendMessageButton').addEventListener('click', sendUVK5Message);
+            document.getElementById('uvk5MessengerInput').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     sendUVK5Message();
                 }
