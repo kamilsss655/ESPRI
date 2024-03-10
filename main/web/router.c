@@ -18,10 +18,19 @@
 #include "web/handlers/root.h"
 #include "web/handlers/static_files.h"
 #include "web/handlers/api/event.h"
+#include "web/handlers/api/uvk5_message.h"
 
-// Initialize rounting for web requests
+/* Initialize rounting for web requests
+
+For REST resources use following name convention
+GET    /      -> Index
+POST   /      -> Create
+GET    /:id   -> Show
+PUT    /:id   -> Update
+DELETE /:id   -> Destroy */
 void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
 {
+    // Root URL
     httpd_uri_t root_uri = {
         .uri = "/",
         .method = HTTP_GET,
@@ -30,14 +39,33 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     };
     httpd_register_uri_handler(server, &root_uri);
 
-    httpd_uri_t api_event_uri = {
+    // API Event
+    httpd_uri_t api_event_create_uri = {
         .uri = "/api/event",
         .method = HTTP_POST,
-        .handler = API_EVENT_Handle,
+        .handler = API_EVENT_Create,
         .user_ctx = server_data
     };
-    httpd_register_uri_handler(server, &api_event_uri);
+    httpd_register_uri_handler(server, &api_event_create_uri);
 
+    // API UVK5 Message
+    // httpd_uri_t api_uvk5_message_index_uri = {
+    //     .uri = "/api/uvk5_message",
+    //     .method = HTTP_GET,
+    //     .handler = API_UVK5_MESSAGE_Index,
+    //     .user_ctx = server_data
+    // };
+    // httpd_register_uri_handler(server, &api_uvk5_message_index_uri);
+
+    httpd_uri_t api_uvk5_message_create_uri = {
+        .uri = "/api/uvk5_message",
+        .method = HTTP_POST,
+        .handler = API_UVK5_MESSAGE_Create,
+        .user_ctx = server_data
+    };
+    httpd_register_uri_handler(server, &api_uvk5_message_create_uri);
+
+    // Match all and try to serve static files
     httpd_uri_t static_file_uri = {
         .uri = "/*", // Match all other URIs
         .method = HTTP_GET,

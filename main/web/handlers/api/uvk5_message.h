@@ -14,12 +14,12 @@
  *     limitations under the License.
  */
 
-#ifndef API_EVENT_H
-#define API_EVENT_H
+#ifndef API_UVK5_MESSAGE_H
+#define API_UVK5_MESSAGE_H
 
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-esp_err_t API_EVENT_Create(httpd_req_t *req);
+esp_err_t API_UVK5_MESSAGE_Create(httpd_req_t *req);
 
 #endif

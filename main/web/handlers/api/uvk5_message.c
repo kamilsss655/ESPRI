@@ -24,29 +24,18 @@
 #include "helper/http.h"
 #include "app/uvk5.h"
 
-static const char *TAG = "WEB/API/EVENT";
+static const char *TAG = "WEB/API/UVK5_MESSAGE";
 
-/*
-Handles JSON requests and sends SMS with event ID, to test:
 
-    curl --header "Content-Type: application/json" \
-                   --request POST \
-                   --data '{"id":231}' \
-                   http://192.168.4.1/api/event
-*/
-esp_err_t API_EVENT_Create(httpd_req_t *req)
+/* Handles JSON requests and sends SMS with event ID, to test:
+
+curl -d '{"content":"Hello!"}' http://192.168.4.1/api/uvk5_message */
+esp_err_t API_UVK5_MESSAGE_Create(httpd_req_t *req)
 {
     int total_len = req->content_len;
     int cur_len = 0;
     char *buf = ((file_server_data *)(req->user_ctx))->scratch;
     int received = 0;
-
-    // TODO: below should probably be set at some higher level protection
-    //  if (total_len >= SCRATCH_BUFSIZE) {
-    //      /* Respond with 500 Internal Server Error */
-    //      httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "content too long");
-    //      return ESP_FAIL;
-    //  }
 
     // Read request content
     while (cur_len < total_len)
@@ -75,28 +64,28 @@ esp_err_t API_EVENT_Create(httpd_req_t *req)
     }
 
     // Handle invalid attr
-    cJSON *attr = cJSON_GetObjectItem(root, "id");
+    cJSON *attr = cJSON_GetObjectItem(root, "content");
     if (attr == NULL)
     {
-        ESP_LOGE(TAG, "No \"id\" attr found in JSON");
-        httpd_json_resp_send(req, HTTPD_500, "No \"id\" attr found in JSON");
+        ESP_LOGE(TAG, "No \"content\" attr found in JSON");
+        httpd_json_resp_send(req, HTTPD_500, "No \"content\" attr found in JSON");
         // Free memory, it handles both root and attr
         cJSON_Delete(root);
         return ESP_FAIL;
     }
 
-    int event_id = attr->valueint;
+    char *message_content = attr->valuestring;
+    uint8_t len = strlen(message_content);
+
+    ESP_LOGI(TAG, "Create action received: %s", message_content);
+    
+    // Send message
+    UVK5_SendMessage(message_content, len);
+
     // Free memory, it handles both root and attr
     cJSON_Delete(root);
 
-    ESP_LOGI(TAG, "Event id:%d received", event_id);
-
-    // Send SMS
-    char String[30];
-    snprintf(String, sizeof(String), "API event: %d received.", event_id);
-    UVK5_SendMessage(String, sizeof(String));
-    
-    httpd_json_resp_send(req, HTTPD_200, "Event received");
+    httpd_json_resp_send(req, HTTPD_200, "Message sent");
 
     return ESP_OK;
 }
