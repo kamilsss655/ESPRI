@@ -20,6 +20,7 @@
 #include <esp_log.h>
 #include <cJSON.h>
 
+#include "helper/api.h"
 #include "helper/http.h"
 #include "app/uvk5.h"
 
@@ -53,7 +54,7 @@ esp_err_t API_EVENT_Handle(httpd_req_t *req)
         received = httpd_req_recv(req, buf + cur_len, total_len);
         if (received <= 0)
         {
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to process request");
+            httpd_json_resp_send(req, HTTPD_500, "Failed to process request");
             return ESP_FAIL;
         }
         cur_len += received;
@@ -67,7 +68,7 @@ esp_err_t API_EVENT_Handle(httpd_req_t *req)
     if (root == NULL)
     {
         ESP_LOGE(TAG, "Invalid JSON received");
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid JSON received");
+        httpd_json_resp_send(req, HTTPD_500, "Invalid JSON received");
         // Free memory
         cJSON_Delete(root);
         return ESP_FAIL;
@@ -78,7 +79,7 @@ esp_err_t API_EVENT_Handle(httpd_req_t *req)
     if (attr == NULL)
     {
         ESP_LOGE(TAG, "No \"id\" attr found in JSON");
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No \"id\" attr found in JSON");
+        httpd_json_resp_send(req, HTTPD_500, "No \"id\" attr found in JSON");
         // Free memory, it handles both root and attr
         cJSON_Delete(root);
         return ESP_FAIL;
@@ -94,9 +95,10 @@ esp_err_t API_EVENT_Handle(httpd_req_t *req)
     char String[30];
     snprintf(String, sizeof(String), "API event: %d received.", event_id);
     UVK5_SendMessage(String, sizeof(String));
-    ESP_LOGI(TAG, "Sent: %s", String);
     
-    httpd_resp_sendstr(req, "Event received");
+    ESP_LOGI(TAG, "Sent: %s", String);
+
+    httpd_json_resp_send(req, HTTPD_200, "Event received");
 
     return ESP_OK;
 }
