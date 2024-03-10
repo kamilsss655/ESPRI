@@ -77,7 +77,7 @@ esp_err_t API_UVK5_MESSAGE_Create(httpd_req_t *req)
     char *message_content = attr->valuestring;
     uint8_t len = strlen(message_content);
 
-    ESP_LOGI(TAG, "Create action received: %s", message_content);
+    ESP_LOGI(TAG, "Received: %s", message_content);
     
     // Send message
     UVK5_SendMessage(message_content, len);
