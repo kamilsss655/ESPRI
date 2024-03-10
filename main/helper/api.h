@@ -20,6 +20,6 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *response_code, const char *content);
+esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *status, const char *content);
 
 #endif

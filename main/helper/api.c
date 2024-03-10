@@ -19,10 +19,10 @@
 
 // Responds with JSON
 // for example: {"response": "Invalid JSON received"}
-esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *response_code, const char *content)
+esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *status, const char *content)
 {
     // Set response params
-    httpd_resp_set_type(req, response_code);
+    httpd_resp_set_status(req, status);
     httpd_resp_set_type(req, "application/json");
 
     // Create response JSON
