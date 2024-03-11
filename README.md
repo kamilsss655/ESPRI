@@ -32,7 +32,6 @@ I (8732) WEB/API/EVENT_HANDLER: Event id:3 received
 I (8732) WEB/API/EVENT_HANDLER: Sent: SMS: API event: 3 received.
 ```
 
-
 ## Dependencies
 Hardware:
 * ESP32 or ESP32 S3
@@ -51,6 +50,20 @@ ESP32 S3 Zero:
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
+
+## Getting started
+
+> [!TIP]
+> You can flash this firmware with [esptool.py](https://docs.espressif.com/projects/esptool/en/latest/esp32/)
+> or with [ESP-Launchpad](https://espressif.github.io/esp-launchpad/) (using web browser)
+
+To flash with `esptool.py`:
+
+`esptool.py write_flash 0x0 espri.bin`
+
+Once flashed:
+- Connect to WIFI access point `NOKIA-3K9N4H1` with password `mypassword`
+- Go to `http://192.168.4.1`
 
 ## Development
 
