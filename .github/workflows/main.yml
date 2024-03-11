@@ -12,11 +12,11 @@ jobs:
         
       - name: safe.directory
         run:  git config --global --add safe.directory /__w/ESPRI/ESPRI        
-      - name: Build ESP-IDF image
-        run: |
-          export IDF_PATH=$RUNNER_WORKSPACE/esp-idf
-          export PATH=$IDF_PATH/tools:$PATH
-          idf.py build
+    #   - name: Build ESP-IDF image
+    #     run: |
+    #       export IDF_PATH=$RUNNER_WORKSPACE/esp-idf
+    #       export PATH=$IDF_PATH/tools:$PATH
+    #       idf.py build
       - name: Pack
         run:  esptool.py --chip ESP32 merge_bin -o firmware.bin --flash_mode dio --flash_size=keep  0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/ESPRI.bin 0x110000 build/storage.bin
       - name: 'Upload Artifact'
