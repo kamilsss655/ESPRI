@@ -16,21 +16,33 @@ jobs:
         esp_idf_version: v5.2.1
         target: esp32
         command: 'idf.py set-target esp32 build'
-    - name: ESP-IDF v5.1 build esp32s2
+    - name: ESP-IDF v5.1 pack esp32
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: v5.2.1
-        target: esp32s2
-        command: 'idf.py set-target esp32s2 build'
-    - name: ESP-IDF v5.1 build esp32s3
-      uses: espressif/esp-idf-ci-action@v1
+        target: esp32
+        command: 'esptool.py --chip ESP32 merge_bin -o firmware.bin --flash_mode dio --flash_size=keep  0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/ESPRI.bin 0x110000 build/storage.bin'
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
       with:
-        esp_idf_version: v5.2.1
-        target: esp32s3
-        command: 'idf.py set-target esp32s3 build'
-    - name: ESP-IDF v5.1 build esp32c3
-      uses: espressif/esp-idf-ci-action@v1
-      with:
-        esp_idf_version: v5.2.1
-        target: esp32c3
-        command: 'idf.py set-target esp32c3 build'
+        name: firmware
+        path: firmware*.bin    
+        
+    # - name: ESP-IDF v5.1 build esp32s2
+    #   uses: espressif/esp-idf-ci-action@v1
+    #   with:
+    #     esp_idf_version: v5.2.1
+    #     target: esp32s2
+    #     command: 'idf.py set-target esp32s2 build'
+    # - name: ESP-IDF v5.1 build esp32s3
+    #   uses: espressif/esp-idf-ci-action@v1
+    #   with:
+    #     esp_idf_version: v5.2.1
+    #     target: esp32s3
+    #     command: 'idf.py set-target esp32s3 build'
+    # - name: ESP-IDF v5.1 build esp32c3
+    #   uses: espressif/esp-idf-ci-action@v1
+    #   with:
+    #     esp_idf_version: v5.2.1
+    #     target: esp32c3
+    #     command: 'idf.py set-target esp32c3 build'
