@@ -12,7 +12,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up ESP-IDF
-      uses: espressif/idf-ci-action@v1
+      uses: espressif/esp-idf-ci-action@v1
       with:
         esp-idf-version: 'v4.3'
 
