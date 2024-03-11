@@ -1,38 +1,48 @@
+name: ESP-IDF build
 on:
   push:
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    container:
-      image: espressif/idf:v5.2.1
-    steps: 
-      - name: Checkout
-        uses: actions/checkout@v3
+  build_esp32_v5_1:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: ESP-IDF v5.1 build esp32
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.2.1
+        target: esp32
+        command: 'idf.py set-target esp32 build'
+    - name: ESP-IDF v5.1 pack esp32
+      uses: espressif/esp-idf-ci-action@v1
+      with:
+        esp_idf_version: v5.2.1
+        target: esp32
+        command: 'esptool.py --chip ESP32 merge_bin -o firmware.bin --flash_mode dio --flash_size=keep  0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/ESPRI.bin 0x110000 build/storage.bin'
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: firmware
+        path: firmware*.bin    
         
-      - name: safe.directory
-        run:  git config --global --add safe.directory /__w/ESPRI/ESPRI        
-    #   - name: Build ESP-IDF image
-    #     run: |
-    #       export IDF_PATH=$RUNNER_WORKSPACE/esp-idf
-    #       export PATH=$IDF_PATH/tools:$PATH
-    #       idf.py build
-      - name: Pack
-        run:  esptool.py --chip ESP32 merge_bin -o firmware.bin --flash_mode dio --flash_size=keep  0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/ESPRI.bin 0x110000 build/storage.bin
-      - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v3
-        with:
-          name: firmware
-          path: firmware*.bin
-
-      - name: Upload binaries to release
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: firmware.packed.bin
-          asset_name: egzumer_$tag.packed.bin
-          tag: ${{ github.ref }}
-          overwrite: true
-          release_name: release ${{ github.ref_name }}     
-   
+    # - name: ESP-IDF v5.1 build esp32s2
+    #   uses: espressif/esp-idf-ci-action@v1
+    #   with:
+    #     esp_idf_version: v5.2.1
+    #     target: esp32s2
+    #     command: 'idf.py set-target esp32s2 build'
+    # - name: ESP-IDF v5.1 build esp32s3
+    #   uses: espressif/esp-idf-ci-action@v1
+    #   with:
+    #     esp_idf_version: v5.2.1
+    #     target: esp32s3
+    #     command: 'idf.py set-target esp32s3 build'
+    # - name: ESP-IDF v5.1 build esp32c3
+    #   uses: espressif/esp-idf-ci-action@v1
+    #   with:
+    #     esp_idf_version: v5.2.1
+    #     target: esp32c3
+    #     command: 'idf.py set-target esp32c3 build'
