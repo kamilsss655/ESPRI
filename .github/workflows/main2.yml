@@ -1,9 +1,6 @@
 name: ESP-IDF build
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build_esp32_v5_1:
