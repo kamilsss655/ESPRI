@@ -1,0 +1,20 @@
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up ESP-IDF
+      uses: espressif/idf-ci-action@v1
+      with:
+        esp-idf-version: 'v5.2.1'
+
+    - name: Build ESP-IDF image
+      run: idf.py build
+
+   
