@@ -1,5 +1,7 @@
 on:
   push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -10,11 +12,12 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up ESP-IDF
-      uses: espressif/esp-idf-ci-action@v1
+      uses: espressif/idf-ci-action@v1
       with:
-        esp-idf-version: 'v5.2.1'
+        esp-idf-version: 'v4.3'
 
     - name: Build ESP-IDF image
-      run: idf.py build
-
-   
+      run: |
+        export IDF_PATH=$RUNNER_WORKSPACE/esp-idf
+        export PATH=$IDF_PATH/tools:$PATH
+        idf.py build
