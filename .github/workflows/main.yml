@@ -39,6 +39,7 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         release_name: release ${{ github.ref_name }}     
+        body: "To flash run `esptool.py write_flash 0x0 espri_$tag.bin`"
         
     # - name: ESP-IDF v5.1 build esp32s2
     #   uses: espressif/esp-idf-ci-action@v1
