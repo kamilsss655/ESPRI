@@ -3,20 +3,20 @@ on:
   push:
 
 jobs:
-  build_esp32_v5_1:
+  build_esp32_v5_2_1:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
       with:
         submodules: 'recursive'
-    - name: ESP-IDF v5.1 build esp32
+    - name: ESP-IDF v5.2.1 build esp32
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: v5.2.1
         target: esp32
         command: 'idf.py set-target esp32 build'
-    - name: ESP-IDF v5.1 pack esp32
+    - name: ESP-IDF v5.2.1 pack esp32
       uses: espressif/esp-idf-ci-action@v1
       with:
         esp_idf_version: v5.2.1
@@ -27,6 +27,16 @@ jobs:
       with:
         name: firmware
         path: firmware*.bin    
+    - name: Upload binaries to release
+      if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: firmware.packed.bin
+        asset_name: egzumer_$tag.packed.bin
+        tag: ${{ github.ref }}
+        overwrite: true
+        release_name: release ${{ github.ref_name }}     
         
     # - name: ESP-IDF v5.1 build esp32s2
     #   uses: espressif/esp-idf-ci-action@v1
