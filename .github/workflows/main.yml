@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: 'recursive'
     - name: ESP-IDF v5.2.1 build esp32
@@ -32,8 +32,8 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: firmware.packed.bin
-        asset_name: egzumer_$tag.packed.bin
+        file: firmware.bin
+        asset_name: espri_$tag.bin
         tag: ${{ github.ref }}
         overwrite: true
         release_name: release ${{ github.ref_name }}     
