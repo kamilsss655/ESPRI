@@ -5,6 +5,8 @@ on:
 jobs:
   build_esp32_v5_2_1:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
