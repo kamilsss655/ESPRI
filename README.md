@@ -35,14 +35,26 @@ I (8732) WEB/API/EVENT_HANDLER: Sent: SMS: API event: 3 received.
 
 ## Dependencies
 Hardware:
-* ESP32 or ESP32 S3 (i.e ESP32-S3-Zero)
+* ESP32 or ESP32 S3
+
+Some of the recommended boards:
+
+ESP32 Lolin Lite:
+
+![esp32-lolin-lite](https://github.com/kamilsss655/ESPRI/assets/8842065/2e74e723-4347-4efb-b17b-20b4e930523f)
+
+ESP32 S3 Zero:
+
+![esp32-s3-zero](https://github.com/kamilsss655/ESPRI/assets/8842065/da0c5b13-dae1-43ec-b053-b3f1df78d63b)
+
+
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
 
 ## Development
 
-### With Visual Studio Code and ESP-IDF extension
+### With Visual Studio Code and ESP-IDF extension (recommended)
 
 This method will install ESP-IDF toolchain locally with the help of the `ESP-IDF` Visual Studio Code extension.
 
