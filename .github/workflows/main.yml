@@ -1,0 +1,35 @@
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container:
+      image: espressif/idf:v5.2.1
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: safe.directory
+        run:  git config --global --add safe.directory /__w/ESPRI/ESPRI        
+      - name: Build
+        run:  idf.py build
+      - name: Pack
+        run:  esptool.py --chip ESP32 merge_bin -o firmware.bin --flash_mode dio --flash_size=keep  0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/ESPRI.bin 0x110000 build/storage.bin
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: firmware*.bin
+
+      - name: Upload binaries to release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: firmware.packed.bin
+          asset_name: egzumer_$tag.packed.bin
+          tag: ${{ github.ref }}
+          overwrite: true
+          release_name: release ${{ github.ref_name }}     
+   
