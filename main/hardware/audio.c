@@ -16,8 +16,6 @@
 
 #include <stdint.h>
 #include <math.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include <driver/i2s_pdm.h>
 #include <driver/gpio.h>
 #include <esp_check.h>

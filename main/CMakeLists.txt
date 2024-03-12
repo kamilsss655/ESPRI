@@ -3,6 +3,7 @@ set(srcs
     "board.c"
     "main.c"
     "app/button.c"
+    "app/morse_code.c"
     "app/uvk5.c"
     "external/printf/printf.c"
     "hardware/button.c"

@@ -13,22 +13,8 @@
  *     See the License for the specific language governing permissions and
  *     limitations under the License.
  */
+#include <stdint.h>
 
-#ifndef HARDWARE_AUDIO_H
-#define HARDWARE_AUDIO_H
+void MORSE_CODE_TransmitOnce(const char *input, uint8_t len);
 
-#include <driver/i2s_pdm.h>
-
-// I2S PDM TX clock io number (not used, but needs to be assigned)
-#define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_21
-#define AUDIO_BUFFER_SIZE     2048
- // I2S PDM TX frequency 16k and higher you can hear digital glitch, 10k seems quite nice
-#define AUDIO_PDM_TX_FREQ_HZ  10000
-// 1~32767, affects the volume
-#define AUDIO_WAVE_AMPLITUDE  (1000.0)        
-#define CONST_PI              (3.1416f)
-
-i2s_chan_handle_t AUDIO_Init(void);
-void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
-
-#endif
+void MORSE_CODE_Transmit(void *pvParameters);
