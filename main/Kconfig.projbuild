@@ -30,4 +30,11 @@ menu "ESPRI Configuration"
         default 4
         help
             Max number of the STA connects to AP.
+
+    config AUDIO_OUT_GPIO
+        int "Audio OUT GPIO Pin"
+        range 1 30
+        default 18
+        help
+            Audio OUT Gpio Pin to use.
 endmenu

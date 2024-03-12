@@ -1,21 +1,34 @@
-#pragma once
-
-#define EXAMPLE_BUFF_SIZE   2048
-
-#define EXAMPLE_I2S_BCLK_IO1        GPIO_NUM_4      // I2S bit clock io number
-#define EXAMPLE_I2S_WS_IO1          GPIO_NUM_5      // I2S word select io number
-#define EXAMPLE_I2S_DOUT_IO1        GPIO_NUM_18     // I2S data out io number
-
-#define EXAMPLE_I2S_BCLK_IO2        GPIO_NUM_22     // I2S bit clock io number
-#define EXAMPLE_I2S_WS_IO2          GPIO_NUM_23     // I2S word select io number
-#define EXAMPLE_I2S_DOUT_IO2        GPIO_NUM_25     // I2S data out io number
-#define EXAMPLE_I2S_DIN_IO2         GPIO_NUM_26     // I2S data in io number
-
-/**
- * @brief I2S PDM TX example task
+/* Copyright 2024 kamilsss655
+ * https://github.com/kamilsss655
  *
- * @param args  The user data given from task creating, not used in this example
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *     Unless required by applicable law or agreed to in writing, software
+ *     distributed under the License is distributed on an "AS IS" BASIS,
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
  */
-void i2s_example_pdm_tx_task(void *args);
-void example_beeper(void *args);
-void AUDIO_PlayTone(uint16_t freq, int16_t duration_ms);
+
+#ifndef HARDWARE_AUDIO_H
+#define HARDWARE_AUDIO_H
+
+#include <driver/i2s_pdm.h>
+
+// I2S PDM TX clock io number (not used, but needs to be assigned)
+#define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_39
+#define AUDIO_BUFFER_SIZE     2048
+ // I2S PDM TX frequency 16k and higher you can hear digital glitch, 10k seems quite nice
+#define AUDIO_PDM_TX_FREQ_HZ  10000
+// 1~32767, affects the volume
+#define AUDIO_WAVE_AMPLITUDE  (1000.0)        
+#define CONST_PI              (3.1416f)
+
+i2s_chan_handle_t AUDIO_Init(void);
+void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
+
+#endif

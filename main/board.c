@@ -14,6 +14,7 @@
  *     limitations under the License.
  */
 
+#include "hardware/audio.h"
 #include "hardware/http_server.h"
 #include "hardware/uart.h"
 #include "hardware/wifi.h"
@@ -34,4 +35,6 @@ void BOARD_Init(void)
     HTTP_SERVER_Init(BOARD_BASE_PATH);
     // Initialize button
     BUTTON_Init();
+    // Initialize audio
+    AUDIO_Init();
 }
