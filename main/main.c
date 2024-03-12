@@ -21,6 +21,7 @@
 #include "hardware/led.h"
 #include "hardware/button.h"
 #include "hardware/uart.h"
+#include "hardware/audio.h"
 
 void app_main()
 {
@@ -39,4 +40,6 @@ void app_main()
 
     // Create UART monitor task
     xTaskCreate(UART_Monitor, "UART_Monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
+
+    xTaskCreate(example_beeper, "example_beeper", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 }

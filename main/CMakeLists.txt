@@ -9,6 +9,7 @@ set(srcs
     "hardware/led.c"
     "hardware/http_server.c"
     "hardware/uart.c"
+    "hardware/audio.c"
     "hardware/wifi.c"
     "hardware/spiffs.c"
     "helper/api.c"
