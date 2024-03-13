@@ -30,14 +30,14 @@ menu "Developer configuration"
         int "WiFi Channel"
         range 1 13
         default 1
-        depends on DEVELOPER_MODE
+        depends on DEVELOPER_MODE && DEVELOPER_WIFI_AP_MODE_ENABLED 
         help
             WiFi channel (network channel) for the example to use.
     
     config DEVELOPER_MAX_STA_CONN
         int "Maximal STA connections"
         default 4
-        depends on DEVELOPER_MODE
+        depends on DEVELOPER_MODE && DEVELOPER_WIFI_AP_MODE_ENABLED 
         help
             Max number of the STA connects to AP.
 
