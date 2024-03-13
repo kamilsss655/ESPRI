@@ -2,6 +2,7 @@
 set(srcs
     "board.c"
     "main.c"
+    "settings.c"
     "app/button.c"
     "app/morse_code.c"
     "app/uvk5.c"

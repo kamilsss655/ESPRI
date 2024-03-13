@@ -27,6 +27,7 @@
 #include <lwip/err.h>
 #include <lwip/sys.h>
 
+#include "settings.h"
 #include "wifi.h"
 
 static const char *TAG = "HW/WIFI";
@@ -48,14 +49,21 @@ void WIFI_Init(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    // configurable in idf.py menuconfig
-    #ifdef CONFIG_WIFI_AP_MODE_ENABLED
+    switch (gSettings.wifi.mode)
+    {
+    case SETTINGS_WIFI_MODE_AP:
         ESP_LOGI(TAG, "Initializing in AP mode.");
         WIFI_InitAp();
-    #else
+        break;
+    case SETTINGS_WIFI_MODE_STA:
         ESP_LOGI(TAG, "Initializing in STA mode.");
         WIFI_InitSta();
-    #endif
+        break;
+    
+    default:
+        ESP_LOGI(TAG, "Disabled.");
+        break;
+    }
 }
 
 // Initialize in Station mode
@@ -86,8 +94,6 @@ void WIFI_InitSta(void)
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = CONFIG_WIFI_SSID,
-            .password = CONFIG_WIFI_PASSWORD,
             /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (pasword len => 8).
              * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
              * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
@@ -98,6 +104,10 @@ void WIFI_InitSta(void)
             .sae_h2e_identifier = "",
         },
     };
+
+    memmove(wifi_config.sta.ssid, gSettings.wifi.ssid, sizeof(wifi_config.sta.ssid));
+    memmove(wifi_config.sta.password, gSettings.wifi.password, sizeof(wifi_config.sta.password));
+
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
@@ -116,10 +126,10 @@ void WIFI_InitSta(void)
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "connected to ap SSID:%s",
-                 CONFIG_WIFI_SSID);
+                 gSettings.wifi.ssid);
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
-                 CONFIG_WIFI_SSID, CONFIG_WIFI_PASSWORD);
+                 gSettings.wifi.ssid, gSettings.wifi.password);
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
@@ -147,11 +157,9 @@ void WIFI_InitAp(void)
 
     wifi_config_t wifi_config = {
         .ap = {
-            .ssid = CONFIG_WIFI_SSID,
-            .ssid_len = strlen(CONFIG_WIFI_SSID),
-            .channel = CONFIG_WIFI_CHANNEL,
-            .password = CONFIG_WIFI_PASSWORD,
-            .max_connection = CONFIG_MAX_STA_CONN,
+            .ssid_len = strlen(gSettings.wifi.ssid),
+            .channel = gSettings.wifi.channel,
+            .max_connection = gSettings.wifi.max_connections,
 #ifdef CONFIG_WIFI_SOFTAP_SAE_SUPPORT
             .authmode = WIFI_AUTH_WPA3_PSK,
             .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
@@ -163,7 +171,11 @@ void WIFI_InitAp(void)
             },
         },
     };
-    if (strlen(CONFIG_WIFI_PASSWORD) == 0)
+
+    memmove(wifi_config.ap.ssid, gSettings.wifi.ssid, sizeof(wifi_config.ap.ssid));
+    memmove(wifi_config.ap.password, gSettings.wifi.password, sizeof(wifi_config.ap.password));
+
+    if (strlen(gSettings.wifi.password) == 0)
     {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
@@ -173,7 +185,7 @@ void WIFI_InitAp(void)
     ESP_ERROR_CHECK(esp_wifi_start());
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
-             CONFIG_WIFI_SSID, CONFIG_WIFI_PASSWORD, CONFIG_WIFI_CHANNEL);
+             gSettings.wifi.ssid, gSettings.wifi.password, gSettings.wifi.channel);
 }
 
 static void WIFI_ap_event_handler(void *arg, esp_event_base_t event_base,

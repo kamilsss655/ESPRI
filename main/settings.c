@@ -14,30 +14,23 @@
  *     limitations under the License.
  */
 
-#include "hardware/audio.h"
-#include "hardware/http_server.h"
-#include "hardware/uart.h"
-#include "hardware/wifi.h"
-#include "hardware/button.h"
-#include "hardware/spiffs.h"
+#include <string.h>
 #include "settings.h"
-#include "board.h"
+
+SETTINGS_Config_t gSettings;
 
 // Initialize the board
-void BOARD_Init(void)
+esp_err_t SETTINGS_Load(void)
 {
-    // Initialize SPIFFS
-    ESP_ERROR_CHECK(SPIFFS_Init(BOARD_BASE_PATH));
-    // Load SETTINGS
-    ESP_ERROR_CHECK(SETTINGS_Load());
-    // Initialize UART
-    UART_Init();
-    // Initialize WIFI
-    WIFI_Init();
-    //Initialize HTTP Server
-    ESP_ERROR_CHECK(HTTP_SERVER_Init(BOARD_BASE_PATH));
-    // Initialize button
-    BUTTON_Init();
-    // Initialize audio
-    AUDIO_Init();
+    gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
+    strcpy(gSettings.wifi.ssid, "NOKIA-4V5O1F0");
+    strcpy(gSettings.wifi.password, "mypassword");
+    gSettings.wifi.channel = SETTINGS_WIFI_CHANNEL_6;
+    gSettings.wifi.max_connections = SETTINGS_WIFI_MAX_CONN_5;
+    return ESP_OK;
+}
+
+esp_err_t SETTINGS_Save(void)
+{
+    return ESP_OK;
 }
