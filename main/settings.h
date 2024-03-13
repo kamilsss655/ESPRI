@@ -19,6 +19,12 @@
 
 #include <esp_err.h>
 
+#include "board.h"
+
+#define CONFIG_FILE_PATH "/config.bin"
+// Determines location of where the config file is stored ie. /storage/config.bin
+#define CONFIG_LOCATION STORAGE_BASE_PATH CONFIG_FILE_PATH
+
 // WIFI mode
 typedef enum
 {

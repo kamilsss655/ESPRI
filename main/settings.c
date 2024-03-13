@@ -24,16 +24,16 @@ static const char *TAG = "SETTINGS";
 
 SETTINGS_Config_t gSettings;
 
-// Initialize the board
+// Load settings from local filesystem
 esp_err_t SETTINGS_Load(void)
 {
 
     FILE *fd = NULL;
 
-    fd = fopen("/storage/config", "rb");
+    fd = fopen(CONFIG_LOCATION, "rb");
     if (!fd)
     {
-        ESP_LOGI(TAG, "No config file found.");
+        ESP_LOGE(TAG, "No config file found.");
         SETTINGS_FactoryReset();
     }
     fread(&gSettings, 1, sizeof(gSettings),fd);
@@ -42,11 +42,12 @@ esp_err_t SETTINGS_Load(void)
     return ESP_OK;
 }
 
+// Save settings into local filesystem
 esp_err_t SETTINGS_Save(void)
 {
     FILE *fd = NULL;
 
-    fd = fopen("/storage/config", "wb");
+    fd = fopen(CONFIG_LOCATION, "wb");
     fwrite(&gSettings, 1, sizeof(gSettings),fd);
     fclose(fd);
 
