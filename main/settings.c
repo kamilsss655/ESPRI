@@ -15,22 +15,57 @@
  */
 
 #include <string.h>
+#include <esp_system.h>
+#include <esp_log.h>
+#include <esp_spiffs.h>
 #include "settings.h"
+
+static const char *TAG = "SETTINGS";
 
 SETTINGS_Config_t gSettings;
 
 // Initialize the board
 esp_err_t SETTINGS_Load(void)
 {
-    gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
-    strcpy(gSettings.wifi.ssid, "NOKIA-4V5O1F0");
-    strcpy(gSettings.wifi.password, "mypassword");
-    gSettings.wifi.channel = SETTINGS_WIFI_CHANNEL_6;
-    gSettings.wifi.max_connections = SETTINGS_WIFI_MAX_CONN_5;
+
+    FILE *fd = NULL;
+
+    fd = fopen("/storage/config", "rb");
+    if (!fd)
+    {
+        ESP_LOGI(TAG, "No config file found.");
+        SETTINGS_FactoryReset();
+    }
+    fread(&gSettings, 1, sizeof(gSettings),fd);
+    fclose(fd);
+
     return ESP_OK;
 }
 
 esp_err_t SETTINGS_Save(void)
 {
+    FILE *fd = NULL;
+
+    fd = fopen("/storage/config", "wb");
+    fwrite(&gSettings, 1, sizeof(gSettings),fd);
+    fclose(fd);
+
+    return ESP_OK;
+}
+
+esp_err_t SETTINGS_FactoryReset(void)
+{
+    ESP_LOGW(TAG, "Performing factory reset.");
+
+    gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
+    strcpy(gSettings.wifi.ssid, "NOKIA-4V5O1F0");
+    strcpy(gSettings.wifi.password, "mypassword");
+    gSettings.wifi.channel = SETTINGS_WIFI_CHANNEL_6;
+    gSettings.wifi.max_connections = SETTINGS_WIFI_MAX_CONN_5;
+
+    SETTINGS_Save();
+    
+    esp_restart();
+    
     return ESP_OK;
 }
