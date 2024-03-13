@@ -28,6 +28,7 @@ static const char *TAG = "HW/AUDIO";
 i2s_chan_handle_t tx_channel;
 
 // Initialize audio
+// Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
 i2s_chan_handle_t AUDIO_Init(void)
 {
     i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
@@ -50,8 +51,6 @@ i2s_chan_handle_t AUDIO_Init(void)
     };
 
     ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
-
-    ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
 
     ESP_LOGI(TAG, "Audio output initialized on pin: %d", CONFIG_AUDIO_OUT_GPIO);
 
@@ -81,6 +80,9 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
 
+    // Turn on PDM output
+    ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
+
     for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
     {
         /* Play the tone */
@@ -89,6 +91,9 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
             printf("Write Task: i2s write failed\n");
         }
     }
+
+     // Turn off PDM output
+    ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
 
     // Deallocate temp buffer
     free(w_buf);
