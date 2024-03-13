@@ -53,19 +53,25 @@ esp_err_t SETTINGS_Save(void)
     return ESP_OK;
 }
 
+// Performs factory reset
+// Allows to overwrite settings with private developer settings
+// To use run: idp.py menuconfig -> Project configuration
+// Settings set with menuconfig are not tracked with version control
+// Useful for connecting to private WIFI network
 esp_err_t SETTINGS_FactoryReset(void)
 {
     ESP_LOGW(TAG, "Performing factory reset.");
 
-    gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
-    strcpy(gSettings.wifi.ssid, "NOKIA-4V5O1F0");
-    strcpy(gSettings.wifi.password, "mypassword");
-    gSettings.wifi.channel = SETTINGS_WIFI_CHANNEL_6;
-    gSettings.wifi.max_connections = SETTINGS_WIFI_MAX_CONN_5;
-
-    #ifdef CONFIG_DEVELOPER_MODE
-        SETTINGS_LoadDeveloperMode();
+    #ifdef CONFIG_WIFI_AP_MODE_ENABLED
+        gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
+        gSettings.wifi.channel = CONFIG_WIFI_CHANNEL;
+        gSettings.wifi.max_connections = CONFIG_MAX_STA_CONN;
+    #else
+        gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
     #endif
+    strcpy(gSettings.wifi.ssid, CONFIG_WIFI_SSID);
+    strcpy(gSettings.wifi.password, CONFIG_WIFI_PASSWORD);
+
 
     SETTINGS_Save();
     
@@ -73,22 +79,3 @@ esp_err_t SETTINGS_FactoryReset(void)
     
     return ESP_OK;
 }
-
-#ifdef CONFIG_DEVELOPER_MODE
-// Allows to overwrite settings with private developer settings
-// To use run: idp.py menuconfig -> Developer configuration
-// Settings set with menuconfig are not tracked with version control
-// Useful for connecting to private WIFI network
-void SETTINGS_LoadDeveloperMode(void)
-{
-    #ifdef CONFIG_DEVELOPER_WIFI_AP_MODE_ENABLED
-        gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
-        gSettings.wifi.channel = CONFIG_DEVELOPER_WIFI_CHANNEL;
-        gSettings.wifi.max_connections = CONFIG_DEVELOPER_MAX_STA_CONN;
-    #else
-        gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
-    #endif
-    strcpy(gSettings.wifi.ssid, CONFIG_DEVELOPER_WIFI_SSID);
-    strcpy(gSettings.wifi.password, CONFIG_DEVELOPER_WIFI_PASSWORD);
-}
-#endif

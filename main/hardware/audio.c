@@ -43,7 +43,7 @@ i2s_chan_handle_t AUDIO_Init(void)
         .slot_cfg = I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
         .gpio_cfg = {
             .clk = AUDIO_PDM_TX_CLK_GPIO,
-            .dout = CONFIG_DEVELOPER_AUDIO_OUT_GPIO,
+            .dout = CONFIG_AUDIO_OUT_GPIO,
             .invert_flags = {
                 .clk_inv = false,
             },
@@ -52,7 +52,7 @@ i2s_chan_handle_t AUDIO_Init(void)
 
     ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
 
-    ESP_LOGI(TAG, "Audio output initialized on pin: %d", CONFIG_DEVELOPER_AUDIO_OUT_GPIO);
+    ESP_LOGI(TAG, "Audio output initialized on pin: %d", CONFIG_AUDIO_OUT_GPIO);
 
     return tx_channel;
 }

@@ -1,47 +1,38 @@
-menu "Developer configuration"
-    config DEVELOPER_MODE
-        bool "Developer mode"
-        default n
-        help
-            Ovewrites default settings with the ones set here.
-
-    config DEVELOPER_WIFI_AP_MODE_ENABLED
+menu "Project configuration"
+    config WIFI_AP_MODE_ENABLED
         bool "Access point mode"
         default y
-        depends on DEVELOPER_MODE
         help
             Run in access point mode. Disable to run in station mode.
 
-    config DEVELOPER_WIFI_SSID
+    config WIFI_SSID
         string "WiFi SSID"
         default "NOKIA-3K9N4H1"
-        depends on DEVELOPER_MODE
         help
             SSID (network name) for the example to connect to.
         
-    config DEVELOPER_WIFI_PASSWORD
+    config WIFI_PASSWORD
         string "WiFi Password"
         default "mypassword"
-        depends on DEVELOPER_MODE
         help
             WiFi password (WPA or WPA2) for the example to use.
         
-    config DEVELOPER_WIFI_CHANNEL
+    config WIFI_CHANNEL
         int "WiFi Channel"
         range 1 13
         default 1
-        depends on DEVELOPER_MODE && DEVELOPER_WIFI_AP_MODE_ENABLED 
+        depends on WIFI_AP_MODE_ENABLED 
         help
             WiFi channel (network channel) for the example to use.
     
-    config DEVELOPER_MAX_STA_CONN
+    config MAX_STA_CONN
         int "Maximal STA connections"
         default 4
-        depends on DEVELOPER_MODE && DEVELOPER_WIFI_AP_MODE_ENABLED 
+        depends on WIFI_AP_MODE_ENABLED 
         help
             Max number of the STA connects to AP.
 
-    config DEVELOPER_AUDIO_OUT_GPIO
+    config AUDIO_OUT_GPIO
         int "Audio OUT GPIO Pin"
         range 1 30
         default 18
