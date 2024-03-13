@@ -76,5 +76,8 @@ extern SETTINGS_Config_t gSettings;
 esp_err_t SETTINGS_Load(void);
 esp_err_t SETTINGS_Save(void);
 esp_err_t SETTINGS_FactoryReset(void);
+#ifdef CONFIG_DEVELOPER_MODE
+    void SETTINGS_LoadDeveloperMode(void);
+#endif
 
 #endif

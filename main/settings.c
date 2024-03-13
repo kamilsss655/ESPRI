@@ -63,9 +63,32 @@ esp_err_t SETTINGS_FactoryReset(void)
     gSettings.wifi.channel = SETTINGS_WIFI_CHANNEL_6;
     gSettings.wifi.max_connections = SETTINGS_WIFI_MAX_CONN_5;
 
+    #ifdef CONFIG_DEVELOPER_MODE
+        SETTINGS_LoadDeveloperMode();
+    #endif
+
     SETTINGS_Save();
     
     esp_restart();
     
     return ESP_OK;
 }
+
+#ifdef CONFIG_DEVELOPER_MODE
+// Allows to overwrite settings with private developer settings
+// To use run: idp.py menuconfig -> Developer configuration
+// Settings set with menuconfig are not tracked with version control
+// Useful for connecting to private WIFI network
+void SETTINGS_LoadDeveloperMode(void)
+{
+    #ifdef CONFIG_DEVELOPER_WIFI_AP_MODE_ENABLED
+        gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
+    #else
+        gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
+    #endif
+    strcpy(gSettings.wifi.ssid, CONFIG_DEVELOPER_WIFI_SSID);
+    strcpy(gSettings.wifi.password, CONFIG_DEVELOPER_WIFI_PASSWORD);
+    gSettings.wifi.channel = CONFIG_DEVELOPER_WIFI_CHANNEL;
+    gSettings.wifi.max_connections = CONFIG_DEVELOPER_MAX_STA_CONN;
+}
+#endif
