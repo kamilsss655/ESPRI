@@ -83,12 +83,12 @@ void SETTINGS_LoadDeveloperMode(void)
 {
     #ifdef CONFIG_DEVELOPER_WIFI_AP_MODE_ENABLED
         gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
+        gSettings.wifi.channel = CONFIG_DEVELOPER_WIFI_CHANNEL;
+        gSettings.wifi.max_connections = CONFIG_DEVELOPER_MAX_STA_CONN;
     #else
         gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
     #endif
     strcpy(gSettings.wifi.ssid, CONFIG_DEVELOPER_WIFI_SSID);
     strcpy(gSettings.wifi.password, CONFIG_DEVELOPER_WIFI_PASSWORD);
-    gSettings.wifi.channel = CONFIG_DEVELOPER_WIFI_CHANNEL;
-    gSettings.wifi.max_connections = CONFIG_DEVELOPER_MAX_STA_CONN;
 }
 #endif
