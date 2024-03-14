@@ -21,7 +21,7 @@
 
 #include "hardware/audio.h"
 
-#define DOT_DURATION 300
+#define DOT_DURATION 200
 
 static const char *TAG  = "APP/MORSE_CODE";
 static const char *code = "- . ... - / .--- ..- ... - / .- / - . ... -";
@@ -33,13 +33,13 @@ void MORSE_CODE_TransmitOnce(const char *input, uint8_t len)
         switch (input[i])
         {
         case '.':
-            AUDIO_PlayTone(1000, DOT_DURATION);
+            AUDIO_PlayTone(700, DOT_DURATION);
             break;
         case '-':
-            AUDIO_PlayTone(1000, DOT_DURATION * 3);
+            AUDIO_PlayTone(700, DOT_DURATION * 3);
             break;
         }
-        vTaskDelay(DOT_DURATION * 3 / portTICK_PERIOD_MS);
+        vTaskDelay(DOT_DURATION / portTICK_PERIOD_MS);
     }
 }
 

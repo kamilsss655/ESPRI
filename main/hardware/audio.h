@@ -22,8 +22,8 @@
 // I2S PDM TX clock io number (not used, but needs to be assigned)
 #define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_21
 #define AUDIO_BUFFER_SIZE     2048
- // I2S PDM TX frequency 16k and higher you can hear digital glitch, 10k seems quite nice
-#define AUDIO_PDM_TX_FREQ_HZ  10000
+// 16kHz seems fine with filtering
+#define AUDIO_PDM_TX_FREQ_HZ  16000
 // 1~32767, affects the volume
 #define AUDIO_WAVE_AMPLITUDE  (1000.0)        
 #define CONST_PI              (3.1416f)
