@@ -19,6 +19,7 @@
 #include "web/handlers/static_files.h"
 #include "web/handlers/api/event.h"
 #include "web/handlers/api/uvk5_message.h"
+#include "web/handlers/api/settings.h"
 
 /* Initialize rounting for web requests
 
@@ -38,6 +39,15 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .user_ctx = server_data
     };
     httpd_register_uri_handler(server, &root_uri);
+
+    // API Settings
+    httpd_uri_t api_settings_index_uri = {
+        .uri = "/api/settings",
+        .method = HTTP_GET,
+        .handler = API_SETTINGS_Index,
+        .user_ctx = server_data
+    };
+    httpd_register_uri_handler(server, &api_settings_index_uri);
 
     // API Event
     httpd_uri_t api_event_create_uri = {
