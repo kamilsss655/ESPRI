@@ -19,23 +19,24 @@
 #include <esp_log.h>
 
 #include "led.h"
+#include "settings.h"
 
 static const char *TAG = "HW/LED";
 
 // Blinks LED
 void LED_Blink(void *pvParameters)
 {
-    gpio_reset_pin(LED_PIN);
-    gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
+    gpio_reset_pin(gSettings.gpio.status_led);
+    gpio_set_direction(gSettings.gpio.status_led, GPIO_MODE_OUTPUT);
 
     while (1)
     {
         ESP_LOGI(TAG, "Turning on the LED");
-        gpio_set_level(LED_PIN, 1);
+        gpio_set_level(gSettings.gpio.status_led, 1);
         vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
 
         ESP_LOGI(TAG, "Turning off the LED");
-        gpio_set_level(LED_PIN, 0);
+        gpio_set_level(gSettings.gpio.status_led, 0);
         vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
     }
 }

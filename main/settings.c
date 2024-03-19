@@ -73,6 +73,8 @@ esp_err_t SETTINGS_FactoryReset(void)
     strcpy(gSettings.wifi.ssid, CONFIG_WIFI_SSID);
     strcpy(gSettings.wifi.password, CONFIG_WIFI_PASSWORD);
 
+    gSettings.gpio.audio_out  = CONFIG_AUDIO_OUT_GPIO;
+    gSettings.gpio.status_led = CONFIG_STATUS_LED_GPIO;
 
     SETTINGS_Save();
     

@@ -28,12 +28,15 @@
 static const char *TAG = "WEB/API/SETTINGS";
 
 // List of supported settings
-ApiSetting_t settings[6] = {
+ApiSetting_t settings[8] = {
     {"wifi.mode",            &gSettings.wifi.mode,            1},
     {"wifi.ssid",            &gSettings.wifi.ssid,            0},
     {"wifi.password",        &gSettings.wifi.password,        0},
     {"wifi.channel",         &gSettings.wifi.channel,         1},
-    {"wifi.max_connections", &gSettings.wifi.max_connections, 1}};
+    {"wifi.max_connections", &gSettings.wifi.max_connections, 1},
+    {"gpio.status_led",      &gSettings.gpio.status_led,      1},
+    {"gpio.audio_out",       &gSettings.gpio.audio_out,       1}
+};
 
 // Shows current settings
 esp_err_t API_SETTINGS_Index(httpd_req_t *req)
@@ -47,7 +50,7 @@ esp_err_t API_SETTINGS_Index(httpd_req_t *req)
     {
         if(settings[i].isInteger)
         {
-            cJSON_AddNumberToObject(root, settings[i].attr,  *(u_int32_t *)settings[i].val);
+            cJSON_AddNumberToObject(root, settings[i].attr,  *(SETTINGS_INTEGER_TYPE *)settings[i].val);
         }
         else
         {
@@ -119,7 +122,7 @@ esp_err_t API_SETTINGS_Create(httpd_req_t *req)
         // set the setting based on the data type
         if(settings[i].isInteger)
         {
-            *(u_int32_t *)settings[i].val = cJSON_GetNumberValue(attr);
+            *(SETTINGS_INTEGER_TYPE *)settings[i].val = cJSON_GetNumberValue(attr);
         }
         else
         {

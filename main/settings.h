@@ -17,6 +17,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#define SETTINGS_INTEGER_TYPE uint16_t
+
 #include <esp_err.h>
 
 #include "board.h"
@@ -70,10 +72,18 @@ typedef struct
     SETTINGS_WifiMaxConn_t  max_connections;
 } SETTINGS_WifiConfig_t;
 
+// GPIO settings
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE status_led;
+    SETTINGS_INTEGER_TYPE audio_out;
+} SETTINGS_GpioConfig_t;
+
 // Global settings
 typedef struct
 {
     SETTINGS_WifiConfig_t wifi;
+    SETTINGS_GpioConfig_t gpio;
 } SETTINGS_Config_t;
 
 extern SETTINGS_Config_t gSettings;

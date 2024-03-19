@@ -37,5 +37,12 @@ menu "Project configuration"
         range 1 30
         default 18
         help
-            Audio OUT Gpio Pin to use.
+            Audio OUT GPIO Pin to use.
+
+    config STATUS_LED_GPIO
+        int "Status LED GPIO Pin"
+        range 1 30
+        default 22
+        help
+            Audio OUT GPIO Pin to use.
 endmenu
