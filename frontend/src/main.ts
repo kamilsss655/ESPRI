@@ -22,14 +22,14 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: "/", name: "Home", component: Main },
-    { path: "/2", name: "Home2", component: Main2 },
+    { path: "/2", name: "Home2", component: Main2 }
   ]
 });
 
 const myApp = createApp(App).use(router);
 
 myApp.use(Quasar, {
-  plugins: {}, // import Quasar plugins and add here
+  plugins: {} // import Quasar plugins and add here
 });
 
 // Assumes you have a <div id="app"></div> in your index.html
