@@ -28,5 +28,6 @@ typedef struct
 } ApiSetting_t;
 
 esp_err_t API_SETTINGS_Index(httpd_req_t *req);
+esp_err_t API_SETTINGS_Create(httpd_req_t *req);
 
 #endif

@@ -16,14 +16,18 @@
 
 #include <esp_err.h>
 #include <esp_log.h>
+#include <esp_system.h>
 #include <esp_http_server.h>
 #include <cJSON.h>
 
 #include "settings.h"
 #include "../../../settings.h"
+#include "helper/http.h"
+#include "helper/api.h"
 
 static const char *TAG = "WEB/API/SETTINGS";
 
+// List of supported settings
 ApiSetting_t settings[6] = {
     {"wifi.mode",            &gSettings.wifi.mode,            1},
     {"wifi.ssid",            &gSettings.wifi.ssid,            0},
@@ -31,6 +35,7 @@ ApiSetting_t settings[6] = {
     {"wifi.channel",         &gSettings.wifi.channel,         1},
     {"wifi.max_connections", &gSettings.wifi.max_connections, 1}};
 
+// Shows current settings
 esp_err_t API_SETTINGS_Index(httpd_req_t *req)
 {
     ESP_LOGI(TAG, "Received request");
@@ -58,6 +63,77 @@ esp_err_t API_SETTINGS_Index(httpd_req_t *req)
 
     // Free memory, it handles all the objects belonging to root
     cJSON_Delete(root);
+
+    return ESP_OK;
+}
+
+/* Sets device settings, saves them and restarts the device
+
+to test:
+curl -d '{
+              "wifi.mode":1,
+              "wifi.ssid":"SAMSUNG-S3",
+              "wifi.password":"testtesttest123",
+              "wifi.channel":3,
+              "wifi.max_connections":3
+              }' http://192.168.4.1.api/settings */
+esp_err_t API_SETTINGS_Create(httpd_req_t *req)
+{
+    int total_len = req->content_len;
+    int cur_len = 0;
+    char *buf = ((file_server_data *)(req->user_ctx))->scratch;
+    int received = 0;
+
+    // Read request content
+    while (cur_len < total_len)
+    {
+        received = httpd_req_recv(req, buf + cur_len, total_len);
+        if (received <= 0)
+        {
+            httpd_json_resp_send(req, HTTPD_500, "Failed to process request");
+            return ESP_FAIL;
+        }
+        cur_len += received;
+    }
+    buf[total_len] = '\0';
+
+    // Parse JSON
+    cJSON *root = cJSON_ParseWithLength(buf, total_len);
+
+    // Handle invalid JSON
+    if (root == NULL)
+    {
+        ESP_LOGE(TAG, "Invalid JSON received");
+        httpd_json_resp_send(req, HTTPD_500, "Invalid JSON received");
+        // Free memory
+        cJSON_Delete(root);
+        return ESP_FAIL;
+    }
+
+    // Get all settings from the JSON object
+    for(u_int8_t i=0; i<(sizeof(settings)/sizeof(settings[0])); i++)
+    {
+        cJSON *attr = cJSON_GetObjectItem(root, settings[i].attr);
+        // if attr is null we go to next item
+        if (attr == NULL) continue;
+        // set the setting based on the data type
+        if(settings[i].isInteger)
+        {
+            *(u_int32_t *)settings[i].val = cJSON_GetNumberValue(attr);
+        }
+        else
+        {
+            strcpy((char *)settings[i].val, cJSON_GetStringValue(attr));
+        }
+    }
+    // Free memory, it handles both root and attr
+    cJSON_Delete(root);
+    
+    httpd_json_resp_send(req, HTTPD_200, "Ok. Restarting...");
+
+    SETTINGS_Save();
+
+    esp_restart();
 
     return ESP_OK;
 }

@@ -49,6 +49,14 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     };
     httpd_register_uri_handler(server, &api_settings_index_uri);
 
+    httpd_uri_t api_settings_create_uri = {
+        .uri = "/api/settings",
+        .method = HTTP_POST,
+        .handler = API_SETTINGS_Create,
+        .user_ctx = server_data
+    };
+    httpd_register_uri_handler(server, &api_settings_create_uri);
+
     // API Event
     httpd_uri_t api_event_create_uri = {
         .uri = "/api/event",
