@@ -1,7 +1,11 @@
-<script setup lang="ts"></script>
-
 <template>
-  <q-drawer v-model="leftDrawerOpen" side="left" overlay elevated>
+  <q-drawer v-model="store.leftDrawerOpen" side="left" overlay elevated>
     <!-- drawer content -->
   </q-drawer>
 </template>
+
+<script setup lang="ts">
+import { useNavigationStore } from '../../stores/navigation';
+const store = useNavigationStore();
+</script>
+

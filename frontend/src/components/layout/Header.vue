@@ -1,9 +1,7 @@
-<script setup lang="ts"></script>
-
 <template>
   <q-header elevated class="bg-primary text-white">
     <q-toolbar>
-      <q-btn dense flat round icon="menu" />
+      <q-btn dense flat round @click="store.toggleLeftDrawer" icon="menu" />
 
       <q-toolbar-title>
         <q-avatar>
@@ -14,3 +12,8 @@
     </q-toolbar>
   </q-header>
 </template>
+
+<script setup lang="ts">
+import { useNavigationStore } from '../../stores/navigation';
+const store = useNavigationStore();
+</script>
