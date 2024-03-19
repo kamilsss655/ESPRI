@@ -20,6 +20,13 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
+typedef struct
+{
+    char  *attr;     // json attr representing given value 
+    void  *val;      // pointer to value
+    bool  isInteger; // determines whether value is integer or string
+} ApiSetting_t;
+
 esp_err_t API_SETTINGS_Index(httpd_req_t *req);
 
 #endif

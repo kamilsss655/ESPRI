@@ -19,8 +19,17 @@
 #include <esp_http_server.h>
 #include <cJSON.h>
 
+#include "settings.h"
 #include "../../../settings.h"
+
 static const char *TAG = "WEB/API/SETTINGS";
+
+ApiSetting_t settings[6] = {
+    {"wifi.mode",            &gSettings.wifi.mode,            1},
+    {"wifi.ssid",            &gSettings.wifi.ssid,            0},
+    {"wifi.password",        &gSettings.wifi.password,        0},
+    {"wifi.channel",         &gSettings.wifi.channel,         1},
+    {"wifi.max_connections", &gSettings.wifi.max_connections, 1}};
 
 esp_err_t API_SETTINGS_Index(httpd_req_t *req)
 {
@@ -28,17 +37,26 @@ esp_err_t API_SETTINGS_Index(httpd_req_t *req)
 
     cJSON *root = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(root, "wifi.mode", gSettings.wifi.mode);
-    cJSON_AddStringToObject(root, "wifi.ssid", gSettings.wifi.ssid);
-    cJSON_AddStringToObject(root, "wifi.password", gSettings.wifi.password);
-    cJSON_AddNumberToObject(root, "wifi.channel", gSettings.wifi.channel);
-    cJSON_AddNumberToObject(root, "wifi.max_connections", gSettings.wifi.max_connections);
+    // Add all settings to JSON object
+    for(u_int8_t i=0; i<(sizeof(settings)/sizeof(settings[0])); i++)
+    {
+        if(settings[i].isInteger)
+        {
+            cJSON_AddNumberToObject(root, settings[i].attr,  *(u_int32_t *)settings[i].val);
+        }
+        else
+        {
+            cJSON_AddStringToObject(root, settings[i].attr,  (const char *)settings[i].val);
+        }
+    }
 
     httpd_resp_set_type(req, "application/json");
     const char *json_str = cJSON_Print(root);
+
+    // Send response
     httpd_resp_sendstr(req, json_str);
 
-    // Free memory, it handles both root and attr
+    // Free memory, it handles all the objects belonging to root
     cJSON_Delete(root);
 
     return ESP_OK;
