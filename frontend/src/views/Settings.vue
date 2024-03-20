@@ -55,19 +55,22 @@
           filled
         />
 
-        <q-input
+        <q-select
           v-model.number="settingsStore['gpio.status_led']"
-          type="number"
+          :options="gpioOptions"
+          behavior="dialog"
           label="Status LED"
           filled
         />
 
-        <q-input
-          v-model.number="settingsStore['gpio.audio_out']"
-          type="number"
+        <q-select
+        v-model.number="settingsStore['gpio.audio_out']"
+          :options="gpioOptions"
+          behavior="dialog"
           label="Audio OUT"
           filled
         />
+
         <div class="text-right q-pa-md">
           <q-btn icon="ion-play" label="Submit" type="submit" color="primary" />
           <q-btn
@@ -129,4 +132,5 @@ const wifiModeOptions = ref([
 ]);
 
 const wifiChannelOptions = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+const gpioOptions = ref(Array.from({ length: 30 }, (v, i) => i));
 </script>
