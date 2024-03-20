@@ -132,5 +132,5 @@ const wifiModeOptions = ref([
 ]);
 
 const wifiChannelOptions = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
-const gpioOptions = ref(Array.from({ length: 30 }, (v, i) => i));
+const gpioOptions = ref(Array.from({ length: 30 }, (_v, i) => i));
 </script>
