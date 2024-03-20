@@ -9,6 +9,10 @@
         </q-toolbar-title>
       </q-btn>
 
+      <q-btn round dense flat to="/" icon="home" v-if="$q.screen.lt.sm">
+        <q-tooltip>Home</q-tooltip>
+      </q-btn>
+
       <q-space />
 
       <div class="q-gutter-sm row items-center no-wrap">

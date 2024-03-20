@@ -1,10 +1,12 @@
 <script setup lang="ts"></script>
 
 <template>
-  <q-footer elevated class="bg-grey-8 text-white">
+  <q-footer elevated class="bg-grey-8 text-white text-right">
     <q-toolbar>
       <q-toolbar-title>
-        <div>Title</div>
+        <div class="text-body2 text-weight-thin">
+          ESPRI - ESP Radio Interface by <a href="https://github.com/kamilsss655" class="text-white">kamilsss655</a>
+        </div class="text-body2 text-weight-thin">
       </q-toolbar-title>
     </q-toolbar>
   </q-footer>
