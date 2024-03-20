@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-card flat bordered class="my-card">
+    <q-card flat bordered>
       <q-card-section>
         <div class="text-h4 text-center">About</div>
       </q-card-section>

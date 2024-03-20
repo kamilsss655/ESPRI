@@ -9,9 +9,15 @@ import Footer from "./components/layout/Footer.vue";
     <Header />
     <Drawer />
     <q-page-container>
-      <div class="q-pa-md">
-        <RouterView />
+      <div class="row">
+        <div class="col-0 col-sm-3"></div>
+        <div class="col-12 col-sm-6">
+          <div class="q-pa-md">
+            <RouterView />
+          </div>
+        </div>
       </div>
+      <div class="col-0 col-sm-3"></div>
     </q-page-container>
     <Footer />
   </q-layout>
