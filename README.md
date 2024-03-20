@@ -21,10 +21,8 @@ The audio input and output (for the means of time domain scrambling) would be th
 ## Web panel
 
 Here is a screenshot of a web control panel being served from the ESP:
-![message-window-www](https://github.com/kamilsss655/ESPRI/assets/8842065/0478f4c3-85f4-4aac-aab7-82b697b748a1)
 
-Screenshot of Event JSON API front-end with error and success handling:
-![event-api-frontend-ok](https://github.com/kamilsss655/ESPRI/assets/8842065/993e34b2-8f03-4c26-aff8-68e81cc8996b)
+![espri-new-ui](https://github.com/kamilsss655/ESPRI/assets/8842065/a17e3bd1-4b6b-48cd-8fb4-0371cf43ec07)
 
 ESP Log:
 ```
@@ -38,11 +36,11 @@ Hardware:
 
 Some of the recommended boards:
 
-ESP32 Lolin Lite:
+ESP32 Lolin Lite (confirmed to work):
 
 ![esp32-lolin-lite](https://github.com/kamilsss655/ESPRI/assets/8842065/2e74e723-4347-4efb-b17b-20b4e930523f)
 
-ESP32 S3 Zero:
+ESP32 S3 Zero (might work):
 
 ![esp32-s3-zero](https://github.com/kamilsss655/ESPRI/assets/8842065/da0c5b13-dae1-43ec-b053-b3f1df78d63b)
 
