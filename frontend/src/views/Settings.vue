@@ -7,13 +7,28 @@
         class="q-gutter-md"
       >
         <div class="text-h4 text-center">Settings</div>
-        <q-input
-          v-model.number="settingsStore['wifi.mode']"
-          type="number"
-          label="Mode"
-          hint="0 for OFF, 1 for AP, 2 for STA"
+        <q-select
           filled
-        />
+          v-model="settingsStore['wifi.mode']"
+          :options="wifiModeOptions"
+          label="Wifi mode"
+          behavior="dialog"
+          emit-value
+          map-options
+        >
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section avatar>
+                <q-icon :name="scope.opt.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ scope.opt.label }}</q-item-label>
+                <q-item-label caption>{{ scope.opt.description }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+
         <q-input v-model="settingsStore['wifi.ssid']" label="SSID" filled />
 
         <q-input
@@ -35,6 +50,7 @@
           v-model.number="settingsStore['wifi.channel']"
           type="number"
           label="Channel"
+          v-if="settingsStore['wifi.mode'] == 1"
           filled
         />
         <q-input
@@ -87,4 +103,25 @@ function submitForm() {
     settingsStore.updateSettings();
   });
 }
+
+const wifiModeOptions = ref([
+  {
+    label: "Off",
+    value: 0,
+    description: "Turns WiFi off.",
+    icon: "ion-airplane"
+  },
+  {
+    label: "Access point",
+    value: 1,
+    description: "Acts as a WiFi router.",
+    icon: "ion-wifi"
+  },
+  {
+    label: "Station mode",
+    value: 2,
+    description: "Connect to your network.",
+    icon: "ion-wifi"
+  }
+]);
 </script>

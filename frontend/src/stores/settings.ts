@@ -8,7 +8,7 @@ axiosInstance.defaults.timeout = 600;
 export const useSettingsStore = defineStore({
   id: "settings",
   state: () => ({
-    "wifi.mode": 0,
+    "wifi.mode": 1,
     "wifi.ssid": "undefined",
     "wifi.password": "undefined",
     "wifi.channel": 0,
