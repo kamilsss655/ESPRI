@@ -31,6 +31,7 @@ export default defineConfig({
       output: {
         assetFileNames: '[name]-[hash:5][extname]' // limit filename length for SPIFFS support
       }
-    }
+    },
+    outDir: '../main/storage/'
   }
 });
