@@ -25,5 +25,12 @@ export default defineConfig({
         ws: true
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        assetFileNames: '[name]-[hash:5][extname]' // limit filename length for SPIFFS support
+      }
+    }
   }
 });

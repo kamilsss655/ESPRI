@@ -2,10 +2,10 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { Quasar } from "quasar";
 
-import router from "./router";
+import iconSet from "quasar/icon-set/ionicons-v4";
+import "@quasar/extras/ionicons-v4/ionicons-v4.css";
 
-// Import icon libraries
-import "@quasar/extras/material-icons/material-icons.css";
+import router from "./router";
 
 // Import Quasar css
 import "quasar/src/css/index.sass";
@@ -19,11 +19,10 @@ import App from "./App.vue";
 
 const pinia = createPinia();
 
-const myApp = createApp(App)
-  .use(router)
-  .use(pinia);
+const myApp = createApp(App).use(router).use(pinia);
 
 myApp.use(Quasar, {
+  iconSet: iconSet,
   plugins: {}, // import Quasar plugins and add here
   config: {
     dark: true // force dark mode
