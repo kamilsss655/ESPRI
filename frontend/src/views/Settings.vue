@@ -46,19 +46,22 @@
           </template>
         </q-input>
 
-        <q-input
-          v-model.number="settingsStore['wifi.channel']"
-          type="number"
-          label="Channel"
+        <q-select
+          v-model="settingsStore['wifi.channel']"
+          :options="wifiChannelOptions"
           v-if="settingsStore['wifi.mode'] == 1"
+          behavior="dialog"
+          label="Wifi channel"
           filled
         />
+
         <q-input
           v-model.number="settingsStore['gpio.status_led']"
           type="number"
           label="Status LED"
           filled
         />
+
         <q-input
           v-model.number="settingsStore['gpio.audio_out']"
           type="number"
@@ -124,4 +127,6 @@ const wifiModeOptions = ref([
     icon: "ion-wifi"
   }
 ]);
+
+const wifiChannelOptions = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
 </script>
