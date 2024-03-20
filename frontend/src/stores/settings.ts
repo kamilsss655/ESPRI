@@ -1,5 +1,9 @@
 import { defineStore } from "pinia";
+import { Notify } from "quasar";
 import axios from "axios";
+
+const axiosInstance = axios.create();
+axiosInstance.defaults.timeout = 600;
 
 export const useSettingsStore = defineStore({
   id: "settings",
@@ -14,17 +18,23 @@ export const useSettingsStore = defineStore({
   actions: {
     async fetchSettings() {
       try {
-        const data = await axios.get("/api/settings");
+        const data = await axiosInstance.get("/api/settings");
         this.$state = data.data;
+        Notify.create({
+          message: "Fetched up-to date data.",
+          color: "positive"
+        });
       } catch (error) {
-        alert(error);
+        Notify.create({
+          message: "Failed to fetch up-to date data.",
+          color: "negative"
+        });
         console.log(error);
       }
     },
     async updateSettings() {
       const jsonData = JSON.stringify(this.$state);
-      console.log(jsonData);
-      axios
+      axiosInstance
         .post("/api/settings", jsonData, {
           headers: {
             "Content-Type": "application/json"
@@ -32,9 +42,17 @@ export const useSettingsStore = defineStore({
         })
         .then((response) => {
           console.log(response.data);
+          Notify.create({
+            message: response.data.response,
+            color: "positive"
+          });
         })
         .catch((error) => {
           console.error(error);
+          Notify.create({
+            message: "Error.",
+            color: "negative"
+          });
         });
     }
   }

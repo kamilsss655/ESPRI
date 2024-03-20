@@ -30,8 +30,8 @@
           label="Audio OUT"
         />
         <div class="text-right q-pa-md">
-          <q-btn icon="ion-play" label="Submit" type="submit" color="primary"/>
-          <q-btn icon="ion-refresh" label="Reload" class="q-ml-sm" outline/>
+          <q-btn icon="ion-play" label="Submit" type="submit" color="primary" />
+          <q-btn icon="ion-refresh" label="Reload" type="reset" class="q-ml-sm" outline />
         </div>
       </q-form>
     </q-card-section>
@@ -41,23 +41,23 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useSettingsStore } from "../stores/settings";
-import { useQuasar } from 'quasar'
+import { useQuasar } from "quasar";
 
 const settingsStore = useSettingsStore();
-const $q = useQuasar()
+const $q = useQuasar();
 
 onMounted(() => {
   settingsStore.fetchSettings();
 });
 
-function submitForm () {
-      $q.dialog({
-        title: 'Confirm',
-        message: 'This will restart the device.',
-        cancel: true,
-        persistent: true
-      }).onOk(() => {
-        settingsStore.updateSettings()
-      })
-    }
+function submitForm() {
+  $q.dialog({
+    title: "Confirm",
+    message: "This will restart the device.",
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    settingsStore.updateSettings();
+  });
+}
 </script>
