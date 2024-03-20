@@ -1,5 +1,5 @@
 <template>
-  <q-drawer v-model="store.leftDrawerIsOpen" side="left" overlay elevated>
+  <q-drawer v-model="store.leftDrawerIsOpen" side="left" flat>
     <!-- drawer content -->
   </q-drawer>
 </template>

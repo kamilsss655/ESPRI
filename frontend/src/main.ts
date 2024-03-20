@@ -24,7 +24,10 @@ const myApp = createApp(App)
   .use(pinia);
 
 myApp.use(Quasar, {
-  plugins: {} // import Quasar plugins and add here
+  plugins: {}, // import Quasar plugins and add here
+  config: {
+    dark: true // force dark mode
+  }
 });
 
 // Assumes you have a <div id="app"></div> in your index.html
