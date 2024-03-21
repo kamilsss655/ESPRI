@@ -23,9 +23,9 @@ typedef struct
 {
     const char *input;
     uint8_t len;
-} MORSE_CODE_TransmitOnceParam_t;
+} MORSE_CODE_TransmitParam_t;
 
-void MORSE_CODE_TransmitOnce(void *pvParameters);
 void MORSE_CODE_Transmit(void *pvParameters);
+void MORSE_CODE_Scheduler(void *pvParameters);
 
 #endif

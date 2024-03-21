@@ -30,9 +30,9 @@ static const char *TAG = "APP/MORSE_CODE";
 
 SemaphoreHandle_t transmitSemaphore;
 
-void MORSE_CODE_TransmitOnce(void *pvParameters)
+void MORSE_CODE_Transmit(void *pvParameters)
 {
-    MORSE_CODE_TransmitOnceParam_t *param = (MORSE_CODE_TransmitOnceParam_t *)pvParameters;
+    MORSE_CODE_TransmitParam_t *param = (MORSE_CODE_TransmitParam_t *)pvParameters;
 
     ESP_LOGI(TAG, "Transmitting: %s", param->input);
 
@@ -59,7 +59,7 @@ void MORSE_CODE_TransmitOnce(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void MORSE_CODE_Transmit(void *pvParameters)
+void MORSE_CODE_Scheduler(void *pvParameters)
 {
     transmitSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(transmitSemaphore);
@@ -84,12 +84,12 @@ void MORSE_CODE_Transmit(void *pvParameters)
 
         uint32_t delay_in_ms = gSettings.morse_code_beacon.period_seconds * 1000;
 
-        MORSE_CODE_TransmitOnceParam_t param = {
+        MORSE_CODE_TransmitParam_t param = {
             .input = gSettings.morse_code_beacon.text,
             .len = strlen(gSettings.morse_code_beacon.text)};
 
         // Schedule transmit task
-        xTaskCreate(MORSE_CODE_TransmitOnce, "MORSE_CODE_TransmitOnce", 4096, &param, RTOS_PRIORITY_MEDIUM, NULL);
+        xTaskCreate(MORSE_CODE_Transmit, "MORSE_CODE_Transmit", 4096, &param, RTOS_PRIORITY_MEDIUM, NULL);
 
         // Delay before re-scheduling attempt
         vTaskDelay(delay_in_ms / portTICK_PERIOD_MS);
