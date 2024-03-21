@@ -2,6 +2,11 @@
 import Header from "./components/layout/Header.vue";
 import Drawer from "./components/layout/Drawer.vue";
 import Footer from "./components/layout/Footer.vue";
+
+import { useQuasar } from 'quasar'
+const $q = useQuasar()
+// set addressbarColor color to $primary color
+$q.addressbarColor.set('')
 </script>
 
 <template>

@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import { Quasar, Dialog, Notify } from "quasar";
+import { Quasar, Dialog, Notify, AddressbarColor } from "quasar";
 
 import iconSet from "quasar/icon-set/ionicons-v4";
 import "@quasar/extras/ionicons-v4/ionicons-v4.css";
@@ -23,7 +23,7 @@ const myApp = createApp(App).use(router).use(pinia);
 
 myApp.use(Quasar, {
   iconSet: iconSet,
-  plugins: { Dialog, Notify }, // import Quasar plugins and add here
+  plugins: { Dialog, Notify, AddressbarColor }, // import Quasar plugins and add here
   config: {
     dark: true // force dark mode
   }
