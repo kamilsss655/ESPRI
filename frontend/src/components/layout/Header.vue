@@ -1,5 +1,5 @@
 <template>
-  <q-header flat class="bg-teal-9 text-white">
+  <q-header flat class="bg-primary text-white">
     <q-toolbar>
       <q-btn dense flat round @click="store.toggleLeftDrawer" icon="ion-menu" />
 

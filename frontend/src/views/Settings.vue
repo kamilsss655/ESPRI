@@ -72,7 +72,7 @@
         />
 
         <div class="text-right q-pa-md">
-          <q-btn icon="ion-play" label="Submit" type="submit" color="positive" />
+          <q-btn icon="ion-play" label="Submit" type="submit" color="primary" />
           <q-btn
             icon="ion-refresh"
             label="Reload"

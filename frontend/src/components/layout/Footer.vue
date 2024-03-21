@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <q-footer class="bg-teal-10 text-white text-right">
+  <q-footer class="bg-secondary text-white text-right">
     <q-toolbar>
       <q-toolbar-title>
         <div class="text-body2 text-weight-thin">
