@@ -10,6 +10,15 @@
             <q-item-label caption>Main home page</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item clickable to="/morse_code" rel="noopener">
+          <q-item-section avatar>
+            <q-icon name="ion-bonfire" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Morse code beacon</q-item-label>
+            <q-item-label caption>Setup Morse code beacon</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item clickable to="/settings" rel="noopener">
           <q-item-section avatar>
             <q-icon name="ion-settings" />
