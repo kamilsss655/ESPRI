@@ -1,5 +1,5 @@
 <template>
-  <q-drawer v-model="store.leftDrawerIsOpen" side="left" flat>
+  <q-drawer v-model="store.leftDrawerIsOpen" side="left" flat bordered>
     <q-list>
         <q-item clickable to="/" rel="noopener">
           <q-item-section avatar>
