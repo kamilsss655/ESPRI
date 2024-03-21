@@ -62,7 +62,7 @@ esp_err_t SETTINGS_Save(void)
 esp_err_t SETTINGS_FactoryReset(void)
 {
     ESP_LOGW(TAG, "Performing factory reset.");
-
+    // WiFi
     #ifdef CONFIG_WIFI_AP_MODE_ENABLED
         gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
         gSettings.wifi.channel = CONFIG_WIFI_CHANNEL;
@@ -72,9 +72,14 @@ esp_err_t SETTINGS_FactoryReset(void)
     #endif
     strcpy(gSettings.wifi.ssid, CONFIG_WIFI_SSID);
     strcpy(gSettings.wifi.password, CONFIG_WIFI_PASSWORD);
-
+    // GPIO
     gSettings.gpio.audio_out  = CONFIG_AUDIO_OUT_GPIO;
     gSettings.gpio.status_led = CONFIG_STATUS_LED_GPIO;
+    // Morse code beacon
+    gSettings.morse_code_beacon.enabled = CONFIG_MORSE_CODE_BEACON_ENABLED;
+    gSettings.morse_code_beacon.period_seconds = CONFIG_MORSE_CODE_BEACON_PERIOD_SECONDS;
+    strcpy(gSettings.morse_code_beacon.text, CONFIG_MORSE_CODE_BEACON_TEXT);
+
 
     SETTINGS_Save();
     

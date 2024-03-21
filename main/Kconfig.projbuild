@@ -45,4 +45,23 @@ menu "Project configuration"
         default 22
         help
             Audio OUT GPIO Pin to use.
+
+    config MORSE_CODE_BEACON_ENABLED
+        bool "Morse code beacon enabled"
+        default y
+        help
+            Morse code beacon enabled.
+
+    config MORSE_CODE_BEACON_TEXT
+        string "Morse code beacon text"
+        default "--- -.- - . ... - - . ... -"
+        help
+            Morse code beacon text.
+
+    config MORSE_CODE_BEACON_PERIOD_SECONDS
+        int "Morse code beacon repeat period in seconds"
+        range 5 65535
+        default 25
+        help
+            Morse code beacon repeat period in seconds.
 endmenu

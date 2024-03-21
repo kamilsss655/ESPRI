@@ -13,8 +13,19 @@
  *     See the License for the specific language governing permissions and
  *     limitations under the License.
  */
+
+#ifndef APP_MORSE_CODE_H
+#define APP_MORSE_CODE_H
+
 #include <stdint.h>
 
-void MORSE_CODE_TransmitOnce(const char *input, uint8_t len);
+typedef struct
+{
+    const char *input;
+    uint8_t len;
+} MORSE_CODE_TransmitOnceParam_t;
 
+void MORSE_CODE_TransmitOnce(void *pvParameters);
 void MORSE_CODE_Transmit(void *pvParameters);
+
+#endif

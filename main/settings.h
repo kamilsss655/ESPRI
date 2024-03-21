@@ -79,11 +79,20 @@ typedef struct
     SETTINGS_INTEGER_TYPE audio_out;
 } SETTINGS_GpioConfig_t;
 
+// Morse code beacon settings
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE enabled;
+    SETTINGS_INTEGER_TYPE period_seconds;
+    char                  text[64];
+} SETTINGS_MorseCodeBeaconConfig_t;
+
 // Global settings
 typedef struct
 {
-    SETTINGS_WifiConfig_t wifi;
-    SETTINGS_GpioConfig_t gpio;
+    SETTINGS_WifiConfig_t            wifi;
+    SETTINGS_GpioConfig_t            gpio;
+    SETTINGS_MorseCodeBeaconConfig_t morse_code_beacon;
 } SETTINGS_Config_t;
 
 extern SETTINGS_Config_t gSettings;
