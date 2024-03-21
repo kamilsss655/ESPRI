@@ -1,6 +1,44 @@
-# Vue 3 + TypeScript + Vite
+# Vue 3 + TypeScript + Vite + Quasar.dev
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+This is a front-end application used for the ESPRI project.
+
+## Commands
+
+1. Install
+
+```
+npm install
+```
+
+2. Run dev server
+
+```
+npm run dev
+```
+
+3. Build front-end (automatically copied to storage on ESP)
+
+```
+npm run build
+```
+
+## ESP server proxy
+
+You can make requests to ESP on your network in front-end dev mode by editing `vite.config.ts` file:
+
+```
+  // Setup proxy to allow making requests to ESP in dev mode
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://192.168.4.1", // IP address for the ESP web server
+        changeOrigin: true,
+        secure: false,
+        ws: true
+      }
+    }
+  },
+```
 
 ## Recommended IDE Setup
 
