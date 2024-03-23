@@ -33,9 +33,9 @@ i2s_chan_handle_t tx_channel;
 i2s_chan_handle_t AUDIO_Init(void)
 {
     i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
-    
+
     tx_chan_cfg.auto_clear = true;
-    
+
     ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &tx_channel, NULL));
 
     i2s_pdm_tx_config_t pdm_tx_cfg = {
@@ -93,9 +93,102 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
         }
     }
 
-     // Turn off PDM output
+    // Turn off PDM output
     ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
 
     // Deallocate temp buffer
     free(w_buf);
+}
+
+// Play AFSK coded data
+// TODO: Works but needs refactor to be cleaner
+void AUDIO_PlayAFSK(uint8_t *data, size_t len)
+{
+    int zero_freq = 800;
+    int one_freq = 1600;
+
+    int duration_ms = 30; // 33 baud
+
+    size_t w_bytes = 0;
+
+    // Allocate temp buffer one
+    int16_t *w_buf_one = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    assert(w_buf_one);
+
+    // Allocate temp buffer zero
+    int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    assert(w_buf_zero);
+
+    uint32_t duration_sine_zero = (AUDIO_PDM_TX_FREQ_HZ / (float)zero_freq) + 0.5;
+    uint32_t duration_sine_one = (AUDIO_PDM_TX_FREQ_HZ / (float)one_freq) + 0.5;
+
+    /* Generate the tone buffer */
+    // Single sinewave zero
+
+    for (int i = 0; i < duration_sine_zero; i++)
+    {
+        w_buf_zero[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_zero)) * AUDIO_WAVE_AMPLITUDE);
+    }
+
+    /* Generate the tone buffer */
+    // Single sinewave one
+
+    for (int i = 0; i < duration_sine_one; i++)
+    {
+        w_buf_one[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_one)) * AUDIO_WAVE_AMPLITUDE);
+    }
+
+    // Multiply single sinewave to desired duration
+
+    uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
+
+    // for (int i = 0; i < sizeof(data)/sizeof(uint8_t); i++)
+    //     for (int bit = 7; bit >= 0; bit--)
+    //     {
+    //         if ((data[i] >> bit) & 1)
+    //         {
+    //             ESP_LOGI(TAG, "1");
+    //         }
+    //         else
+    //         {
+    //             ESP_LOGI(TAG, "0");
+    //         }
+    //     }
+
+    // Turn on PDM output
+    ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
+
+    for (int i = 0; i < len; i++)
+        for (int bit = 7; bit >= 0; bit--)
+        {
+            if ((data[i] >> bit) & 1)
+            {
+                for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+                {
+                    /* Play the tone one */
+                    if (i2s_channel_write(tx_channel, w_buf_one, duration_sine_one * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
+                    {
+                        printf("Write Task: i2s write failed\n");
+                    }
+                }
+            }
+            else
+            {
+                for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+                {
+                    /* Play the tone zero */
+                    if (i2s_channel_write(tx_channel, w_buf_zero, duration_sine_zero * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
+                    {
+                        printf("Write Task: i2s write failed\n");
+                    }
+                }
+            }
+        }
+
+    // Turn off PDM output
+    ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
+
+    // Deallocate temp buffer
+    free(w_buf_zero);
+    free(w_buf_one);
 }
