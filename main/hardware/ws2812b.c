@@ -23,14 +23,12 @@
 
 static const char *TAG = "HW/WS2812B";
 
-#define LED_NUM 1
-
 CRGB *ws2812_buffer;
 
 // Blinks LED
 void WS2812B_Blink(void *pvParameters)
 {
-    ws28xx_init(21, WS2812B, LED_NUM, &ws2812_buffer);
+    ws28xx_init(gSettings.gpio.status_led, WS2812B, 1, &ws2812_buffer);
 
     while (1)
     {
