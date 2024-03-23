@@ -19,9 +19,13 @@
 #include "board.h"
 #include "app/morse_code.h"
 #include "helper/rtos.h"
-#include "hardware/led.h"
 #include "hardware/button.h"
 #include "hardware/uart.h"
+#ifdef CONFIG_STATUS_LED_WS2812B
+    #include "hardware/ws2812b.h"
+#else
+    #include "hardware/led.h"
+#endif
 
 void app_main()
 {
@@ -33,7 +37,11 @@ void app_main()
     // TASKS_init();
 
     // Create LED_Blink task
-    xTaskCreate(LED_Blink, "LED_Blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+    #ifdef CONFIG_STATUS_LED_WS2812B
+        xTaskCreate(WS2812B_Blink, "WS2812B_Blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+    #else
+        xTaskCreate(LED_Blink, "LED_Blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+    #endif
 
     // Create button monitor task
     xTaskCreate(BUTTON_Monitor, "BUTTON_Monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
