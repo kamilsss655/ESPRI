@@ -45,7 +45,7 @@ ESP32 Lolin Lite (confirmed to work):
 
 ![esp32-lolin-lite](https://github.com/kamilsss655/ESPRI/assets/8842065/2e74e723-4347-4efb-b17b-20b4e930523f)
 
-ESP32 S3 Zero (might work):
+ESP32 S3 Zero (confirmed to work):
 
 ![esp32-s3-zero](https://github.com/kamilsss655/ESPRI/assets/8842065/da0c5b13-dae1-43ec-b053-b3f1df78d63b)
 
