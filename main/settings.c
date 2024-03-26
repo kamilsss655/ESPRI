@@ -75,6 +75,7 @@ esp_err_t SETTINGS_FactoryReset(void)
     // GPIO
     gSettings.gpio.audio_out  = CONFIG_AUDIO_OUT_GPIO;
     gSettings.gpio.status_led = CONFIG_STATUS_LED_GPIO;
+    gSettings.gpio.ptt        = CONFIG_PTT_GPIO;
     // Morse code beacon
     gSettings.morse_code_beacon.enabled = CONFIG_MORSE_CODE_BEACON_ENABLED;
     gSettings.morse_code_beacon.period_seconds = CONFIG_MORSE_CODE_BEACON_PERIOD_SECONDS;

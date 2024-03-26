@@ -77,6 +77,7 @@ typedef struct
 {
     SETTINGS_INTEGER_TYPE status_led;
     SETTINGS_INTEGER_TYPE audio_out;
+    SETTINGS_INTEGER_TYPE ptt;
 } SETTINGS_GpioConfig_t;
 
 // Morse code beacon settings

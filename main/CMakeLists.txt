@@ -16,6 +16,7 @@ set(srcs
     "hardware/wifi.c"
     "hardware/ws2812b.c"
     "hardware/spiffs.c"
+    "hardware/ptt.c"
     "helper/api.c"
     "web/router.c"
     "web/handlers/root.c"

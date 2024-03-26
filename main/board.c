@@ -20,6 +20,7 @@
 #include "hardware/wifi.h"
 #include "hardware/button.h"
 #include "hardware/spiffs.h"
+#include "hardware/ptt.h"
 #include "settings.h"
 #include "board.h"
 
@@ -40,4 +41,6 @@ void BOARD_Init(void)
     BUTTON_Init();
     // Initialize audio
     AUDIO_Init();
+    // Initialize PTT
+    ESP_ERROR_CHECK(PTT_Init());
 }

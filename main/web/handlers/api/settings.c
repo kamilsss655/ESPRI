@@ -36,6 +36,7 @@ ApiSetting_t settings[11] = {
     {"wifi.max_connections",             &gSettings.wifi.max_connections,             1},
     {"gpio.status_led",                  &gSettings.gpio.status_led,                  1},
     {"gpio.audio_out",                   &gSettings.gpio.audio_out,                   1},
+    {"gpio.ptt",                         &gSettings.gpio.ptt,                         1},
     {"morse_code_beacon.enabled",        &gSettings.morse_code_beacon.enabled,        1},
     {"morse_code_beacon.period_seconds", &gSettings.morse_code_beacon.period_seconds, 1},
     {"morse_code_beacon.text",           &gSettings.morse_code_beacon.text,           0}

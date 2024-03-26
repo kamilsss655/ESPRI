@@ -21,6 +21,7 @@
 
 #include "morse_code.h"
 #include "hardware/audio.h"
+#include "hardware/ptt.h"
 #include "settings.h"
 #include "helper/rtos.h"
 
@@ -33,6 +34,8 @@ SemaphoreHandle_t transmitSemaphore;
 void MORSE_CODE_Transmit(void *pvParameters)
 {
     MORSE_CODE_TransmitParam_t *param = (MORSE_CODE_TransmitParam_t *)pvParameters;
+
+    PTT_Press();
 
     ESP_LOGI(TAG, "Transmitting: %s", param->input);
 
@@ -51,6 +54,8 @@ void MORSE_CODE_Transmit(void *pvParameters)
         }
         vTaskDelay((DOT_DURATION * 3) / portTICK_PERIOD_MS);
     }
+
+    PTT_Release();
 
     // Indicate that we are done and can transmit again
     xSemaphoreGive(transmitSemaphore);

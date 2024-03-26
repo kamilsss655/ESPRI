@@ -39,6 +39,13 @@ menu "Project configuration"
         help
             Audio OUT GPIO Pin to use.
 
+    config PTT_GPIO
+        int "PTT GPIO Pin"
+        range 1 30
+        default 13
+        help
+            PTT GPIO Pin to use.
+
     config STATUS_LED_WS2812B
         bool "Use WS2812B for status LED. Otherwise regular LED will be used."
         default n if IDF_TARGET="esp32"
