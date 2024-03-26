@@ -14,6 +14,7 @@ export const useSettingsStore = defineStore({
     "wifi.channel": 0,
     "gpio.status_led": 0,
     "gpio.audio_out": 0,
+    "gpio.ptt": 0,
     "morse_code_beacon.text": "undefined",
     "morse_code_beacon.period_seconds": 0,
     "morse_code_beacon.enabled": 0

@@ -71,6 +71,14 @@
           filled
         />
 
+        <q-select
+        v-model.number="settingsStore['gpio.ptt']"
+          :options="gpioOptions"
+          behavior="dialog"
+          label="PTT Pin"
+          filled
+        />
+
         <div class="text-right q-pa-md">
           <q-btn icon="ion-play" label="Submit" type="submit" color="primary" />
           <q-btn
