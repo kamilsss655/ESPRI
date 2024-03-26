@@ -16,7 +16,7 @@
       <q-space />
 
       <div class="q-gutter-sm row items-center no-wrap">
-        <q-btn round dense flat to="/morse_code" icon="ion-bonfire">
+        <q-btn round dense flat to="/morse_code" icon="ion-flag">
           <q-tooltip>Morse code</q-tooltip>
         </q-btn>
         <q-btn round dense flat to="/settings" icon="ion-settings">

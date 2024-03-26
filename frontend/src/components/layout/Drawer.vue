@@ -12,7 +12,7 @@
         </q-item>
         <q-item clickable to="/morse_code" rel="noopener">
           <q-item-section avatar>
-            <q-icon name="ion-bonfire" />
+            <q-icon name="ion-flag" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Morse code beacon</q-item-label>
