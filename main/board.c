@@ -31,16 +31,17 @@ void BOARD_Init(void)
     ESP_ERROR_CHECK(SPIFFS_Init(STORAGE_BASE_PATH));
     // Load SETTINGS
     ESP_ERROR_CHECK(SETTINGS_Load());
+
     // Initialize UART
     UART_Init();
     // Initialize WIFI
     WIFI_Init();
-    //Initialize HTTP Server
+    // Initialize HTTP Server
     ESP_ERROR_CHECK(HTTP_SERVER_Init(STORAGE_BASE_PATH));
     // Initialize button
+
     BUTTON_Init();
-    // Initialize audio
-    AUDIO_Init();
     // Initialize PTT
     ESP_ERROR_CHECK(PTT_Init());
+    AUDIO_Init();
 }

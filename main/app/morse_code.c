@@ -37,6 +37,7 @@ void MORSE_CODE_Transmit(void *pvParameters)
 
     PTT_Press();
 
+
     ESP_LOGI(TAG, "Transmitting: %s", param->input);
 
     for (uint8_t i = 0; i < param->len; i++)
@@ -66,6 +67,7 @@ void MORSE_CODE_Transmit(void *pvParameters)
 
 void MORSE_CODE_Scheduler(void *pvParameters)
 {
+
     transmitSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(transmitSemaphore);
 

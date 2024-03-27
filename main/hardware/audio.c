@@ -14,48 +14,244 @@
  *     limitations under the License.
  */
 
+#include <driver/i2s.h>
 #include <stdint.h>
+#include <string.h>
 #include <math.h>
 #include <driver/i2s_pdm.h>
 #include <driver/gpio.h>
 #include <esp_check.h>
 #include <esp_log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+#include <esp_adc/adc_continuous.h>
 
 #include "audio.h"
 #include "settings.h"
+#include "helper/rtos.h"
+
+i2s_pin_config_t pin_config;
+
+#define EXAMPLE_ADC_UNIT ADC_UNIT_1
+#define _EXAMPLE_ADC_UNIT_STR(unit) #unit
+#define EXAMPLE_ADC_UNIT_STR(unit) _EXAMPLE_ADC_UNIT_STR(unit)
+#define EXAMPLE_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
+#define EXAMPLE_ADC_ATTEN ADC_ATTEN_DB_12
+#define EXAMPLE_ADC_BIT_WIDTH SOC_ADC_DIGI_MAX_BITWIDTH
+
+#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
+#define EXAMPLE_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE1
+#define EXAMPLE_ADC_GET_CHANNEL(p_data) ((p_data)->type1.channel)
+#define EXAMPLE_ADC_GET_DATA(p_data) ((p_data)->type1.data)
+#else
+#define EXAMPLE_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE2
+#define EXAMPLE_ADC_GET_CHANNEL(p_data) ((p_data)->type2.channel)
+#define EXAMPLE_ADC_GET_DATA(p_data) ((p_data)->type2.data)
+#endif
+#define EXAMPLE_READ_LEN 256
+static adc_channel_t channel[1] = {ADC_CHANNEL_7};
+
+static TaskHandle_t s_task_handle;
 
 static const char *TAG = "HW/AUDIO";
 
+AudioState_t gAudioState;
+
 i2s_chan_handle_t tx_channel;
+static adc_continuous_handle_t rx_channel;
 
-// Initialize audio
-// Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
-i2s_chan_handle_t AUDIO_Init(void)
+static bool IRAM_ATTR s_conv_done_cb(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
 {
-    i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
+    BaseType_t mustYield = pdFALSE;
+    // Notify that ADC continuous driver has done enough number of conversions
+    vTaskNotifyGiveFromISR(s_task_handle, &mustYield);
 
-    tx_chan_cfg.auto_clear = true;
+    return (mustYield == pdTRUE);
+}
 
-    ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &tx_channel, NULL));
+static void AUDIO_AdcInit()
+{
+    // adc_continuous_handle_t adc_handle = NULL;
 
-    i2s_pdm_tx_config_t pdm_tx_cfg = {
-        .clk_cfg = I2S_PDM_TX_CLK_DEFAULT_CONFIG(AUDIO_PDM_TX_FREQ_HZ),
-        /* The data bit-width of PDM mode is fixed to 16 */
-        .slot_cfg = I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
-        .gpio_cfg = {
-            .clk = AUDIO_PDM_TX_CLK_GPIO,
-            .dout = gSettings.gpio.audio_out,
-            .invert_flags = {
-                .clk_inv = false,
-            },
-        },
+    adc_continuous_handle_cfg_t adc_config = {
+        .max_store_buf_size = 1024,
+        .conv_frame_size = EXAMPLE_READ_LEN,
+    };
+    ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &rx_channel));
+
+    adc_continuous_config_t dig_cfg = {
+        .sample_freq_hz = 32 * 1000,
+        .conv_mode = EXAMPLE_ADC_CONV_MODE,
+        .format = EXAMPLE_ADC_OUTPUT_TYPE,
     };
 
-    ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
+    adc_digi_pattern_config_t adc_pattern[SOC_ADC_PATT_LEN_MAX] = {0};
+    dig_cfg.pattern_num = 1;
+    for (int i = 0; i < 1; i++)
+    {
+        adc_pattern[i].atten = EXAMPLE_ADC_ATTEN;
+        adc_pattern[i].channel = channel[i] & 0x7;
+        adc_pattern[i].unit = EXAMPLE_ADC_UNIT;
+        adc_pattern[i].bit_width = EXAMPLE_ADC_BIT_WIDTH;
 
-    ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
+        ESP_LOGI(TAG, "adc_pattern[%d].atten is :%" PRIx8, i, adc_pattern[i].atten);
+        ESP_LOGI(TAG, "adc_pattern[%d].channel is :%" PRIx8, i, adc_pattern[i].channel);
+        ESP_LOGI(TAG, "adc_pattern[%d].unit is :%" PRIx8, i, adc_pattern[i].unit);
+    }
+    dig_cfg.adc_pattern = adc_pattern;
+    ESP_ERROR_CHECK(adc_continuous_config(rx_channel, &dig_cfg));
+
+    // *out_handle = adc_handle;
+
+    // continuous_adc_init(channel, sizeof(channel) / sizeof(adc_channel_t), &rx_channel);
+
+    adc_continuous_evt_cbs_t cbs = {
+        .on_conv_done = s_conv_done_cb,
+    };
+    ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(rx_channel, &cbs, NULL));
+    ESP_ERROR_CHECK(adc_continuous_start(rx_channel));
+}
+
+void AUDIO_AdcStop()
+{
+    adc_continuous_stop(rx_channel);
+    adc_continuous_deinit(rx_channel);
+}
+
+void AUDIO_Monitor(void *pvParameters)
+{
+    esp_err_t ret;
+    uint32_t ret_num = 0;
+    uint8_t result[EXAMPLE_READ_LEN] = {0};
+    memset(result, 0xcc, EXAMPLE_READ_LEN);
+    s_task_handle = xTaskGetCurrentTaskHandle();
+
+    // adc_continuous_stop(rx_channel);
+
+    /* If the rx_channel is not needed any more, delete it to release the channel resources */
+    // adc_continuous_deinit(rx_channel);
+
+    while (1)
+    {
+
+        /**
+         * This is to show you the way to use the ADC continuous mode driver event callback.
+         * This `ulTaskNotifyTake` will block when the data processing in the task is fast.
+         * However in this example, the data processing (print) is slow, so you barely block here.
+         *
+         * Without using this event callback (to notify this task), you can still just call
+         * `adc_continuous_read()` here in a loop, with/without a certain block timeout.
+         */
+
+        char unit[] = EXAMPLE_ADC_UNIT_STR(EXAMPLE_ADC_UNIT);
+
+        while (1)
+        {
+            // Check if we can re-schedule new transmission
+
+            ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+            // Give control back to RTOS for 1s before we check again
+            if (gAudioState == AUDIO_TRANSMITTING)
+            {
+                vTaskDelay(1000);
+                continue;
+            }
+
+            ret = adc_continuous_read(rx_channel, result, EXAMPLE_READ_LEN, &ret_num, 0);
+            if (ret == ESP_OK)
+            {
+                // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
+                for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
+                {
+                    adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
+                    uint32_t chan_num = EXAMPLE_ADC_GET_CHANNEL(p);
+                    uint32_t data = EXAMPLE_ADC_GET_DATA(p);
+                    /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
+                    if (chan_num < SOC_ADC_CHANNEL_NUM(EXAMPLE_ADC_UNIT))
+                    {
+                        ESP_LOGI(TAG, "Unit: %s, Channel: %" PRIu32 ", Value: %" PRIx32, unit, chan_num, data);
+                    }
+                    else
+                    {
+                        ESP_LOGW(TAG, "Invalid data [%s_%" PRIu32 "_%" PRIx32 "]", unit, chan_num, data);
+                    }
+                }
+                /**
+                 * Because printing is slow, so every time you call `ulTaskNotifyTake`, it will immediately return.
+                 * To avoid a task watchdog timeout, add a delay here. When you replace the way you process the data,
+                 * usually you don't need this delay (as this task will block for a while).
+                 */
+                vTaskDelay(1);
+            }
+            else if (ret == ESP_ERR_TIMEOUT)
+            {
+                // We try to read `EXAMPLE_READ_LEN` until API returns timeout, which means there's no available data
+                break;
+            }
+        }
+    }
+
+    AUDIO_AdcStop();
+}
+
+// Initialize audio transmit
+// Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
+i2s_chan_handle_t AUDIO_Transmit(void)
+{
+    if (gAudioState == AUDIO_LISTENING)
+    {
+        ESP_LOGI(TAG, "Transmit starting");
+
+        gAudioState = AUDIO_TRANSMITTING;
+
+        AUDIO_AdcStop();
+
+        i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
+
+        tx_chan_cfg.auto_clear = true;
+
+        ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &tx_channel, NULL));
+
+        i2s_pdm_tx_config_t pdm_tx_cfg = {
+            .clk_cfg = I2S_PDM_TX_CLK_DEFAULT_CONFIG(AUDIO_PDM_TX_FREQ_HZ),
+            /* The data bit-width of PDM mode is fixed to 16 */
+            .slot_cfg = I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
+            .gpio_cfg = {
+                .clk = AUDIO_PDM_TX_CLK_GPIO,
+                .dout = gSettings.gpio.audio_out,
+                .invert_flags = {
+                    .clk_inv = false,
+                },
+            },
+        };
+
+        ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
+
+        ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
+    }
 
     return tx_channel;
+}
+
+// Stop audio transmit
+esp_err_t AUDIO_Listen(void)
+{
+    if (gAudioState == AUDIO_TRANSMITTING)
+    {
+        ESP_LOGI(TAG, "Listening starting");
+
+        gAudioState = AUDIO_LISTENING;
+
+        i2s_channel_disable(tx_channel);
+        /* If the handle is not needed any more, delete it to release the channel resources */
+        i2s_del_channel(tx_channel);
+
+        // enable ADC here
+        AUDIO_AdcInit();
+    }
+    return ESP_OK;
 }
 
 // Play tone
@@ -81,6 +277,8 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
 
+    AUDIO_Transmit();
+
     // Turn on PDM output
     ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
 
@@ -98,6 +296,9 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     // Deallocate temp buffer
     free(w_buf);
+
+    // Free I2S0 controller
+    AUDIO_Listen();
 }
 
 // Play AFSK coded data
@@ -155,6 +356,8 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
     //         }
     //     }
 
+    AUDIO_Transmit();
+
     // Turn on PDM output
     ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
 
@@ -188,7 +391,17 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
     // Turn off PDM output
     ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
 
+    AUDIO_Listen();
     // Deallocate temp buffer
     free(w_buf_zero);
     free(w_buf_one);
+}
+
+void AUDIO_Init(void)
+{
+    gAudioState = AUDIO_LISTENING;
+
+    AUDIO_AdcInit();
+
+    ESP_LOGI(TAG, "Initialized adc");
 }

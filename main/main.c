@@ -19,6 +19,7 @@
 #include "board.h"
 #include "app/morse_code.h"
 #include "helper/rtos.h"
+#include "hardware/audio.h"
 #include "hardware/button.h"
 #include "hardware/uart.h"
 #ifdef CONFIG_STATUS_LED_WS2812B
@@ -49,6 +50,10 @@ void app_main()
     // Create UART monitor task
     xTaskCreate(UART_Monitor, "UART_Monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
 
+    xTaskCreate(MORSE_CODE_Scheduler, "MORSE_CODE_Scheduler", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+      // Audio monitor
+    xTaskCreate(AUDIO_Monitor, "AUDIO_Monitor", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
+
     // Create Morse code transmit task
-    xTaskCreate(MORSE_CODE_Scheduler, "MORSE_CODE_Scheduler", 4096, NULL, RTOS_PRIORITY_LOW, NULL);
+    
 }

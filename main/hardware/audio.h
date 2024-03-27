@@ -19,17 +19,31 @@
 
 #include <driver/i2s_pdm.h>
 
+typedef enum
+{
+    AUDIO_OFF,
+    AUDIO_LISTENING,
+    AUDIO_RECEIVING,
+    AUDIO_TRANSMITTING
+} AudioState_t;
+
+extern AudioState_t gAudioState;
+
 // I2S PDM TX clock io number (not used, but needs to be assigned)
 #define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_21
-#define AUDIO_BUFFER_SIZE     2048
+#define AUDIO_BUFFER_SIZE 2048
 // 16kHz seems fine with filtering
-#define AUDIO_PDM_TX_FREQ_HZ  32000
+#define AUDIO_PDM_TX_FREQ_HZ 32000
 // 1~32767, affects the volume
-#define AUDIO_WAVE_AMPLITUDE  (1000.0)        
-#define CONST_PI              (3.1416f)
+#define AUDIO_WAVE_AMPLITUDE (1000.0)
+#define CONST_PI (3.1416f)
 
-i2s_chan_handle_t AUDIO_Init(void);
+i2s_chan_handle_t AUDIO_Transmit(void);
+esp_err_t AUDIO_Listen(void);
+void AUDIO_Monitor(void *pvParameters);
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
 void AUDIO_PlayAFSK(uint8_t *data, size_t len);
+void AUDIO_Init(void);
+void AUDIO_AdcStop();
 
 #endif
