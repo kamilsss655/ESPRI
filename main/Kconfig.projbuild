@@ -32,6 +32,14 @@ menu "Project configuration"
         help
             Max number of the STA connects to AP.
 
+    config AUDIO_IN_GPIO
+        int "Audio IN GPIO Pin"
+        range 1 36
+        default 35 if IDF_TARGET="esp32"
+        default 7 if IDF_TARGET="esp32s3"
+        help
+            Audio IN GPIO Pin to use.
+
     config AUDIO_OUT_GPIO
         int "Audio OUT GPIO Pin"
         range 1 30

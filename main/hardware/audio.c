@@ -76,7 +76,7 @@ static void AUDIO_AdcInit()
     static adc_channel_t audioAdcChannel;
 
     // set adc channel and unit based on audio input GPIO number
-    adc_continuous_io_to_channel(AUDIO_INPUT_PIN, &audioAdcUnit, &audioAdcChannel);
+    adc_continuous_io_to_channel(gSettings.gpio.audio_in, &audioAdcUnit, &audioAdcChannel);
 
     dig_cfg.pattern_num = 1;
 

@@ -19,9 +19,6 @@
 
 #include <driver/i2s_pdm.h>
 
-// Define audio input GPIO pin
-#define AUDIO_INPUT_PIN GPIO_NUM_35
-
 // Define audio input max buffer size
 #define AUDIO_INPUT_MAX_BUFF_SIZE 1024
 

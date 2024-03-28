@@ -74,6 +74,7 @@ esp_err_t SETTINGS_FactoryReset(void)
     strcpy(gSettings.wifi.password, CONFIG_WIFI_PASSWORD);
     // GPIO
     gSettings.gpio.audio_out  = CONFIG_AUDIO_OUT_GPIO;
+    gSettings.gpio.audio_in   = CONFIG_AUDIO_IN_GPIO;
     gSettings.gpio.status_led = CONFIG_STATUS_LED_GPIO;
     gSettings.gpio.ptt        = CONFIG_PTT_GPIO;
     // Morse code beacon
