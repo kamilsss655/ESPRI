@@ -64,6 +64,14 @@
         />
 
         <q-select
+        v-model.number="settingsStore['gpio.audio_in']"
+          :options="gpioOptions"
+          behavior="dialog"
+          label="Audio IN"
+          filled
+        />
+
+        <q-select
         v-model.number="settingsStore['gpio.audio_out']"
           :options="gpioOptions"
           behavior="dialog"
@@ -140,5 +148,5 @@ const wifiModeOptions = ref([
 ]);
 
 const wifiChannelOptions = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
-const gpioOptions = ref(Array.from({ length: 30 }, (_v, i) => i));
+const gpioOptions = ref(Array.from({ length: 36 }, (_v, i) => i));
 </script>
