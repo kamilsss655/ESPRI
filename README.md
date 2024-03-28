@@ -41,15 +41,21 @@ Hardware:
 
 Some of the recommended boards:
 
-ESP32 Lolin Lite (confirmed to work):
+ESP32 Lolin Lite (recommended, confirmed to work, lipo charger built-in):
 
 ![esp32-lolin-lite](https://github.com/kamilsss655/ESPRI/assets/8842065/2e74e723-4347-4efb-b17b-20b4e930523f)
 
-ESP32 S3 Zero (confirmed to work):
+ESP32 S3 Zero (confirmed to work, the board gets quite hot):
 
 ![esp32-s3-zero](https://github.com/kamilsss655/ESPRI/assets/8842065/da0c5b13-dae1-43ec-b053-b3f1df78d63b)
 
+## Analog components
 
+In order to interface radios through Kenwood connector following analog components have to be added to the ESP board:
+
+<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/15d2561c-7e28-4bd9-984c-40301740e6e6" width="50%">
+
+Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cable for Kenwood pinout.
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
