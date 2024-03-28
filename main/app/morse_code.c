@@ -35,7 +35,7 @@ void MORSE_CODE_Transmit(void *pvParameters)
 {
     MORSE_CODE_TransmitParam_t *param = (MORSE_CODE_TransmitParam_t *)pvParameters;
 
-    AUDIO_Transmit();
+    AUDIO_TransmitStart();
 
     PTT_Press();
 
@@ -59,7 +59,7 @@ void MORSE_CODE_Transmit(void *pvParameters)
 
     PTT_Release();
 
-    AUDIO_TransmitFinish();
+    AUDIO_TransmitStop();
 
     // Indicate that we are done and can transmit again
     xSemaphoreGive(transmitSemaphore);

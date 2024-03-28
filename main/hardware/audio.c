@@ -14,75 +14,50 @@
  *     limitations under the License.
  */
 
-#include <driver/i2s.h>
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
-#include <driver/i2s_pdm.h>
-#include <driver/gpio.h>
-#include <esp_check.h>
-#include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
+#include <driver/i2s_pdm.h>
 #include <esp_adc/adc_continuous.h>
+#include <driver/gpio.h>
+#include <esp_check.h>
+#include <esp_log.h>
 
 #include "audio.h"
 #include "settings.h"
 #include "helper/rtos.h"
 
-i2s_pin_config_t pin_config;
+static const char *TAG = "HW/AUDIO";
 
-#define EXAMPLE_ADC_UNIT ADC_UNIT_1
-#define _EXAMPLE_ADC_UNIT_STR(unit) #unit
-#define EXAMPLE_ADC_UNIT_STR(unit) _EXAMPLE_ADC_UNIT_STR(unit)
-#define EXAMPLE_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
-#define EXAMPLE_ADC_ATTEN ADC_ATTEN_DB_12
-#define EXAMPLE_ADC_BIT_WIDTH SOC_ADC_DIGI_MAX_BITWIDTH
-
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
-#define EXAMPLE_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE1
-#define EXAMPLE_ADC_GET_CHANNEL(p_data) ((p_data)->type1.channel)
-#define EXAMPLE_ADC_GET_DATA(p_data) ((p_data)->type1.data)
-#else
-#define EXAMPLE_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE2
-#define EXAMPLE_ADC_GET_CHANNEL(p_data) ((p_data)->type2.channel)
-#define EXAMPLE_ADC_GET_DATA(p_data) ((p_data)->type2.data)
-#endif
-#define EXAMPLE_READ_LEN 256
 static adc_channel_t channel[1] = {ADC_CHANNEL_7};
 
-static TaskHandle_t s_task_handle;
-
-static const char *TAG = "HW/AUDIO";
+static TaskHandle_t audioListenTaskHandle;
 
 EventGroupHandle_t audioEventGroup;
 
-typedef enum
-{
-    BIT_STOP_LISTEN = (1 << 0),
-    BIT_STOPPED_LISTENING = (1 << 1),
-    BIT_DONE_TX = (1 << 2)
-} AudioEventBit_t;
+// AudioState_t gAudioState;
 
-AudioState_t gAudioState;
-
+// I2S handle to transmit audio
 i2s_chan_handle_t tx_channel;
+// I2S handle to receive/listen audio
 static adc_continuous_handle_t rx_channel;
 
-static bool IRAM_ATTR s_conv_done_cb(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
+// Interupt callback called when ADC finishes one portion of ADC conversions
+static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
 {
     BaseType_t mustYield = pdFALSE;
     // Notify that ADC continuous driver has done enough number of conversions
-    vTaskNotifyGiveFromISR(s_task_handle, &mustYield);
+    vTaskNotifyGiveFromISR(audioListenTaskHandle, &mustYield);
 
     return (mustYield == pdTRUE);
 }
 
+// Initialize ADC
 static void AUDIO_AdcInit()
 {
-    // adc_continuous_handle_t adc_handle = NULL;
-
     adc_continuous_handle_cfg_t adc_config = {
         .max_store_buf_size = 1024,
         .conv_frame_size = EXAMPLE_READ_LEN,
@@ -111,30 +86,28 @@ static void AUDIO_AdcInit()
     dig_cfg.adc_pattern = adc_pattern;
     ESP_ERROR_CHECK(adc_continuous_config(rx_channel, &dig_cfg));
 
-    // *out_handle = adc_handle;
-
-    // continuous_adc_init(channel, sizeof(channel) / sizeof(adc_channel_t), &rx_channel);
-
     adc_continuous_evt_cbs_t cbs = {
-        .on_conv_done = s_conv_done_cb,
+        .on_conv_done = adc_conv_done_callback,
     };
     ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(rx_channel, &cbs, NULL));
     ESP_ERROR_CHECK(adc_continuous_start(rx_channel));
 }
 
+// Stop ADC
 void AUDIO_AdcStop()
 {
     adc_continuous_stop(rx_channel);
     adc_continuous_deinit(rx_channel);
 }
 
-void AUDIO_Monitor(void *pvParameters)
+// Task listening to incoming audio on ADC port
+void AUDIO_Listen(void *pvParameters)
 {
     esp_err_t ret;
     uint32_t ret_num = 0;
     uint8_t result[EXAMPLE_READ_LEN] = {0};
     memset(result, 0xcc, EXAMPLE_READ_LEN);
-    s_task_handle = xTaskGetCurrentTaskHandle();
+    audioListenTaskHandle = xTaskGetCurrentTaskHandle();
     char unit[] = EXAMPLE_ADC_UNIT_STR(EXAMPLE_ADC_UNIT);
     EventBits_t audioEventGroupBits;
 
@@ -142,43 +115,37 @@ void AUDIO_Monitor(void *pvParameters)
 
     while (1)
     {
+        // Read event bits
         audioEventGroupBits = xEventGroupGetBits(audioEventGroup);
-        /**
-         * This is to show you the way to use the ADC continuous mode driver event callback.
-         * This `ulTaskNotifyTake` will block when the data processing in the task is fast.
-         * However in this example, the data processing (print) is slow, so you barely block here.
-         *
-         * Without using this event callback (to notify this task), you can still just call
-         * `adc_continuous_read()` here in a loop, with/without a certain block timeout.
-         */
-
-        // Check if we can re-schedule new transmission
 
         if ((audioEventGroupBits & BIT_STOP_LISTEN) != 0)
-        {
+        { // something requested that we stop listening
             AUDIO_AdcStop();
-            ESP_LOGI(TAG, "Stopped ADC");
+            ESP_LOGI(TAG, "Stopped ADC.");
+            // clear bit
             xEventGroupClearBits(audioEventGroup, BIT_STOP_LISTEN);
+            // indicate that we stopped listening
             xEventGroupSetBits(audioEventGroup, BIT_STOPPED_LISTENING);
         }
         else if ((audioEventGroupBits & BIT_STOPPED_LISTENING) != 0)
-        {
-            ESP_LOGI(TAG, "Listening waiting for tx to end");
+        { // we idle here, until external process turns of this bit
+            ESP_LOGI(TAG, "Waiting for TX to end.");
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
         else if ((audioEventGroupBits & BIT_DONE_TX) != 0)
         {
-            ESP_LOGI(TAG, "Listening detected tx end, re-initializing adc");
+            ESP_LOGI(TAG, "Detected TX end, re-initializing listening.");
             // re-init adc
             AUDIO_AdcInit();
             xEventGroupClearBits(audioEventGroup, BIT_DONE_TX);
         }
-        else // if no bits set we listen by default
+        else // if no bits are set do listen (default state)
         {
-            // monitor here
+            // Block until we receive notification from the interupt that data is available
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
             ret = adc_continuous_read(rx_channel, result, EXAMPLE_READ_LEN, &ret_num, 0);
+
             if (ret == ESP_OK)
             {
                 // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
@@ -206,38 +173,33 @@ void AUDIO_Monitor(void *pvParameters)
             }
             else if (ret == ESP_ERR_TIMEOUT)
             {
-                // We try to read `EXAMPLE_READ_LEN` until API returns timeout, which means there's no available data
-                // break;
+                // ESP_ERR_TIMEOUT means there is no available data to read, so we idle
                 vTaskDelay(10);
             }
         }
     }
-
-    // AUDIO_AdcStop();
 }
 
-// Initialize audio transmit
+// Start audio transmit
+// This will stop audio listen so we can use I2S0 peripheral for transmit
 // Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
-i2s_chan_handle_t AUDIO_Transmit(void)
+i2s_chan_handle_t AUDIO_TransmitStart(void)
 {
     EventBits_t audioEventGroupBits;
 
     // request that we stop listening
     xEventGroupSetBits(audioEventGroup, BIT_STOP_LISTEN);
-    // uxBits & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 )
+
     // block until listening stopped
     do
     {
-        // if we haven't stopped listening we will block an wait here
         audioEventGroupBits = xEventGroupGetBits(audioEventGroup);
         vTaskDelay(10 / portTICK_PERIOD_MS);
     } while ((audioEventGroupBits & BIT_STOPPED_LISTENING) != BIT_STOPPED_LISTENING);
 
-    ESP_LOGI(TAG, "bits: %lu", audioEventGroupBits);
-
     ESP_LOGI(TAG, "Transmit starting");
 
-    gAudioState = AUDIO_TRANSMITTING;
+    // Configure I2S0 peripheral for audio transmit
 
     i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
 
@@ -266,25 +228,17 @@ i2s_chan_handle_t AUDIO_Transmit(void)
 }
 
 // Stop audio transmit
-esp_err_t AUDIO_TransmitFinish(void)
+esp_err_t AUDIO_TransmitStop(void)
 {
+    ESP_LOGI(TAG, "Transmit stop");
 
-    ESP_LOGI(TAG, "Transmit finish");
-
-    gAudioState = AUDIO_LISTENING;
-
-    // i2s_channel_disable(tx_channel); // this is already disabled by beep?
-    /* If the handle is not needed any more, delete it to release the channel resources */
+    // Release I2S0 peripheral
+    i2s_channel_disable(tx_channel); // this is already disabled by beep?
     i2s_del_channel(tx_channel);
 
+    // Indicate that audio transmit is finished
     xEventGroupClearBits(audioEventGroup, BIT_STOPPED_LISTENING);
     xEventGroupSetBits(audioEventGroup, BIT_DONE_TX);
-
-    EventBits_t audioEventGroupBits;
-
-    audioEventGroupBits = xEventGroupGetBits(audioEventGroup);
-
-    ESP_LOGI(TAG, "bits after transmit finish: %lu", audioEventGroupBits);
 
     return ESP_OK;
 }
@@ -312,8 +266,6 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
 
-    // AUDIO_Transmit();
-
     // Turn on PDM output
     ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
 
@@ -331,9 +283,6 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     // Deallocate temp buffer
     free(w_buf);
-
-    // Free I2S0 controller
-    // AUDIO_TransmitFinish();
 }
 
 // Play AFSK coded data
@@ -391,8 +340,6 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
     //         }
     //     }
 
-    // AUDIO_Transmit();
-
     // Turn on PDM output
     ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
 
@@ -426,19 +373,13 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
     // Turn off PDM output
     ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
 
-    // AUDIO_TransmitFinish();
     // Deallocate temp buffer
     free(w_buf_zero);
     free(w_buf_one);
 }
 
 void AUDIO_Init(void)
-{
+{   
+    // Initialize event group
     audioEventGroup = xEventGroupCreate();
-
-    // gAudioState = AUDIO_LISTENING;
-
-    // AUDIO_AdcInit();
-
-    // ESP_LOGI(TAG, "Initialized adc");
 }
