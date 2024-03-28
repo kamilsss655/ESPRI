@@ -74,19 +74,15 @@ static void AUDIO_AdcInit()
     adc_digi_pattern_config_t adc_pattern[SOC_ADC_PATT_LEN_MAX] = {0};
 
     dig_cfg.pattern_num = 1;
-    
-    for (int i = 0; i < 1; i++)
-    {
-        adc_pattern[i].atten = AUDIO_ADC_ATTEN;
-        adc_pattern[i].channel = channel[i] & 0x7;
-        adc_pattern[i].unit = AUDIO_ADC_UNIT;
-        adc_pattern[i].bit_width = AUDIO_ADC_BIT_WIDTH;
 
-        ESP_LOGI(TAG, "adc_pattern[%d].atten is :%" PRIx8, i, adc_pattern[i].atten);
-        ESP_LOGI(TAG, "adc_pattern[%d].channel is :%" PRIx8, i, adc_pattern[i].channel);
-        ESP_LOGI(TAG, "adc_pattern[%d].unit is :%" PRIx8, i, adc_pattern[i].unit);
-    }
+    adc_pattern[0].atten = AUDIO_ADC_ATTEN;
+    adc_pattern[0].atten = AUDIO_ADC_ATTEN;
+    adc_pattern[0].channel = channel[0] & 0x7;
+    adc_pattern[0].unit = AUDIO_ADC_UNIT;
+    adc_pattern[0].bit_width = AUDIO_ADC_BIT_WIDTH;
+
     dig_cfg.adc_pattern = adc_pattern;
+
     ESP_ERROR_CHECK(adc_continuous_config(rx_channel, &dig_cfg));
 
     adc_continuous_evt_cbs_t cbs = {
@@ -94,6 +90,10 @@ static void AUDIO_AdcInit()
     };
     ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(rx_channel, &cbs, NULL));
     ESP_ERROR_CHECK(adc_continuous_start(rx_channel));
+
+    ESP_LOGI(TAG, "ADC initialized.");
+    ESP_LOGI(TAG, "ADC attenuation: %" PRIx8, dig_cfg.adc_pattern[0].atten);
+    ESP_LOGI(TAG, "ADC channel: %" PRIx8, dig_cfg.adc_pattern[0].channel);
 }
 
 // Stop ADC
@@ -238,7 +238,7 @@ esp_err_t AUDIO_TransmitStop(void)
     // Release I2S0 peripheral
     // TODO: This causes runtime error if channel was already disabled
     // we should probably check if it was disabled before disabling it
-    i2s_channel_disable(tx_channel); 
+    i2s_channel_disable(tx_channel);
     i2s_del_channel(tx_channel);
 
     // Indicate that audio transmit is finished
@@ -384,7 +384,7 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
 }
 
 void AUDIO_Init(void)
-{   
+{
     // Initialize event group
     audioEventGroup = xEventGroupCreate();
 }
