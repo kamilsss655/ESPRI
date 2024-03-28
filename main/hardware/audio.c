@@ -155,8 +155,8 @@ void AUDIO_Listen(void *pvParameters)
                 for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
                 {
                     adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
-                    uint32_t chan_num = p->type1.channel;
-                    uint32_t data = p->type1.data;
+                    uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
+                    uint32_t data = AUDIO_ADC_GET_DATA(p);
                     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
                     if (chan_num < SOC_ADC_CHANNEL_NUM(AUDIO_ADC_UNIT))
                     {

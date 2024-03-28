@@ -43,6 +43,14 @@
 // Define ADC bit width
 #define AUDIO_ADC_BIT_WIDTH SOC_ADC_DIGI_MAX_BITWIDTH
 
+#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
+#define AUDIO_ADC_GET_CHANNEL(p_data)     ((p_data)->type1.channel)
+#define AUDIO_ADC_GET_DATA(p_data)        ((p_data)->type1.data)
+#else
+#define AUDIO_ADC_GET_CHANNEL(p_data)     ((p_data)->type2.channel)
+#define AUDIO_ADC_GET_DATA(p_data)        ((p_data)->type2.data)
+#endif
+
 // At the same time we can either listen to audio, or transmit audio.
 // We cannot do both at the same time. Event bits are used to syncronize shared I2S0 resource.
 typedef enum
