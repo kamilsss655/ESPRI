@@ -28,7 +28,7 @@
 static const char *TAG = "WEB/API/SETTINGS";
 
 // List of supported settings
-ApiSetting_t settings[11] = {
+ApiSetting_t settings[12] = {
     {"wifi.mode",                        &gSettings.wifi.mode,                        1},
     {"wifi.ssid",                        &gSettings.wifi.ssid,                        0},
     {"wifi.password",                    &gSettings.wifi.password,                    0},
