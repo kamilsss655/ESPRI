@@ -39,7 +39,7 @@ extern AudioState_t gAudioState;
 #define CONST_PI (3.1416f)
 
 i2s_chan_handle_t AUDIO_Transmit(void);
-esp_err_t AUDIO_Listen(void);
+esp_err_t AUDIO_TransmitFinish(void);
 void AUDIO_Monitor(void *pvParameters);
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
 void AUDIO_PlayAFSK(uint8_t *data, size_t len);

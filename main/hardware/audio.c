@@ -56,6 +56,15 @@ static TaskHandle_t s_task_handle;
 
 static const char *TAG = "HW/AUDIO";
 
+EventGroupHandle_t audioEventGroup;
+
+typedef enum
+{
+    BIT_STOP_LISTEN = (1 << 0),
+    BIT_STOPPED_LISTENING = (1 << 1),
+    BIT_DONE_TX = (1 << 2)
+} AudioEventBit_t;
+
 AudioState_t gAudioState;
 
 i2s_chan_handle_t tx_channel;
@@ -126,15 +135,14 @@ void AUDIO_Monitor(void *pvParameters)
     uint8_t result[EXAMPLE_READ_LEN] = {0};
     memset(result, 0xcc, EXAMPLE_READ_LEN);
     s_task_handle = xTaskGetCurrentTaskHandle();
+    char unit[] = EXAMPLE_ADC_UNIT_STR(EXAMPLE_ADC_UNIT);
+    EventBits_t audioEventGroupBits;
 
-    // adc_continuous_stop(rx_channel);
-
-    /* If the rx_channel is not needed any more, delete it to release the channel resources */
-    // adc_continuous_deinit(rx_channel);
+    AUDIO_AdcInit();
 
     while (1)
     {
-
+        audioEventGroupBits = xEventGroupGetBits(audioEventGroup);
         /**
          * This is to show you the way to use the ADC continuous mode driver event callback.
          * This `ulTaskNotifyTake` will block when the data processing in the task is fast.
@@ -144,20 +152,31 @@ void AUDIO_Monitor(void *pvParameters)
          * `adc_continuous_read()` here in a loop, with/without a certain block timeout.
          */
 
-        char unit[] = EXAMPLE_ADC_UNIT_STR(EXAMPLE_ADC_UNIT);
+        // Check if we can re-schedule new transmission
 
-        while (1)
+        if ((audioEventGroupBits & BIT_STOP_LISTEN) != 0)
         {
-            // Check if we can re-schedule new transmission
-
+            AUDIO_AdcStop();
+            ESP_LOGI(TAG, "Stopped ADC");
+            xEventGroupClearBits(audioEventGroup, BIT_STOP_LISTEN);
+            xEventGroupSetBits(audioEventGroup, BIT_STOPPED_LISTENING);
+        }
+        else if ((audioEventGroupBits & BIT_STOPPED_LISTENING) != 0)
+        {
+            ESP_LOGI(TAG, "Listening waiting for tx to end");
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
+        else if ((audioEventGroupBits & BIT_DONE_TX) != 0)
+        {
+            ESP_LOGI(TAG, "Listening detected tx end, re-initializing adc");
+            // re-init adc
+            AUDIO_AdcInit();
+            xEventGroupClearBits(audioEventGroup, BIT_DONE_TX);
+        }
+        else // if no bits set we listen by default
+        {
+            // monitor here
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-            // Give control back to RTOS for 1s before we check again
-            if (gAudioState == AUDIO_TRANSMITTING)
-            {
-                vTaskDelay(1000);
-                continue;
-            }
 
             ret = adc_continuous_read(rx_channel, result, EXAMPLE_READ_LEN, &ret_num, 0);
             if (ret == ESP_OK)
@@ -188,69 +207,85 @@ void AUDIO_Monitor(void *pvParameters)
             else if (ret == ESP_ERR_TIMEOUT)
             {
                 // We try to read `EXAMPLE_READ_LEN` until API returns timeout, which means there's no available data
-                break;
+                // break;
+                vTaskDelay(10);
             }
         }
     }
 
-    AUDIO_AdcStop();
+    // AUDIO_AdcStop();
 }
 
 // Initialize audio transmit
 // Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
 i2s_chan_handle_t AUDIO_Transmit(void)
 {
-    if (gAudioState == AUDIO_LISTENING)
+    EventBits_t audioEventGroupBits;
+
+    // request that we stop listening
+    xEventGroupSetBits(audioEventGroup, BIT_STOP_LISTEN);
+    // uxBits & ( BIT_0 | BIT_4 ) ) == ( BIT_0 | BIT_4 )
+    // block until listening stopped
+    do
     {
-        ESP_LOGI(TAG, "Transmit starting");
+        // if we haven't stopped listening we will block an wait here
+        audioEventGroupBits = xEventGroupGetBits(audioEventGroup);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    } while ((audioEventGroupBits & BIT_STOPPED_LISTENING) != BIT_STOPPED_LISTENING);
 
-        gAudioState = AUDIO_TRANSMITTING;
+    ESP_LOGI(TAG, "bits: %lu", audioEventGroupBits);
 
-        AUDIO_AdcStop();
+    ESP_LOGI(TAG, "Transmit starting");
 
-        i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
+    gAudioState = AUDIO_TRANSMITTING;
 
-        tx_chan_cfg.auto_clear = true;
+    i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
 
-        ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &tx_channel, NULL));
+    tx_chan_cfg.auto_clear = true;
 
-        i2s_pdm_tx_config_t pdm_tx_cfg = {
-            .clk_cfg = I2S_PDM_TX_CLK_DEFAULT_CONFIG(AUDIO_PDM_TX_FREQ_HZ),
-            /* The data bit-width of PDM mode is fixed to 16 */
-            .slot_cfg = I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
-            .gpio_cfg = {
-                .clk = AUDIO_PDM_TX_CLK_GPIO,
-                .dout = gSettings.gpio.audio_out,
-                .invert_flags = {
-                    .clk_inv = false,
-                },
+    ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &tx_channel, NULL));
+
+    i2s_pdm_tx_config_t pdm_tx_cfg = {
+        .clk_cfg = I2S_PDM_TX_CLK_DEFAULT_CONFIG(AUDIO_PDM_TX_FREQ_HZ),
+        /* The data bit-width of PDM mode is fixed to 16 */
+        .slot_cfg = I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
+        .gpio_cfg = {
+            .clk = AUDIO_PDM_TX_CLK_GPIO,
+            .dout = gSettings.gpio.audio_out,
+            .invert_flags = {
+                .clk_inv = false,
             },
-        };
+        },
+    };
 
-        ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
+    ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
 
-        ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
-    }
+    ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
 
     return tx_channel;
 }
 
 // Stop audio transmit
-esp_err_t AUDIO_Listen(void)
+esp_err_t AUDIO_TransmitFinish(void)
 {
-    if (gAudioState == AUDIO_TRANSMITTING)
-    {
-        ESP_LOGI(TAG, "Listening starting");
 
-        gAudioState = AUDIO_LISTENING;
+    ESP_LOGI(TAG, "Transmit finish");
 
-        i2s_channel_disable(tx_channel);
-        /* If the handle is not needed any more, delete it to release the channel resources */
-        i2s_del_channel(tx_channel);
+    gAudioState = AUDIO_LISTENING;
 
-        // enable ADC here
-        AUDIO_AdcInit();
-    }
+    // i2s_channel_disable(tx_channel); // this is already disabled by beep?
+    /* If the handle is not needed any more, delete it to release the channel resources */
+    i2s_del_channel(tx_channel);
+
+    xEventGroupClearBits(audioEventGroup, BIT_STOPPED_LISTENING);
+    xEventGroupSetBits(audioEventGroup, BIT_DONE_TX);
+
+    EventBits_t audioEventGroupBits;
+
+    audioEventGroupBits = xEventGroupGetBits(audioEventGroup);
+
+    ESP_LOGI(TAG, "bits after transmit finish: %lu", audioEventGroupBits);
+
     return ESP_OK;
 }
 
@@ -277,7 +312,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
 
-    AUDIO_Transmit();
+    // AUDIO_Transmit();
 
     // Turn on PDM output
     ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
@@ -298,7 +333,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     free(w_buf);
 
     // Free I2S0 controller
-    AUDIO_Listen();
+    // AUDIO_TransmitFinish();
 }
 
 // Play AFSK coded data
@@ -356,7 +391,7 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
     //         }
     //     }
 
-    AUDIO_Transmit();
+    // AUDIO_Transmit();
 
     // Turn on PDM output
     ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
@@ -391,7 +426,7 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
     // Turn off PDM output
     ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
 
-    AUDIO_Listen();
+    // AUDIO_TransmitFinish();
     // Deallocate temp buffer
     free(w_buf_zero);
     free(w_buf_one);
@@ -399,9 +434,11 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
 
 void AUDIO_Init(void)
 {
-    gAudioState = AUDIO_LISTENING;
+    audioEventGroup = xEventGroupCreate();
 
-    AUDIO_AdcInit();
+    // gAudioState = AUDIO_LISTENING;
 
-    ESP_LOGI(TAG, "Initialized adc");
+    // AUDIO_AdcInit();
+
+    // ESP_LOGI(TAG, "Initialized adc");
 }

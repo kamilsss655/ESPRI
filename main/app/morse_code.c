@@ -35,8 +35,9 @@ void MORSE_CODE_Transmit(void *pvParameters)
 {
     MORSE_CODE_TransmitParam_t *param = (MORSE_CODE_TransmitParam_t *)pvParameters;
 
-    PTT_Press();
+    AUDIO_Transmit();
 
+    PTT_Press();
 
     ESP_LOGI(TAG, "Transmitting: %s", param->input);
 
@@ -57,6 +58,8 @@ void MORSE_CODE_Transmit(void *pvParameters)
     }
 
     PTT_Release();
+
+    AUDIO_TransmitFinish();
 
     // Indicate that we are done and can transmit again
     xSemaphoreGive(transmitSemaphore);
