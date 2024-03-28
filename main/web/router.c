@@ -16,6 +16,7 @@
 
 #include "helper/http.h"
 #include "web/handlers/root.h"
+#include "web/handlers/websocket.h"
 #include "web/handlers/static_files.h"
 #include "web/handlers/api/event.h"
 #include "web/handlers/api/uvk5_message.h"
@@ -36,25 +37,31 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .uri = "/",
         .method = HTTP_GET,
         .handler = ROOT_Handle,
-        .user_ctx = server_data
-    };
+        .user_ctx = server_data};
     httpd_register_uri_handler(server, &root_uri);
+
+    // Websocket
+    httpd_uri_t websocket_uri = {
+        .uri = "/websocket",
+        .method = HTTP_GET,
+        .handler = WEBSOCKET_Handle,
+        .user_ctx = NULL,
+        .is_websocket = true};
+    httpd_register_uri_handler(server, &websocket_uri);
 
     // API Settings
     httpd_uri_t api_settings_index_uri = {
         .uri = "/api/settings",
         .method = HTTP_GET,
         .handler = API_SETTINGS_Index,
-        .user_ctx = server_data
-    };
+        .user_ctx = server_data};
     httpd_register_uri_handler(server, &api_settings_index_uri);
 
     httpd_uri_t api_settings_create_uri = {
         .uri = "/api/settings",
         .method = HTTP_POST,
         .handler = API_SETTINGS_Create,
-        .user_ctx = server_data
-    };
+        .user_ctx = server_data};
     httpd_register_uri_handler(server, &api_settings_create_uri);
 
     // API Event
@@ -62,8 +69,7 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .uri = "/api/event",
         .method = HTTP_POST,
         .handler = API_EVENT_Create,
-        .user_ctx = server_data
-    };
+        .user_ctx = server_data};
     httpd_register_uri_handler(server, &api_event_create_uri);
 
     // API UVK5 Message
@@ -79,8 +85,7 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .uri = "/api/uvk5_message",
         .method = HTTP_POST,
         .handler = API_UVK5_MESSAGE_Create,
-        .user_ctx = server_data
-    };
+        .user_ctx = server_data};
     httpd_register_uri_handler(server, &api_uvk5_message_create_uri);
 
     // Match all and try to serve static files
@@ -88,7 +93,6 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .uri = "/*", // Match all other URIs
         .method = HTTP_GET,
         .handler = STATIC_FILES_Handle,
-        .user_ctx = server_data
-    };
+        .user_ctx = server_data};
     httpd_register_uri_handler(server, &static_file_uri);
 }

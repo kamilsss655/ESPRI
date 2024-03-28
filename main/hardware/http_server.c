@@ -23,6 +23,8 @@
 
 static const char *TAG = "HW/HTTP_SERVER";
 
+httpd_handle_t gHttpServerHandle = NULL;
+
 /* Function to start the file server */
 esp_err_t HTTP_SERVER_Init(const char *base_path)
 {
@@ -44,7 +46,6 @@ esp_err_t HTTP_SERVER_Init(const char *base_path)
     strlcpy(server_data->base_path, base_path,
             sizeof(server_data->base_path));
 
-    httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
     /* Use the URI wildcard matching function in order to
@@ -53,14 +54,14 @@ esp_err_t HTTP_SERVER_Init(const char *base_path)
     config.uri_match_fn = httpd_uri_match_wildcard;
 
     ESP_LOGI(TAG, "Starting HTTP Server on port: '%d'", config.server_port);
-    if (httpd_start(&server, &config) != ESP_OK)
+    if (httpd_start(&gHttpServerHandle, &config) != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to start file server!");
         return ESP_FAIL;
     }
 
     // Initalize router
-    ROUTER_Init(server_data, server);
+    ROUTER_Init(server_data, gHttpServerHandle);
 
     return ESP_OK;
 }

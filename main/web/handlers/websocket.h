@@ -14,17 +14,14 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_HTTP_SERVER_H
-#define HARDWARE_HTTP_SERVER_H
 
-#include <esp_http_server.h>
+#ifndef WEBSOCKET_H
+#define WEBSOCKET_H
+
 #include <esp_err.h>
+#include <esp_http_server.h>
 
-/* Scratch buffer size */
-#define SCRATCH_BUFSIZE 8192
-
-extern httpd_handle_t gHttpServerHandle;
-
-esp_err_t HTTP_SERVER_Init(const char *base_path);
+esp_err_t WEBSOCKET_Handle(httpd_req_t *req);
+void WEBSOCKET_Send();
 
 #endif
