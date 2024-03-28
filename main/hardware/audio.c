@@ -233,7 +233,9 @@ esp_err_t AUDIO_TransmitStop(void)
     ESP_LOGI(TAG, "Transmit stop");
 
     // Release I2S0 peripheral
-    i2s_channel_disable(tx_channel); // this is already disabled by beep?
+    // TODO: This causes runtime error if channel was already disabled
+    // we should probably check if it was disabled before disabling it
+    i2s_channel_disable(tx_channel); 
     i2s_del_channel(tx_channel);
 
     // Indicate that audio transmit is finished
