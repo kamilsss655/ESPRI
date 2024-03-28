@@ -19,6 +19,9 @@
 
 #include <driver/i2s_pdm.h>
 
+// Define audio input GPIO pin
+#define AUDIO_INPUT_PIN GPIO_NUM_35
+
 // Define audio input max buffer size
 #define AUDIO_INPUT_MAX_BUFF_SIZE 1024
 
@@ -36,9 +39,6 @@
 
 // Define ADC input attenuation
 #define AUDIO_ADC_ATTEN ADC_ATTEN_DB_12 // ADC_ATTEN_DB_12 allows to measure 0-3.3V
-
-// Define ADC unit
-#define AUDIO_ADC_UNIT ADC_UNIT_1
 
 // Define ADC bit width
 #define AUDIO_ADC_BIT_WIDTH SOC_ADC_DIGI_MAX_BITWIDTH

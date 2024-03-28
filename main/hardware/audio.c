@@ -32,11 +32,11 @@
 
 static const char *TAG = "HW/AUDIO";
 
-static adc_channel_t channel[1] = {ADC_CHANNEL_7};
-
 static TaskHandle_t audioListenTaskHandle;
 
 EventGroupHandle_t audioEventGroup;
+
+adc_unit_t audioAdcUnit;
 
 // AudioState_t gAudioState;
 
@@ -73,12 +73,17 @@ static void AUDIO_AdcInit()
 
     adc_digi_pattern_config_t adc_pattern[SOC_ADC_PATT_LEN_MAX] = {0};
 
+    static adc_channel_t audioAdcChannel;
+
+    // set adc channel and unit based on audio input GPIO number
+    adc_continuous_io_to_channel(AUDIO_INPUT_PIN, &audioAdcUnit, &audioAdcChannel);
+
     dig_cfg.pattern_num = 1;
 
     adc_pattern[0].atten = AUDIO_ADC_ATTEN;
     adc_pattern[0].atten = AUDIO_ADC_ATTEN;
-    adc_pattern[0].channel = channel[0] & 0x7;
-    adc_pattern[0].unit = AUDIO_ADC_UNIT;
+    adc_pattern[0].channel = audioAdcChannel;
+    adc_pattern[0].unit = audioAdcUnit;
     adc_pattern[0].bit_width = AUDIO_ADC_BIT_WIDTH;
 
     dig_cfg.adc_pattern = adc_pattern;
@@ -158,7 +163,7 @@ void AUDIO_Listen(void *pvParameters)
                     uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
                     uint32_t data = AUDIO_ADC_GET_DATA(p);
                     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
-                    if (chan_num < SOC_ADC_CHANNEL_NUM(AUDIO_ADC_UNIT))
+                    if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
                     {
                         ESP_LOGI(TAG, "Unit: %s, Channel: %" PRIu32 ", Value: %" PRIx32, unit, chan_num, data);
                     }
