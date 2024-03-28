@@ -59,25 +59,28 @@ static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, con
 static void AUDIO_AdcInit()
 {
     adc_continuous_handle_cfg_t adc_config = {
-        .max_store_buf_size = 1024,
-        .conv_frame_size = EXAMPLE_READ_LEN,
+        .max_store_buf_size = AUDIO_INPUT_MAX_BUFF_SIZE,
+        .conv_frame_size = AUDIO_INPUT_CHUNK_SIZE,
     };
+
     ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &rx_channel));
 
     adc_continuous_config_t dig_cfg = {
-        .sample_freq_hz = 32 * 1000,
-        .conv_mode = EXAMPLE_ADC_CONV_MODE,
-        .format = EXAMPLE_ADC_OUTPUT_TYPE,
+        .sample_freq_hz = AUDIO_INPUT_SAMPLE_FREQ,
+        .conv_mode = AUDIO_ADC_CONV_MODE,
+        .format = AUDIO_ADC_OUTPUT_TYPE,
     };
 
     adc_digi_pattern_config_t adc_pattern[SOC_ADC_PATT_LEN_MAX] = {0};
+
     dig_cfg.pattern_num = 1;
+    
     for (int i = 0; i < 1; i++)
     {
-        adc_pattern[i].atten = EXAMPLE_ADC_ATTEN;
+        adc_pattern[i].atten = AUDIO_ADC_ATTEN;
         adc_pattern[i].channel = channel[i] & 0x7;
-        adc_pattern[i].unit = EXAMPLE_ADC_UNIT;
-        adc_pattern[i].bit_width = EXAMPLE_ADC_BIT_WIDTH;
+        adc_pattern[i].unit = AUDIO_ADC_UNIT;
+        adc_pattern[i].bit_width = AUDIO_ADC_BIT_WIDTH;
 
         ESP_LOGI(TAG, "adc_pattern[%d].atten is :%" PRIx8, i, adc_pattern[i].atten);
         ESP_LOGI(TAG, "adc_pattern[%d].channel is :%" PRIx8, i, adc_pattern[i].channel);
@@ -105,10 +108,10 @@ void AUDIO_Listen(void *pvParameters)
 {
     esp_err_t ret;
     uint32_t ret_num = 0;
-    uint8_t result[EXAMPLE_READ_LEN] = {0};
-    memset(result, 0xcc, EXAMPLE_READ_LEN);
+    uint8_t result[AUDIO_INPUT_CHUNK_SIZE] = {0};
+    memset(result, 0xcc, AUDIO_INPUT_CHUNK_SIZE);
     audioListenTaskHandle = xTaskGetCurrentTaskHandle();
-    char unit[] = EXAMPLE_ADC_UNIT_STR(EXAMPLE_ADC_UNIT);
+    char unit[] = "#unit";
     EventBits_t audioEventGroupBits;
 
     AUDIO_AdcInit();
@@ -144,7 +147,7 @@ void AUDIO_Listen(void *pvParameters)
             // Block until we receive notification from the interupt that data is available
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-            ret = adc_continuous_read(rx_channel, result, EXAMPLE_READ_LEN, &ret_num, 0);
+            ret = adc_continuous_read(rx_channel, result, AUDIO_INPUT_CHUNK_SIZE, &ret_num, 0);
 
             if (ret == ESP_OK)
             {
@@ -152,10 +155,10 @@ void AUDIO_Listen(void *pvParameters)
                 for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
                 {
                     adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
-                    uint32_t chan_num = EXAMPLE_ADC_GET_CHANNEL(p);
-                    uint32_t data = EXAMPLE_ADC_GET_DATA(p);
+                    uint32_t chan_num = p->type1.channel;
+                    uint32_t data = p->type1.data;
                     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
-                    if (chan_num < SOC_ADC_CHANNEL_NUM(EXAMPLE_ADC_UNIT))
+                    if (chan_num < SOC_ADC_CHANNEL_NUM(AUDIO_ADC_UNIT))
                     {
                         ESP_LOGI(TAG, "Unit: %s, Channel: %" PRIu32 ", Value: %" PRIx32, unit, chan_num, data);
                     }

@@ -19,23 +19,29 @@
 
 #include <driver/i2s_pdm.h>
 
-#define EXAMPLE_ADC_UNIT ADC_UNIT_1
-#define _EXAMPLE_ADC_UNIT_STR(unit) #unit
-#define EXAMPLE_ADC_UNIT_STR(unit) _EXAMPLE_ADC_UNIT_STR(unit)
-#define EXAMPLE_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
-#define EXAMPLE_ADC_ATTEN ADC_ATTEN_DB_12
-#define EXAMPLE_ADC_BIT_WIDTH SOC_ADC_DIGI_MAX_BITWIDTH
+// Define audio input max buffer size
+#define AUDIO_INPUT_MAX_BUFF_SIZE 1024
 
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
-#define EXAMPLE_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE1
-#define EXAMPLE_ADC_GET_CHANNEL(p_data) ((p_data)->type1.channel)
-#define EXAMPLE_ADC_GET_DATA(p_data) ((p_data)->type1.data)
-#else
-#define EXAMPLE_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE2
-#define EXAMPLE_ADC_GET_CHANNEL(p_data) ((p_data)->type2.channel)
-#define EXAMPLE_ADC_GET_DATA(p_data) ((p_data)->type2.data)
-#endif
-#define EXAMPLE_READ_LEN 256
+// Define chunk size for audio input we process at a time
+#define AUDIO_INPUT_CHUNK_SIZE 256
+
+// Define audio input sampling frequency in Hz
+#define AUDIO_INPUT_SAMPLE_FREQ 32000
+
+// Define ADC conv mode
+#define AUDIO_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
+
+// Define ADC output type
+#define AUDIO_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE1
+
+// Define ADC input attenuation
+#define AUDIO_ADC_ATTEN ADC_ATTEN_DB_12 // ADC_ATTEN_DB_12 allows to measure 0-3.3V
+
+// Define ADC unit
+#define AUDIO_ADC_UNIT ADC_UNIT_1
+
+// Define ADC bit width
+#define AUDIO_ADC_BIT_WIDTH SOC_ADC_DIGI_MAX_BITWIDTH
 
 // At the same time we can either listen to audio, or transmit audio.
 // We cannot do both at the same time. Event bits are used to syncronize shared I2S0 resource.
