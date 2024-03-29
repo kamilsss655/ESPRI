@@ -22,10 +22,10 @@ export const useWebsocketStore = defineStore({
       );
 
       connection.onmessage = (event) => {
-        if (this.messageCount >= maxMessagesStored) {
-          this.clearMessages();
+        if (this.messageCountMaxLimitReached) {
+          this.shiftMessages();
         } else {
-          this.$state.messages.push(JSON.parse(event.data));
+          this.storeMessage(JSON.parse(event.data));
         }
         this.updateLastSeenTimestamp();
       };
@@ -49,14 +49,20 @@ export const useWebsocketStore = defineStore({
         connection.close();
       };
     },
-    clearMessages() {
-      this.$state.messages = [];
+    storeMessage(message : {[index: string]:any}) {
+      message['timestamp'] = Date.now();
+      this.$state.messages.push(message);
+    },
+    shiftMessages() {
+      this.$state.messages.shift;
     },
     updateLastSeenTimestamp() {
       this.$state.lastSeenTimestamp = new Date().getTime();
     }
   },
   getters: {
-    messageCount: (state) => state.messages.length
+    messageCount: (state) => state.messages.length,
+    messageCountMaxLimitReached: (state) =>
+      state.messages.length >= maxMessagesStored
   }
 });

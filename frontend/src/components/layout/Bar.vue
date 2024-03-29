@@ -2,14 +2,27 @@
   <q-bar>
     <!-- <div class="text-weight-bold">Status bar</div> -->
     <q-icon v-if="isWebsocketConnected" name="ion-cellular" />
-    <q-btn dense v-if="!isWebsocketConnected" flat icon="ion-close-circle" color="negative"/>
+    <q-btn
+      dense
+      v-if="!isWebsocketConnected"
+      flat
+      icon="ion-close-circle"
+      color="negative"
+    />
     <div>{{ settingsStore["wifi.ssid"] }}</div>
     <q-space />
     <q-btn dense flat icon="ion-flag" v-if="isMorseCodeBeaconEnabled" />
-    <q-btn dense flat icon="ion-notifications" color="white">
-      <q-badge rounded color="white" text-color="black">{{
-        websocketStore.messageCount
-      }}</q-badge>
+    <q-btn
+      dense
+      flat
+      icon="ion-notifications"
+      color="white"
+      to="/notifications"
+    >
+      <q-badge rounded color="white" text-color="black">
+        {{ websocketStore.messageCount }}
+        {{ websocketStore.messageCountMaxLimitReached ? "+" : "" }}
+      </q-badge>
     </q-btn>
   </q-bar>
 </template>
@@ -24,8 +37,9 @@ const websocketStore = useWebsocketStore();
 
 // Keep alive function that checks when we received ping from ESP
 function keepAlive() {
-  let secondsSinceLastSeen: number = (new Date().getTime() - websocketStore.lastSeenTimestamp) / 1000;
-  secondsSinceLastSeen =  Math.floor(secondsSinceLastSeen);
+  let secondsSinceLastSeen: number =
+    (new Date().getTime() - websocketStore.lastSeenTimestamp) / 1000;
+  secondsSinceLastSeen = Math.floor(secondsSinceLastSeen);
 
   // If we didn't receive ping from ESP in 5 seconds it is likely offline
   if (secondsSinceLastSeen > 5) {
