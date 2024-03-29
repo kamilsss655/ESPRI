@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useSystemStore } from "./system";
 
 let connection: WebSocket;
 const maxMessagesStored = 100;
@@ -24,9 +25,11 @@ export const useWebsocketStore = defineStore({
       connection.onmessage = (event) => {
         if (this.messageCountMaxLimitReached) {
           this.shiftMessages();
-        } else {
-          this.storeMessage(JSON.parse(event.data));
         }
+        let jsonMessage = JSON.parse(event.data);
+        const systemStore = useSystemStore();
+        systemStore.handle(jsonMessage);
+        this.storeMessage(jsonMessage);
         this.updateLastSeenTimestamp();
       };
 
@@ -49,12 +52,12 @@ export const useWebsocketStore = defineStore({
         connection.close();
       };
     },
-    storeMessage(message : {[index: string]:any}) {
-      message['timestamp'] = Date.now();
+    storeMessage(message: { [index: string]: any }) {
+      message["timestamp"] = Date.now();
       this.$state.messages.push(message);
     },
     shiftMessages() {
-      this.$state.messages.shift;
+      this.$state.messages.shift();
     },
     updateLastSeenTimestamp() {
       this.$state.lastSeenTimestamp = new Date().getTime();

@@ -11,7 +11,24 @@
     />
     <div>{{ settingsStore["wifi.ssid"] }}</div>
     <q-space />
-    <q-btn dense flat icon="ion-flag" v-if="isMorseCodeBeaconEnabled" to="/morse_code"/>
+
+    <q-btn
+      dense
+      flat
+      icon="ion-flag"
+      v-if="isMorseCodeBeaconEnabled"
+      to="/morse_code"
+    />
+    <q-btn dense flat icon="ion-arrow-dropup-circle" v-if="systemStore.audioTransmitting" color="red">
+      <q-tooltip>
+        TRANSMITTING
+      </q-tooltip>
+    </q-btn>
+    <q-btn dense flat icon="ion-headset" v-if="systemStore.audioListening" color="white">
+      <q-tooltip>
+        LISTENING
+      </q-tooltip>
+    </q-btn>
     <q-btn
       dense
       flat
@@ -24,6 +41,7 @@
         {{ websocketStore.messageCountMaxLimitReached ? "+" : "" }}
       </q-badge>
     </q-btn>
+    
   </q-bar>
 </template>
 
@@ -31,9 +49,11 @@
 import { onMounted, computed } from "vue";
 import { useSettingsStore } from "../../stores/settings";
 import { useWebsocketStore } from "../../stores/websocket";
+import { useSystemStore } from "../../stores/system";
 
 const settingsStore = useSettingsStore();
 const websocketStore = useWebsocketStore();
+const systemStore = useSystemStore();
 
 // Keep alive function that checks when we received ping from ESP
 function keepAlive() {
