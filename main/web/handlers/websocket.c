@@ -21,6 +21,7 @@
 
 #include "websocket.h"
 #include "hardware/http_server.h"
+#include "external/printf/printf.h"
 
 static const char *TAG = "WEB/WEBSOCKET";
 
@@ -35,20 +36,29 @@ esp_err_t WEBSOCKET_Handle(httpd_req_t *req)
     return ESP_OK;
 }
 
-void WEBSOCKET_Send(WebsocketMessage_t message)
+void WEBSOCKET_Send(const char *tag, const char *format, ...)
 {
+    va_list va;
+    va_start(va, format);
+    char *buffer = (char *)calloc(1, WEBSOCKET_MESSAGE_MAX_LENGTH);
+
+    vsnprintf(buffer, WEBSOCKET_MESSAGE_MAX_LENGTH, format, va);
+
+    va_end(va);
+
     httpd_ws_frame_t ws_pkt;
 
     // Create JSON
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "tag", message.tag);
-    cJSON_AddStringToObject(root, "message", message.message);
+    cJSON_AddStringToObject(root, "tag", tag);
+    cJSON_AddStringToObject(root, "message", buffer);
 
     // Generate JSON string
     const char *json_str = cJSON_Print(root);
 
     // Free memory, it handles all the objects belonging to root
     cJSON_Delete(root);
+    free(buffer);
 
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     ws_pkt.payload = (uint8_t *)json_str;
@@ -81,14 +91,9 @@ void WEBSOCKET_Send(WebsocketMessage_t message)
 // Ping task
 void WEBSOCKET_Ping(void *pvParameters)
 {
-    WebsocketMessage_t message = {
-        .tag = TAG,
-        .message = "Ping.."};
-
     while (1)
     {
-        ESP_LOGI(TAG, "Ping");
-        WEBSOCKET_Send(message);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        WEBSOCKET_Send(TAG, "Ping");
+        vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }

@@ -92,6 +92,7 @@ typedef struct
 // Global settings
 typedef struct
 {
+    char                             padding[4];
     SETTINGS_WifiConfig_t            wifi;
     SETTINGS_GpioConfig_t            gpio;
     SETTINGS_MorseCodeBeaconConfig_t morse_code_beacon;

@@ -57,15 +57,16 @@ typedef enum
     BIT_DONE_TX = (1 << 2) // used to indicate that audio tx is done
 } AudioEventBit_t;
 
-// typedef enum
-// {
-//     AUDIO_OFF,
-//     AUDIO_LISTENING,
-//     AUDIO_RECEIVING,
-//     AUDIO_TRANSMITTING
-// } AudioState_t;
+typedef enum
+{
+    AUDIO_OFF,
+    AUDIO_LISTENING,
+    AUDIO_RECEIVING,
+    AUDIO_TRANSMITTING,
+    AUDIO_LAST
+} AudioState_t;
 
-// extern AudioState_t gAudioState;
+extern AudioState_t gAudioState;
 
 // I2S PDM TX clock io number (not used, but needs to be assigned)
 #define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_21

@@ -52,12 +52,12 @@ void app_main()
     xTaskCreate(UART_Monitor, "UART_Monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
 
     // Audio listen task
-    // xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
+    xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
 
     // Create Morse code transmit task
     xTaskCreate(MORSE_CODE_Scheduler, "MORSE_CODE_Scheduler", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Create websocket ping task
-    xTaskCreate(WEBSOCKET_Ping, "WEBSOCKET_Ping", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
+    xTaskCreate(WEBSOCKET_Ping, "WEBSOCKET_Ping", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
     
 }

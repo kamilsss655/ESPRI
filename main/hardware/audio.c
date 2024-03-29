@@ -29,6 +29,7 @@
 #include "audio.h"
 #include "settings.h"
 #include "helper/rtos.h"
+#include "web/handlers/websocket.h"
 
 static const char *TAG = "HW/AUDIO";
 
@@ -38,12 +39,21 @@ EventGroupHandle_t audioEventGroup;
 
 adc_unit_t audioAdcUnit;
 
-// AudioState_t gAudioState;
+AudioState_t gAudioState;
+
+SemaphoreHandle_t gAudioStateSemaphore;
 
 // I2S handle to transmit audio
 i2s_chan_handle_t tx_channel;
 // I2S handle to receive/listen audio
 static adc_continuous_handle_t rx_channel;
+
+const char *gAudioStateNames[4] = {
+    "OFF",
+    "LISTENING",
+    "RECEIVING",
+    "TRANSMITTING"
+};
 
 // Interupt callback called when ADC finishes one portion of ADC conversions
 static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
@@ -55,6 +65,22 @@ static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, con
     return (mustYield == pdTRUE);
 }
 
+// Set gAudioState, protect with semaphores to prevent race conditions
+static void AUDIO_SetAudioState(AudioState_t state)
+{
+    if (xSemaphoreTake(gAudioStateSemaphore, 1000 / portTICK_PERIOD_MS) == pdTRUE)
+    {
+        gAudioState = state;
+
+        WEBSOCKET_Send("gAudioState", "%s", gAudioStateNames[state]);
+
+        xSemaphoreGive(gAudioStateSemaphore);
+    }
+    else
+    {
+        ESP_LOGW(TAG, "Could not update gAudioState due to lock.");
+    }
+}
 // Initialize ADC
 static void AUDIO_AdcInit()
 {
@@ -146,6 +172,7 @@ void AUDIO_Listen(void *pvParameters)
             // re-init adc
             AUDIO_AdcInit();
             xEventGroupClearBits(audioEventGroup, BIT_DONE_TX);
+            AUDIO_SetAudioState(AUDIO_LISTENING);
         }
         else // if no bits are set do listen (default state)
         {
@@ -159,18 +186,18 @@ void AUDIO_Listen(void *pvParameters)
                 // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
                 for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
                 {
-                    adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
-                    uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
-                    uint32_t data = AUDIO_ADC_GET_DATA(p);
+                    // adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
+                    // uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
+                    // uint32_t data = AUDIO_ADC_GET_DATA(p);
                     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
-                    if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
-                    {
-                        ESP_LOGI(TAG, "Unit: %s, Channel: %" PRIu32 ", Value: %" PRIx32, unit, chan_num, data);
-                    }
-                    else
-                    {
-                        ESP_LOGW(TAG, "Invalid data [%s_%" PRIu32 "_%" PRIx32 "]", unit, chan_num, data);
-                    }
+                    // if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
+                    // {
+                    //     ESP_LOGI(TAG, "Unit: %s, Channel: %" PRIu32 ", Value: %" PRIx32, unit, chan_num, data);
+                    // }
+                    // else
+                    // {
+                    //     ESP_LOGW(TAG, "Invalid data [%s_%" PRIu32 "_%" PRIx32 "]", unit, chan_num, data);
+                    // }
                 }
                 /**
                  * Because printing is slow, so every time you call `ulTaskNotifyTake`, it will immediately return.
@@ -204,6 +231,8 @@ i2s_chan_handle_t AUDIO_TransmitStart(void)
         audioEventGroupBits = xEventGroupGetBits(audioEventGroup);
         vTaskDelay(10 / portTICK_PERIOD_MS);
     } while ((audioEventGroupBits & BIT_STOPPED_LISTENING) != BIT_STOPPED_LISTENING);
+
+    AUDIO_SetAudioState(AUDIO_TRANSMITTING);
 
     ESP_LOGI(TAG, "Transmit starting");
 
@@ -392,4 +421,7 @@ void AUDIO_Init(void)
 {
     // Initialize event group
     audioEventGroup = xEventGroupCreate();
+
+    gAudioStateSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(gAudioStateSemaphore);
 }

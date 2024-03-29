@@ -20,14 +20,10 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-typedef struct
-{
-    const char *tag;
-    const char *message;
-} WebsocketMessage_t;
+#define WEBSOCKET_MESSAGE_MAX_LENGTH 200
 
 esp_err_t WEBSOCKET_Handle(httpd_req_t *req);
-void WEBSOCKET_Send(WebsocketMessage_t);
+void WEBSOCKET_Send(const char *tag, const char *format, ...);
 void WEBSOCKET_Ping(void *pvParameters);
 
 #endif
