@@ -1,5 +1,6 @@
 <template>
   <q-header flat class="bg-primary text-white">
+    <Bar/>
     <q-toolbar>
       <q-btn dense flat round @click="store.toggleLeftDrawer" icon="ion-menu" />
 
@@ -31,6 +32,7 @@
 </template>
 
 <script setup lang="ts">
+import Bar from "../layout/Bar.vue"
 import { useNavigationStore } from "../../stores/navigation";
 const store = useNavigationStore();
 </script>

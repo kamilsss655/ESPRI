@@ -14,14 +14,20 @@
  *     limitations under the License.
  */
 
-
 #ifndef WEBSOCKET_H
 #define WEBSOCKET_H
 
 #include <esp_err.h>
 #include <esp_http_server.h>
 
+typedef struct
+{
+    const char *tag;
+    const char *message;
+} WebsocketMessage_t;
+
 esp_err_t WEBSOCKET_Handle(httpd_req_t *req);
-void WEBSOCKET_Send();
+void WEBSOCKET_Send(WebsocketMessage_t);
+void WEBSOCKET_Ping(void *pvParameters);
 
 #endif

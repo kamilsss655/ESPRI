@@ -2,11 +2,19 @@
 import Header from "./components/layout/Header.vue";
 import Drawer from "./components/layout/Drawer.vue";
 import Footer from "./components/layout/Footer.vue";
+import { useWebsocketStore } from "./stores/websocket";
 
-import { useQuasar } from 'quasar'
-const $q = useQuasar()
+import { onMounted } from "vue";
+import { useQuasar } from "quasar";
+const $q = useQuasar();
 // set addressbarColor color to $primary color
-$q.addressbarColor.set('')
+$q.addressbarColor.set("");
+
+const websocketStore = useWebsocketStore();
+
+onMounted(() => {
+  websocketStore.connect();
+});
 </script>
 
 <template>
