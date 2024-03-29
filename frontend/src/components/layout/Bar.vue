@@ -26,14 +26,15 @@ const websocketStore = useWebsocketStore();
 function keepAlive() {
   let secondsSinceLastSeen: number = (new Date().getTime() - websocketStore.lastSeenTimestamp) / 1000;
   secondsSinceLastSeen =  Math.floor(secondsSinceLastSeen);
-  console.log(secondsSinceLastSeen);
 
   // If we didn't receive ping from ESP in 5 seconds it is likely offline
   if (secondsSinceLastSeen > 5) {
     websocketStore.$state.connected = false;
+    // discard old connections to avoid multiple websocket connections
     websocketStore.disconnect();
+    // zero the delta between times
     websocketStore.updateLastSeenTimestamp();
-    console.log("reconnecting");
+    // try to connect
     websocketStore.connect();
   }
 }
