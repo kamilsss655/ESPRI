@@ -11,7 +11,7 @@
     />
     <div>{{ settingsStore["wifi.ssid"] }}</div>
     <q-space />
-    <q-btn dense flat icon="ion-flag" v-if="isMorseCodeBeaconEnabled" />
+    <q-btn dense flat icon="ion-flag" v-if="isMorseCodeBeaconEnabled" to="/morse_code"/>
     <q-btn
       dense
       flat
