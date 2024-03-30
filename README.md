@@ -49,6 +49,9 @@ ESP32 S3 Zero (confirmed to work, the board gets quite hot):
 
 ![esp32-s3-zero](https://github.com/kamilsss655/ESPRI/assets/8842065/da0c5b13-dae1-43ec-b053-b3f1df78d63b)
 
+> [!WARNING]
+> With ESP32 S3 Zero some unstable behavior was observed. Likely only the ESP32 will be supported in the future.
+
 ## Analog components
 
 In order to interface radios through Kenwood connector following analog components have to be added to the ESP board:
