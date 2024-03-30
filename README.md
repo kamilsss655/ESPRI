@@ -28,6 +28,10 @@ Morse code beacon config:
 
 ![morse](https://github.com/kamilsss655/ESPRI/assets/8842065/c34a8f98-b447-408b-ab64-517cab04be98)
 
+Notifications (real-time communication via Websocket):
+
+![notifications](https://github.com/kamilsss655/ESPRI/assets/8842065/48d81130-c0fc-4a62-a131-9cc244b71f9f)
+
 
 ESP Log:
 ```
