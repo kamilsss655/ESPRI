@@ -60,7 +60,7 @@ ESP32 S3 Zero (confirmed to work, the board gets quite hot):
 
 In order to interface radios through Kenwood connector following analog components have to be added to the ESP board:
 
-<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/15d2561c-7e28-4bd9-984c-40301740e6e6" width="50%">
+![schematic](https://github.com/kamilsss655/ESPRI/assets/8842065/fe40aa4f-8f9f-41ef-9298-324ccca43c26)
 
 Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cable for Kenwood pinout.
 
