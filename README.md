@@ -64,6 +64,10 @@ In order to interface radios through Kenwood connector following analog componen
 
 Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cable for Kenwood pinout.
 
+Custom PCB:
+
+![espri-pcb-v1](https://github.com/kamilsss655/ESPRI/assets/8842065/05645503-235e-4e15-8238-9999271f34e0)
+
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
 
