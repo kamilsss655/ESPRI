@@ -35,11 +35,11 @@ void WS2812B_Blink(void *pvParameters)
         ESP_LOGI(TAG, "Turning on the LED");
         ws2812_buffer[0] = (CRGB){.r = 0, .g = 0, .b = 10};
         ws28xx_update();
-        vTaskDelay(LED_DELAY_MS / 8 / portTICK_PERIOD_MS);
+        vTaskDelay(LED_ON_MS / portTICK_PERIOD_MS);
 
         ESP_LOGI(TAG, "Turning off the LED");
         ws2812_buffer[0] = (CRGB){.r = 0, .g = 0, .b = 0};
         ws28xx_update();
-        vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
+        vTaskDelay(LED_OFF_MS / portTICK_PERIOD_MS);
     }
 }

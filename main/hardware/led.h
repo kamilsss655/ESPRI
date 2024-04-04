@@ -17,7 +17,8 @@
 #ifndef HARDWARE_LED_H
 #define HARDWARE_LED_H
 
-#define LED_DELAY_MS 2000
+#define LED_ON_MS 10
+#define LED_OFF_MS 2000
 
 void LED_Blink(void *pvParameters);
 

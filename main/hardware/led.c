@@ -28,15 +28,14 @@ void LED_Blink(void *pvParameters)
 {
     gpio_reset_pin(gSettings.gpio.status_led);
     gpio_set_direction(gSettings.gpio.status_led, GPIO_MODE_OUTPUT);
+    ESP_LOGI(TAG, "Initialized at pin: %d", gSettings.gpio.status_led);
 
     while (1)
     {
-        ESP_LOGI(TAG, "Turning on the LED");
-        gpio_set_level(gSettings.gpio.status_led, 1);
-        vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
-
-        ESP_LOGI(TAG, "Turning off the LED");
         gpio_set_level(gSettings.gpio.status_led, 0);
-        vTaskDelay(LED_DELAY_MS / portTICK_PERIOD_MS);
+        vTaskDelay(LED_ON_MS / portTICK_PERIOD_MS);
+
+        gpio_set_level(gSettings.gpio.status_led, 1);
+        vTaskDelay(LED_OFF_MS / portTICK_PERIOD_MS);
     }
 }
