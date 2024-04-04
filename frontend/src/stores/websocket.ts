@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useSystemStore } from "./system";
+import WebsocketMessage from "../types/WebsocketMessage";
 
 let connection: WebSocket;
 const maxMessagesStored = 100;
@@ -9,7 +10,7 @@ export const useWebsocketStore = defineStore({
   state: () => ({
     connected: false,
     lastSeenTimestamp: new Date().getTime(),
-    messages: Array()
+    messages: [] as WebsocketMessage[]
   }),
   actions: {
     disconnect() {
@@ -53,8 +54,13 @@ export const useWebsocketStore = defineStore({
       };
     },
     storeMessage(message: { [index: string]: any }) {
-      message["timestamp"] = Date.now();
-      this.$state.messages.push(message);
+      const websocketMessage = {} as WebsocketMessage;
+
+      websocketMessage.tag = message["tag"];
+      websocketMessage.message = message["message"];
+      websocketMessage.timestamp = Date.now();
+
+      this.$state.messages.push(websocketMessage);
     },
     shiftMessages() {
       this.$state.messages.shift();
