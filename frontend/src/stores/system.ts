@@ -8,7 +8,6 @@ export const useSystemStore = defineStore({
   actions: {
     handle(event: any) {
       if (event.tag == "gAudioState") {
-        console.log(event);
         this.$state.audio = event.message;
       }
     }
