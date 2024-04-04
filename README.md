@@ -28,6 +28,10 @@ Morse code beacon config:
 
 ![morse](https://github.com/kamilsss655/ESPRI/assets/8842065/c34a8f98-b447-408b-ab64-517cab04be98)
 
+Notifications (real-time communication via Websocket):
+
+![notifications](https://github.com/kamilsss655/ESPRI/assets/8842065/48d81130-c0fc-4a62-a131-9cc244b71f9f)
+
 
 ESP Log:
 ```
@@ -37,7 +41,7 @@ I (8732) WEB/API/EVENT_HANDLER: Sent: SMS: API event: 3 received.
 
 ## Dependencies
 Hardware:
-* ESP32 or ESP32 S3
+* ESP32
 
 Some of the recommended boards:
 
@@ -45,17 +49,17 @@ ESP32 Lolin Lite (recommended, confirmed to work, lipo charger built-in):
 
 ![esp32-lolin-lite](https://github.com/kamilsss655/ESPRI/assets/8842065/2e74e723-4347-4efb-b17b-20b4e930523f)
 
-ESP32 S3 Zero (confirmed to work, the board gets quite hot):
-
-![esp32-s3-zero](https://github.com/kamilsss655/ESPRI/assets/8842065/da0c5b13-dae1-43ec-b053-b3f1df78d63b)
-
 ## Analog components
 
 In order to interface radios through Kenwood connector following analog components have to be added to the ESP board:
 
-<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/15d2561c-7e28-4bd9-984c-40301740e6e6" width="50%">
+![schematic](https://github.com/kamilsss655/ESPRI/assets/8842065/fe40aa4f-8f9f-41ef-9298-324ccca43c26)
 
 Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cable for Kenwood pinout.
+
+Custom PCB:
+
+![espri-pcb-v1](https://github.com/kamilsss655/ESPRI/assets/8842065/05645503-235e-4e15-8238-9999271f34e0)
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
