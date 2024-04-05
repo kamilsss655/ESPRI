@@ -69,22 +69,57 @@ menu "Project configuration"
         help
             Audio OUT GPIO Pin to use.
 
-    config MORSE_CODE_BEACON_ENABLED
-        bool "Morse code beacon enabled"
-        default y
+    config BEACON_MODE
+        int "Beacon mode"
+        default 1
         help
-            Morse code beacon enabled.
+            Beacon mode.
 
-    config MORSE_CODE_BEACON_TEXT
-        string "Morse code beacon text"
+    config BEACON_TEXT
+        string "Beacon text"
         default "--- -.- - . ... - - . ... -"
         help
-            Morse code beacon text.
+            Beacon text.
 
-    config MORSE_CODE_BEACON_PERIOD_SECONDS
-        int "Morse code beacon repeat period in seconds"
+    config BEACON_DELAY_SECONDS
+        int "Beacon repeat delay in seconds"
         range 5 65535
         default 25
         help
-            Morse code beacon repeat period in seconds.
+            Beacon repeat delay in seconds
+
+    config MORSE_CODE_BEACON_TONE_FREQ
+        int "Morse code beacon tone frequency"
+        range 500 4000
+        default 800
+        help
+            Morse code beacon tone frequency
+
+    config MORSE_CODE_BEACON_BAUD
+        int "Morse code beacon baud"
+        range 1 200
+        default 5
+        help
+            Morse code beacon baud
+
+    config AFSK_BEACON_BAUD
+        int "AFSK beacon baud"
+        range 50 1200
+        default 1200
+        help
+            AFSK beacon baud.
+
+    config AFSK_ZERO_FREQ
+        int "AFSK zero frequency"
+        range 300 4000
+        default 2200
+        help
+            AFSK zero frequency.
+
+    config AFSK_ONE_FREQ
+        int "AFSK one frequency"
+        range 300 4000
+        default 1200
+        help
+            AFSK one frequency.
 endmenu

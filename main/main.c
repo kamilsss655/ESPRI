@@ -17,7 +17,7 @@
 #include <freertos/FreeRTOS.h>
 
 #include "board.h"
-#include "app/morse_code.h"
+#include "app/beacon.h"
 #include "helper/rtos.h"
 #include "hardware/audio.h"
 #include "hardware/button.h"
@@ -55,7 +55,7 @@ void app_main()
     xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
 
     // Create Morse code transmit task
-    xTaskCreate(MORSE_CODE_Scheduler, "MORSE_CODE_Scheduler", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+    xTaskCreate(BEACON_Scheduler, "BEACON_Scheduler", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Create websocket ping task
     xTaskCreate(WEBSOCKET_Ping, "WEBSOCKET_Ping", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);

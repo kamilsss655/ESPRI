@@ -81,13 +81,37 @@ typedef struct
     SETTINGS_INTEGER_TYPE ptt;
 } SETTINGS_GpioConfig_t;
 
+// Beacon mode
+typedef enum {
+    SETTINGS_BEACON_MODE_OFF,
+    SETTINGS_BEACON_MODE_MORSE_CODE,
+    SETTINGS_BEACON_MODE_AFSK
+} SETTINGS_BeaconMode_t;
+
 // Morse code beacon settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE enabled;
-    SETTINGS_INTEGER_TYPE period_seconds;
-    char                  text[64];
+    SETTINGS_INTEGER_TYPE baud;
+    SETTINGS_INTEGER_TYPE tone_freq;
 } SETTINGS_MorseCodeBeaconConfig_t;
+
+// AFSK beacon settings
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE baud;
+    SETTINGS_INTEGER_TYPE zero_freq;
+    SETTINGS_INTEGER_TYPE one_freq;
+} SETTINGS_AfskBeaconConfig_t;
+
+// Beacon settings
+typedef struct
+{
+    SETTINGS_BeaconMode_t            mode;
+    char                             text[64];
+    SETTINGS_INTEGER_TYPE            delay_seconds;
+    SETTINGS_MorseCodeBeaconConfig_t morse_code;
+    SETTINGS_AfskBeaconConfig_t      afsk;
+} SETTINGS_BeaconConfig_t;
 
 // Global settings
 typedef struct
@@ -95,7 +119,7 @@ typedef struct
     char                             padding[4];
     SETTINGS_WifiConfig_t            wifi;
     SETTINGS_GpioConfig_t            gpio;
-    SETTINGS_MorseCodeBeaconConfig_t morse_code_beacon;
+    SETTINGS_BeaconConfig_t          beacon;
 } SETTINGS_Config_t;
 
 extern SETTINGS_Config_t gSettings;

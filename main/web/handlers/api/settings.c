@@ -28,7 +28,7 @@
 static const char *TAG = "WEB/API/SETTINGS";
 
 // List of supported settings
-ApiSetting_t settings[12] = {
+ApiSetting_t settings[] = {
     {"wifi.mode",                        &gSettings.wifi.mode,                        1},
     {"wifi.ssid",                        &gSettings.wifi.ssid,                        0},
     {"wifi.password",                    &gSettings.wifi.password,                    0},
@@ -38,9 +38,14 @@ ApiSetting_t settings[12] = {
     {"gpio.audio_in",                    &gSettings.gpio.audio_in,                    1},
     {"gpio.audio_out",                   &gSettings.gpio.audio_out,                   1},
     {"gpio.ptt",                         &gSettings.gpio.ptt,                         1},
-    {"morse_code_beacon.enabled",        &gSettings.morse_code_beacon.enabled,        1},
-    {"morse_code_beacon.period_seconds", &gSettings.morse_code_beacon.period_seconds, 1},
-    {"morse_code_beacon.text",           &gSettings.morse_code_beacon.text,           0}
+    {"beacon.mode",                      &gSettings.beacon.mode,                      1},
+    {"beacon.text",                      &gSettings.beacon.text,                      0},
+    {"beacon.delay_seconds",             &gSettings.beacon.delay_seconds,             1},
+    {"beacon.morse_code.baud",           &gSettings.beacon.morse_code.baud,           1},
+    {"beacon.morse_code.tone_freq",      &gSettings.beacon.morse_code.tone_freq,      1},
+    {"beacon.afsk.baud",                 &gSettings.beacon.afsk.baud,                 1},
+    {"beacon.afsk.zero_freq",            &gSettings.beacon.afsk.zero_freq,            1},
+    {"beacon.afsk.one_freq",             &gSettings.beacon.afsk.one_freq,             1}
 };
 
 // Shows current settings

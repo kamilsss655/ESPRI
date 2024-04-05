@@ -43,6 +43,7 @@ adc_unit_t audioAdcUnit;
 AudioState_t gAudioState;
 
 SemaphoreHandle_t gAudioStateSemaphore;
+SemaphoreHandle_t transmitSemaphore;
 
 // I2S handle to transmit audio
 i2s_chan_handle_t tx_channel;
@@ -142,7 +143,7 @@ void AUDIO_Listen(void *pvParameters)
     uint8_t result[AUDIO_INPUT_CHUNK_SIZE] = {0};
     memset(result, 0xcc, AUDIO_INPUT_CHUNK_SIZE);
     audioListenTaskHandle = xTaskGetCurrentTaskHandle();
-    char unit[] = "#unit";
+    // char unit[] = "#unit";
     EventBits_t audioEventGroupBits;
 
     AUDIO_AdcInit();
@@ -222,6 +223,13 @@ i2s_chan_handle_t AUDIO_TransmitStart(void)
 {
     EventBits_t audioEventGroupBits;
 
+    // Check if we can re-schedule new transmission
+    if (xSemaphoreTake(transmitSemaphore, 5000 / portTICK_PERIOD_MS) == pdFALSE)
+    {
+        // Transmission in progress
+        ESP_LOGW(TAG, "Overlapping transmissions. Increase morse_code_beacon.period_seconds setting.");
+    }
+
     // request that we stop listening
     xEventGroupSetBits(audioEventGroup, BIT_STOP_LISTEN);
 
@@ -278,6 +286,9 @@ esp_err_t AUDIO_TransmitStop(void)
     // Indicate that audio transmit is finished
     xEventGroupClearBits(audioEventGroup, BIT_STOPPED_LISTENING);
     xEventGroupSetBits(audioEventGroup, BIT_DONE_TX);
+
+    // Indicate that we are done and can transmit again
+    xSemaphoreGive(transmitSemaphore);
 
     return ESP_OK;
 }
@@ -440,4 +451,7 @@ void AUDIO_Init(void)
 
     gAudioStateSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(gAudioStateSemaphore);
+
+    transmitSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(transmitSemaphore);
 }

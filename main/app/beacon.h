@@ -14,18 +14,9 @@
  *     limitations under the License.
  */
 
-#ifndef APP_MORSE_CODE_H
-#define APP_MORSE_CODE_H
+#ifndef APP_BEACON_H
+#define APP_BEACON_H
 
-#include <stdint.h>
-
-typedef struct
-{
-    const char *input;
-    uint8_t len;
-} MORSE_CODE_TransmitParam_t;
-
-void MORSE_CODE_Transmit(void *pvParameters);
-void MORSE_CODE_Scheduler(void *pvParameters);
+void BEACON_Scheduler(void *pvParameters);
 
 #endif

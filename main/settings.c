@@ -77,11 +77,17 @@ esp_err_t SETTINGS_FactoryReset(void)
     gSettings.gpio.audio_in   = CONFIG_AUDIO_IN_GPIO;
     gSettings.gpio.status_led = CONFIG_STATUS_LED_GPIO;
     gSettings.gpio.ptt        = CONFIG_PTT_GPIO;
+    // Beacon
+    gSettings.beacon.mode = CONFIG_BEACON_MODE;
+    gSettings.beacon.delay_seconds = CONFIG_BEACON_DELAY_SECONDS;
+    strcpy(gSettings.beacon.text, CONFIG_BEACON_TEXT);
     // Morse code beacon
-    gSettings.morse_code_beacon.enabled = CONFIG_MORSE_CODE_BEACON_ENABLED;
-    gSettings.morse_code_beacon.period_seconds = CONFIG_MORSE_CODE_BEACON_PERIOD_SECONDS;
-    strcpy(gSettings.morse_code_beacon.text, CONFIG_MORSE_CODE_BEACON_TEXT);
-
+    gSettings.beacon.morse_code.tone_freq = CONFIG_MORSE_CODE_BEACON_TONE_FREQ;
+    gSettings.beacon.morse_code.baud = CONFIG_MORSE_CODE_BEACON_BAUD;
+    // AFSK beacon
+    gSettings.beacon.afsk.baud = CONFIG_AFSK_BEACON_BAUD;
+    gSettings.beacon.afsk.zero_freq = CONFIG_AFSK_ZERO_FREQ;
+    gSettings.beacon.afsk.one_freq = CONFIG_AFSK_ONE_FREQ;
 
     SETTINGS_Save();
     
