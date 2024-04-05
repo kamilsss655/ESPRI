@@ -28,6 +28,7 @@
 
 #include "audio.h"
 #include "settings.h"
+#include "helper/misc.h"
 #include "helper/rtos.h"
 #include "web/handlers/websocket.h"
 
@@ -52,8 +53,7 @@ const char *gAudioStateNames[4] = {
     "OFF",
     "LISTENING",
     "RECEIVING",
-    "TRANSMITTING"
-};
+    "TRANSMITTING"};
 
 // Interupt callback called when ADC finishes one portion of ADC conversions
 static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
@@ -326,12 +326,26 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
 // Play AFSK coded data
 // TODO: Works but needs refactor to be cleaner
-void AUDIO_PlayAFSK(uint8_t *data, size_t len)
+// AUDIO_PlayAFSK((uint8_t *)msg, strlen(msg), 1200, 2200, 1200);
+void AUDIO_PlayAFSK(uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq)
 {
-    int zero_freq = 800;
-    int one_freq = 1600;
+    uint16_t zero_freq_p;
+    uint16_t one_freq_p;
+    uint16_t baud_p;
 
-    int duration_ms = 30; // 33 baud
+    // Sanitize inputs
+    zero_freq_p = MAX(zero_freq, AUDIO_AFSK_TONE_MIN_FREQ);
+    one_freq_p = MAX(one_freq, AUDIO_AFSK_TONE_MIN_FREQ);
+    baud_p = MAX(baud, AUDIO_AFSK_MIN_BAUD);
+
+    zero_freq_p = MIN(zero_freq, AUDIO_AFSK_TONE_MAX_FREQ);
+    one_freq_p = MIN(one_freq, AUDIO_AFSK_TONE_MAX_FREQ);
+    baud_p = MIN(baud, AUDIO_AFSK_MAX_BAUD);
+
+    int duration_us = (1000001 / baud_p);
+
+    ESP_LOGI(TAG, "AFSK baud: %d, duration_us: %d", baud_p, duration_us);
+    ESP_LOGI(TAG, "AFSK zero_f: %d, one_f: %d", zero_freq_p, one_freq_p);
 
     size_t w_bytes = 0;
 
@@ -343,8 +357,8 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
     int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
     assert(w_buf_zero);
 
-    uint32_t duration_sine_zero = (AUDIO_PDM_TX_FREQ_HZ / (float)zero_freq) + 0.5;
-    uint32_t duration_sine_one = (AUDIO_PDM_TX_FREQ_HZ / (float)one_freq) + 0.5;
+    uint32_t duration_sine_zero = (AUDIO_PDM_TX_FREQ_HZ / (float)zero_freq_p) + 0.5;
+    uint32_t duration_sine_one = (AUDIO_PDM_TX_FREQ_HZ / (float)one_freq_p) + 0.5;
 
     /* Generate the tone buffer */
     // Single sinewave zero
@@ -364,7 +378,9 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len)
 
     // Multiply single sinewave to desired duration
 
-    uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
+    uint32_t duration_i2s = duration_us * AUDIO_PDM_TX_FREQ_HZ / 1000000;
+
+    ESP_LOGI(TAG, "AFSK duration_i2s: %" PRIu32 "", duration_i2s);
 
     // for (int i = 0; i < sizeof(data)/sizeof(uint8_t); i++)
     //     for (int bit = 7; bit >= 0; bit--)

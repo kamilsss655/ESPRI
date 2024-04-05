@@ -48,6 +48,12 @@
 #define AUDIO_ADC_GET_DATA(p_data)        ((p_data)->type2.data)
 #endif
 
+#define AUDIO_AFSK_TONE_MIN_FREQ 300
+#define AUDIO_AFSK_TONE_MAX_FREQ 4000
+#define AUDIO_AFSK_MIN_BAUD 50
+#define AUDIO_AFSK_MAX_BAUD 2400
+
+
 // At the same time we can either listen to audio, or transmit audio.
 // We cannot do both at the same time. Event bits are used to syncronize shared I2S0 resource.
 typedef enum
@@ -81,7 +87,7 @@ i2s_chan_handle_t AUDIO_TransmitStart(void);
 esp_err_t AUDIO_TransmitStop(void);
 void AUDIO_Listen(void *pvParameters);
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
-void AUDIO_PlayAFSK(uint8_t *data, size_t len);
+void AUDIO_PlayAFSK(uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq);
 void AUDIO_Init(void);
 void AUDIO_AdcStop();
 
