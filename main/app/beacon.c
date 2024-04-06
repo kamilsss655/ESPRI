@@ -39,16 +39,24 @@ void BEACON_Scheduler(void *pvParameters)
             break;
 
         case SETTINGS_BEACON_MODE_AFSK:
-            // TODO: To be implemented
+            // Schedule transmit task
+            TRANSMIT_AfskParam_t afsk_param = {
+                .input = gSettings.beacon.text,
+                .len = strlen(gSettings.beacon.text),
+                .baud = gSettings.beacon.afsk.baud,
+                .zero_freq = gSettings.beacon.afsk.zero_freq,
+                .one_freq = gSettings.beacon.afsk.one_freq};
+
+            xTaskCreate(TRANSMIT_Afsk, "TRANSMIT_Afsk", 4096, &afsk_param, RTOS_PRIORITY_MEDIUM, NULL);
             break;
 
         case SETTINGS_BEACON_MODE_MORSE_CODE:
             // Schedule transmit task
-            TRANSMIT_MorseCodeParam_t param = {
+            TRANSMIT_MorseCodeParam_t morse_code_param = {
                 .input = gSettings.beacon.text,
                 .len = strlen(gSettings.beacon.text)};
 
-            xTaskCreate(TRANSMIT_MorseCode, "TRANSMIT_MorseCode", 4096, &param, RTOS_PRIORITY_MEDIUM, NULL);
+            xTaskCreate(TRANSMIT_MorseCode, "TRANSMIT_MorseCode", 4096, &morse_code_param, RTOS_PRIORITY_MEDIUM, NULL);
             break;
         }
 

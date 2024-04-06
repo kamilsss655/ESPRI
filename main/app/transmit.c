@@ -29,6 +29,7 @@ void TRANSMIT_MorseCode(void *pvParameters)
 {
     TRANSMIT_MorseCodeParam_t *param = (TRANSMIT_MorseCodeParam_t *)pvParameters;
 
+    // TODO: This is wrong, it should be delivered as param
     uint16_t dot_duration_ms = 1000 / gSettings.beacon.morse_code.baud;
 
     AUDIO_TransmitStart();
@@ -53,6 +54,32 @@ void TRANSMIT_MorseCode(void *pvParameters)
         }
         vTaskDelay((dot_duration_ms * 3) / portTICK_PERIOD_MS);
     }
+
+    PTT_Release();
+
+    AUDIO_TransmitStop();
+
+    // Delete self
+    vTaskDelete(NULL);
+}
+
+// Task to transmit AFSK message
+void TRANSMIT_Afsk(void *pvParameters)
+{
+    TRANSMIT_AfskParam_t *param = (TRANSMIT_AfskParam_t *)pvParameters;
+
+    AUDIO_TransmitStart();
+
+    PTT_Press();
+
+    ESP_LOGI(TAG, "Transmitting <Afsk>: %s", param->input);
+
+    AUDIO_PlayAFSK(
+        param->input,
+        param->len,
+        param->baud,
+        param->zero_freq,
+        param->one_freq);
 
     PTT_Release();
 

@@ -25,6 +25,16 @@ typedef struct
     uint8_t len;
 } TRANSMIT_MorseCodeParam_t;
 
+typedef struct
+{
+    const char *input;
+    uint8_t len;
+    uint16_t baud;
+    uint16_t zero_freq;
+    uint16_t one_freq;
+} TRANSMIT_AfskParam_t;
+
 void TRANSMIT_MorseCode(void *pvParameters);
+void TRANSMIT_Afsk(void *pvParameters);
 
 #endif
