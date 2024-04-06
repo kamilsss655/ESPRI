@@ -83,7 +83,7 @@ extern AudioState_t gAudioState;
 #define AUDIO_WAVE_AMPLITUDE (1000.0)
 #define CONST_PI (3.1416f)
 
-i2s_chan_handle_t AUDIO_TransmitStart(void);
+esp_err_t AUDIO_TransmitStart(void);
 esp_err_t AUDIO_TransmitStop(void);
 void AUDIO_Listen(void *pvParameters);
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);

@@ -219,15 +219,17 @@ void AUDIO_Listen(void *pvParameters)
 // Start audio transmit
 // This will stop audio listen so we can use I2S0 peripheral for transmit
 // Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
-i2s_chan_handle_t AUDIO_TransmitStart(void)
+esp_err_t AUDIO_TransmitStart(void)
 {
     EventBits_t audioEventGroupBits;
 
     // Check if we can re-schedule new transmission
-    if (xSemaphoreTake(transmitSemaphore, 5000 / portTICK_PERIOD_MS) == pdFALSE)
+    if (xSemaphoreTake(transmitSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
     {
         // Transmission in progress
-        ESP_LOGW(TAG, "Overlapping transmissions. Increase morse_code_beacon.period_seconds setting.");
+        ESP_LOGW(TAG, "Overlapping audio output transmissions detected.");
+        WEBSOCKET_Send(TAG, "Overlapping audio output transmissions detected.");
+        return ESP_FAIL;
     }
 
     // request that we stop listening
@@ -269,7 +271,7 @@ i2s_chan_handle_t AUDIO_TransmitStart(void)
 
     ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
 
-    return tx_channel;
+    return ESP_OK;
 }
 
 // Stop audio transmit

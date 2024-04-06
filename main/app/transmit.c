@@ -32,7 +32,11 @@ void TRANSMIT_MorseCode(void *pvParameters)
     // TODO: This is wrong, it should be delivered as param
     uint16_t dot_duration_ms = 1000 / gSettings.beacon.morse_code.baud;
 
-    AUDIO_TransmitStart();
+    esp_err_t ret = AUDIO_TransmitStart();
+
+    // If we cannot start TX (audio resource likely busy) we abort
+    if (ret == ESP_FAIL)
+        goto Done;
 
     PTT_Press();
 
@@ -59,6 +63,8 @@ void TRANSMIT_MorseCode(void *pvParameters)
 
     AUDIO_TransmitStop();
 
+Done:
+
     // Delete self
     vTaskDelete(NULL);
 }
@@ -68,7 +74,11 @@ void TRANSMIT_Afsk(void *pvParameters)
 {
     TRANSMIT_AfskParam_t *param = (TRANSMIT_AfskParam_t *)pvParameters;
 
-    AUDIO_TransmitStart();
+    esp_err_t ret = AUDIO_TransmitStart();
+
+    // If we cannot start TX (audio resource likely busy) we abort
+    if (ret == ESP_FAIL)
+        goto Done;
 
     PTT_Press();
 
@@ -84,6 +94,8 @@ void TRANSMIT_Afsk(void *pvParameters)
     PTT_Release();
 
     AUDIO_TransmitStop();
+
+Done:
 
     // Delete self
     vTaskDelete(NULL);
