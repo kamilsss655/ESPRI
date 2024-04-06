@@ -16,8 +16,8 @@
       dense
       flat
       icon="ion-flag"
-      v-if="isMorseCodeBeaconEnabled"
-      to="/morse_code"
+      v-if="isBeaconEnabled"
+      to="/beacon"
     />
     <q-btn dense flat icon="ion-arrow-dropup-circle" v-if="systemStore.audioTransmitting" color="red">
       <q-tooltip>
@@ -50,6 +50,7 @@ import { onMounted, computed } from "vue";
 import { useSettingsStore } from "../../stores/settings";
 import { useWebsocketStore } from "../../stores/websocket";
 import { useSystemStore } from "../../stores/system";
+import { BeaconMode } from "../../types/Settings";
 
 const settingsStore = useSettingsStore();
 const websocketStore = useWebsocketStore();
@@ -78,8 +79,8 @@ onMounted(() => {
   setInterval(keepAlive, 1000);
 });
 
-const isMorseCodeBeaconEnabled = computed(() => {
-  return settingsStore["morse_code_beacon.enabled"];
+const isBeaconEnabled = computed(() => {
+  return settingsStore["beacon.mode"] != BeaconMode.OFF;
 });
 
 const isWebsocketConnected = computed(() => {

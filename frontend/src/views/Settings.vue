@@ -104,8 +104,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useSettingsStore } from "../stores/settings";
 import { useQuasar } from "quasar";
+import { useSettingsStore } from "../stores/settings";
+import { WifiMode } from "../types/Settings"
 
 const hideWifiPassword = ref(true);
 const settingsStore = useSettingsStore();
@@ -129,19 +130,19 @@ function submitForm() {
 const wifiModeOptions = ref([
   {
     label: "Off",
-    value: 0,
+    value: WifiMode.OFF,
     description: "Turns WiFi off.",
     icon: "ion-airplane"
   },
   {
     label: "Access point",
-    value: 1,
+    value: WifiMode.AP,
     description: "Acts as a WiFi router.",
     icon: "ion-wifi"
   },
   {
     label: "Station mode",
-    value: 2,
+    value: WifiMode.STA,
     description: "Connect to your network.",
     icon: "ion-wifi"
   }

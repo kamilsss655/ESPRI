@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { Notify } from "quasar";
+import { Settings, WifiMode, BeaconMode } from "../types/Settings";
 import axios from "axios";
 
 const axiosInstance = axios.create();
@@ -7,18 +8,24 @@ axiosInstance.defaults.timeout = 600;
 
 export const useSettingsStore = defineStore({
   id: "settings",
-  state: () => ({
-    "wifi.mode": 1,
+  state: (): Settings => ({
+    "wifi.mode": WifiMode.AP,
     "wifi.ssid": "undefined",
     "wifi.password": "undefined",
     "wifi.channel": 0,
-    "gpio.status_led": 0,
-    "gpio.audio_in": 0,
-    "gpio.audio_out": 0,
-    "gpio.ptt": 0,
-    "morse_code_beacon.text": "undefined",
-    "morse_code_beacon.period_seconds": 0,
-    "morse_code_beacon.enabled": 0
+    "wifi.max_connections": 0,
+    "gpio.status_led": 22,
+    "gpio.audio_in": 35,
+    "gpio.audio_out": 18,
+    "gpio.ptt": 13,
+    "beacon.mode": BeaconMode.MORSE_CODE,
+    "beacon.text": "-..--.",
+    "beacon.delay_seconds": 12,
+    "beacon.morse_code.baud": 5,
+    "beacon.morse_code.tone_freq": 800,
+    "beacon.afsk.baud": 1200,
+    "beacon.afsk.zero_freq": 2200,
+    "beacon.afsk.one_freq": 1200
   }),
   actions: {
     async fetchSettings() {
