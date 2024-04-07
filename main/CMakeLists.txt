@@ -26,6 +26,7 @@ set(srcs
     "web/handlers/api/event.c"
     "web/handlers/api/uvk5_message.c"
     "web/handlers/api/settings.c"
+    "web/handlers/api/system.c"
 )
 
 idf_component_register(SRCS "${srcs}"

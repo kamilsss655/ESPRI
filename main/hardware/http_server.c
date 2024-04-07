@@ -53,6 +53,9 @@ esp_err_t HTTP_SERVER_Init(const char *base_path)
      * target URIs which match the wildcard scheme */
     config.uri_match_fn = httpd_uri_match_wildcard;
 
+    // Increase max amount of URI handlers defined in router.c
+    config.max_uri_handlers = HTTP_SERVER_MAX_URI_HANDLERS;
+
     ESP_LOGI(TAG, "Starting HTTP Server on port: '%d'", config.server_port);
     if (httpd_start(&gHttpServerHandle, &config) != ESP_OK)
     {

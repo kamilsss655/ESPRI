@@ -16,7 +16,6 @@
 
 #include <esp_err.h>
 #include <esp_log.h>
-#include <esp_system.h>
 #include <esp_http_server.h>
 #include <cJSON.h>
 
@@ -142,11 +141,9 @@ esp_err_t API_SETTINGS_Create(httpd_req_t *req)
     // Free memory, it handles both root and attr
     cJSON_Delete(root);
     
-    httpd_json_resp_send(req, HTTPD_200, "Ok. Restarting...");
+    httpd_json_resp_send(req, HTTPD_200, "Settings saved.");
 
     SETTINGS_Save();
-
-    esp_restart();
 
     return ESP_OK;
 }

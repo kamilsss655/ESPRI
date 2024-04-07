@@ -21,6 +21,7 @@
 #include "web/handlers/api/event.h"
 #include "web/handlers/api/uvk5_message.h"
 #include "web/handlers/api/settings.h"
+#include "web/handlers/api/system.h"
 
 /* Initialize rounting for web requests
 
@@ -48,6 +49,28 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .user_ctx = NULL,
         .is_websocket = true};
     httpd_register_uri_handler(server, &websocket_uri);
+
+    // API System
+    httpd_uri_t api_system_reboot_uri = {
+        .uri = "/api/system/reboot",
+        .method = HTTP_PUT,
+        .handler = API_SYSTEM_Reboot,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &api_system_reboot_uri);
+
+    httpd_uri_t api_system_deep_sleep_uri = {
+        .uri = "/api/system/deep_sleep",
+        .method = HTTP_PUT,
+        .handler = API_SYSTEM_DeepSleep,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &api_system_deep_sleep_uri);
+
+    httpd_uri_t api_system_factory_reset_uri = {
+        .uri = "/api/system/factory_reset",
+        .method = HTTP_PUT,
+        .handler = API_SYSTEM_FactoryReset,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &api_system_factory_reset_uri);
 
     // API Settings
     httpd_uri_t api_settings_index_uri = {

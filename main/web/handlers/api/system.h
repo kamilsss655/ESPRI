@@ -14,18 +14,14 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_HTTP_SERVER_H
-#define HARDWARE_HTTP_SERVER_H
+#ifndef API_SYSTEM_H
+#define API_SYSTEM_H
 
-#include <esp_http_server.h>
 #include <esp_err.h>
+#include <esp_http_server.h>
 
-/* Scratch buffer size */
-#define SCRATCH_BUFSIZE 8192
-#define HTTP_SERVER_MAX_URI_HANDLERS 20
-
-extern httpd_handle_t gHttpServerHandle;
-
-esp_err_t HTTP_SERVER_Init(const char *base_path);
+esp_err_t API_SYSTEM_Reboot(httpd_req_t *req);
+esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req);
+esp_err_t API_SYSTEM_FactoryReset(httpd_req_t *req);
 
 #endif
