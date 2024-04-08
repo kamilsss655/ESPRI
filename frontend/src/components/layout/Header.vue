@@ -26,6 +26,7 @@
         <q-btn round dense flat to="/about" icon="ion-information-circle">
           <q-tooltip>About</q-tooltip>
         </q-btn>
+        <ActionsButton />
       </div>
     </q-toolbar>
   </q-header>
@@ -34,5 +35,6 @@
 <script setup lang="ts">
 import Bar from "../layout/Bar.vue"
 import { useNavigationStore } from "../../stores/navigation";
+import ActionsButton from "../system/ActionsButton.vue";
 const store = useNavigationStore();
 </script>
