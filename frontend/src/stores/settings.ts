@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { Notify } from "quasar";
 import { Settings, WifiMode, BeaconMode } from "../types/Settings";
+import { ApiPaths, ApiResponse } from "../types/Api";
 import axios from "axios";
 
 const axiosInstance = axios.create();
@@ -30,7 +31,7 @@ export const useSettingsStore = defineStore({
   actions: {
     async fetchSettings() {
       try {
-        const data = await axiosInstance.get("/api/settings");
+        const data = await axiosInstance.get(ApiPaths.Settings);
         this.$state = data.data;
         Notify.create({
           message: "Fetched up-to date data.",
@@ -47,12 +48,12 @@ export const useSettingsStore = defineStore({
     async updateSettings() {
       const jsonData = JSON.stringify(this.$state);
       axiosInstance
-        .post("/api/settings", jsonData, {
+        .post(ApiPaths.Settings, jsonData, {
           headers: {
             "Content-Type": "application/json"
           }
         })
-        .then((response) => {
+        .then((response : ApiResponse) => {
           console.log(response.data);
           Notify.create({
             message: response.data.response,
