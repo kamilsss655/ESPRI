@@ -23,9 +23,9 @@ export function systemReboot() {
         color: "positive"
       });
     })
-    .catch((_error) => {
+    .catch((error) => {
       Notify.create({
-        message: "Error.",
+        message: error.message,
         color: "negative"
       });
     });
@@ -45,9 +45,31 @@ export function systemDeepSleep() {
         color: "positive"
       });
     })
-    .catch((_error) => {
+    .catch((error) => {
       Notify.create({
-        message: "Error.",
+        message: error.message,
+        color: "negative"
+      });
+    });
+}
+
+// Go into deep sleep
+export function systemFactoryReset() {
+  axiosInstance
+    .put(ApiPaths.FactoryReset, null, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then((response: ApiResponse) => {
+      Notify.create({
+        message: response.data.response,
+        color: "positive"
+      });
+    })
+    .catch((error) => {
+      Notify.create({
+        message: error.message,
         color: "negative"
       });
     });

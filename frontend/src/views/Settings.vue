@@ -7,85 +7,141 @@
         class="q-gutter-md"
       >
         <div class="text-h4 text-center">Settings</div>
-        <q-select
-          filled
-          v-model="settingsStore['wifi.mode']"
-          :options="wifiModeOptions"
-          label="Wifi mode"
-          behavior="dialog"
-          emit-value
-          map-options
-        >
-          <template v-slot:option="scope">
-            <q-item v-bind="scope.itemProps">
-              <q-item-section avatar>
-                <q-icon :name="scope.opt.icon" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ scope.opt.label }}</q-item-label>
-                <q-item-label caption>{{ scope.opt.description }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
 
-        <q-input v-model="settingsStore['wifi.ssid']" label="SSID" filled />
+        <div>
+          <q-splitter v-model="splitterModel" style="height: 50vh">
+            <template v-slot:before>
+              <q-tabs v-model="currentTab" vertical>
+                <q-tab name="wifi" icon="ion-wifi" label="Wifi" />
+                <q-tab name="gpio" icon="ion-swap" label="GPIO" />
+                <q-tab name="advanced" icon="ion-build" label="Advanced" />
+              </q-tabs>
+            </template>
 
-        <q-input
-          v-model="settingsStore['wifi.password']"
-          label="Password"
-          filled
-          :type="hideWifiPassword ? 'password' : 'text'"
-        >
-          <template v-slot:append>
-            <q-icon
-              :name="hideWifiPassword ? 'ion-eye' : 'ion-eye-off'"
-              class="cursor-pointer"
-              @click="hideWifiPassword = !hideWifiPassword"
-            />
-          </template>
-        </q-input>
+            <template v-slot:after>
+              <q-tab-panels
+                v-model="currentTab"
+                animated
+                swipeable
+                vertical
+                transition-prev="jump-up"
+                transition-next="jump-up"
+              >
+                <q-tab-panel name="wifi">
+                  <div class="q-mb-md">
+                    <q-select
+                      filled
+                      v-model="settingsStore['wifi.mode']"
+                      :options="wifiModeOptions"
+                      label="Wifi mode"
+                      behavior="dialog"
+                      emit-value
+                      map-options
+                    >
+                      <template v-slot:option="scope">
+                        <q-item v-bind="scope.itemProps">
+                          <q-item-section avatar>
+                            <q-icon :name="scope.opt.icon" />
+                          </q-item-section>
+                          <q-item-section>
+                            <q-item-label>{{ scope.opt.label }}</q-item-label>
+                            <q-item-label caption>{{
+                              scope.opt.description
+                            }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                  </div>
+                  <div class="q-mb-md">
+                    <q-input
+                      v-model="settingsStore['wifi.ssid']"
+                      label="SSID"
+                      filled
+                    />
+                  </div>
+                  <div class="q-mb-md">
+                    <q-input
+                      v-model="settingsStore['wifi.password']"
+                      label="Password"
+                      filled
+                      :type="hideWifiPassword ? 'password' : 'text'"
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          :name="hideWifiPassword ? 'ion-eye' : 'ion-eye-off'"
+                          class="cursor-pointer"
+                          @click="hideWifiPassword = !hideWifiPassword"
+                        />
+                      </template>
+                    </q-input>
+                  </div>
+                  <div class="q-mb-md">
+                    <q-select
+                      v-model="settingsStore['wifi.channel']"
+                      :options="wifiChannelOptions"
+                      v-if="settingsStore['wifi.mode'] == 1"
+                      behavior="dialog"
+                      label="Wifi channel"
+                      filled
+                    />
+                  </div>
+                </q-tab-panel>
 
-        <q-select
-          v-model="settingsStore['wifi.channel']"
-          :options="wifiChannelOptions"
-          v-if="settingsStore['wifi.mode'] == 1"
-          behavior="dialog"
-          label="Wifi channel"
-          filled
-        />
-
-        <q-select
-          v-model.number="settingsStore['gpio.status_led']"
-          :options="gpioOptions"
-          behavior="dialog"
-          label="Status LED"
-          filled
-        />
-
-        <q-select
-        v-model.number="settingsStore['gpio.audio_in']"
-          :options="gpioOptions"
-          behavior="dialog"
-          label="Audio IN"
-          filled
-        />
-
-        <q-select
-        v-model.number="settingsStore['gpio.audio_out']"
-          :options="gpioOptions"
-          behavior="dialog"
-          label="Audio OUT"
-          filled
-        />
-
-        <q-select
-        v-model.number="settingsStore['gpio.ptt']"
-          :options="gpioOptions"
-          behavior="dialog"
-          label="PTT Pin"
-          filled
-        />
+                <q-tab-panel name="gpio">
+                  <div class="q-mb-md">
+                    <q-select
+                      v-model.number="settingsStore['gpio.status_led']"
+                      :options="gpioOptions"
+                      behavior="dialog"
+                      label="Status LED"
+                      filled
+                    />
+                  </div>
+                  <div class="q-mb-md">
+                    <q-select
+                      v-model.number="settingsStore['gpio.audio_in']"
+                      :options="gpioOptions"
+                      behavior="dialog"
+                      label="Audio IN"
+                      filled
+                    />
+                  </div>
+                  <div class="q-mb-md">
+                    <q-select
+                      v-model.number="settingsStore['gpio.audio_out']"
+                      :options="gpioOptions"
+                      behavior="dialog"
+                      label="Audio OUT"
+                      filled
+                    />
+                  </div>
+                  <div class="q-mb-md">
+                    <q-select
+                      v-model.number="settingsStore['gpio.ptt']"
+                      :options="gpioOptions"
+                      behavior="dialog"
+                      label="PTT Pin"
+                      filled
+                    />
+                  </div>
+                </q-tab-panel>
+                <q-tab-panel name="advanced">
+                  <div class="q-mb-md text-center">
+                    <q-btn
+                      icon="ion-build"
+                      label="Factory reset"
+                      @click="factoryReset()"
+                      type="reset"
+                      class="q-ml-sm"
+                      outline
+                    />
+                  </div>
+                </q-tab-panel>
+              </q-tab-panels>
+            </template>
+          </q-splitter>
+        </div>
 
         <div class="text-right q-pa-md">
           <q-btn icon="ion-play" label="Submit" type="submit" color="primary" />
@@ -106,11 +162,14 @@
 import { ref, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import { useSettingsStore } from "../stores/settings";
-import { WifiMode } from "../types/Settings"
+import { WifiMode } from "../types/Settings";
+import { systemFactoryReset } from "../helpers/System";
 
 const hideWifiPassword = ref(true);
 const settingsStore = useSettingsStore();
 const $q = useQuasar();
+const currentTab = ref("wifi");
+const splitterModel = ref(20);
 
 onMounted(() => {
   settingsStore.fetchSettings();
@@ -124,6 +183,18 @@ function submitForm() {
     persistent: true
   }).onOk(() => {
     settingsStore.updateSettings(true);
+  });
+}
+
+function factoryReset() {
+  $q.dialog({
+    title: "Confirm",
+    message:
+      "Are you sure? This will completely reset device settings to the factory defaults.",
+    cancel: true,
+    persistent: true
+  }).onOk(() => {
+    systemFactoryReset();
   });
 }
 
