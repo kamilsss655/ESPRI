@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { Notify } from "quasar";
+import { useSystemStore } from "./system";
 import { Settings, WifiMode, BeaconMode } from "../types/Settings";
 import { ApiPaths, ApiResponse } from "../types/Api";
 import axios from "axios";
@@ -45,7 +46,7 @@ export const useSettingsStore = defineStore({
         console.log(error);
       }
     },
-    async updateSettings() {
+    async updateSettings(askForReboot?: Boolean) {
       const jsonData = JSON.stringify(this.$state);
       axiosInstance
         .post(ApiPaths.Settings, jsonData, {
@@ -53,8 +54,14 @@ export const useSettingsStore = defineStore({
             "Content-Type": "application/json"
           }
         })
-        .then((response : ApiResponse) => {
+        .then((response: ApiResponse) => {
           console.log(response.data);
+
+          if (askForReboot) {
+            const systemStore = useSystemStore();
+            systemStore.setRebootRequiredFlag();
+          }
+
           Notify.create({
             message: response.data.response,
             color: "positive"

@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 export const useSystemStore = defineStore({
   id: "system",
   state: () => ({
+    rebootRequired: false as Boolean,
     audio: "LISTENING"
   }),
   actions: {
@@ -10,6 +11,12 @@ export const useSystemStore = defineStore({
       if (event.tag == "gAudioState") {
         this.$state.audio = event.message;
       }
+    },
+    resetRebootRequiredFlag() {
+      this.$state.rebootRequired = false;
+    },
+    setRebootRequiredFlag() {
+      this.$state.rebootRequired = true;
     }
   },
   getters: {

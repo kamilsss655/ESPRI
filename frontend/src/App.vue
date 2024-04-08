@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Banner from "./components/layout/Banner.vue";
 import Header from "./components/layout/Header.vue";
 import Drawer from "./components/layout/Drawer.vue";
 import Footer from "./components/layout/Footer.vue";
@@ -22,6 +23,7 @@ onMounted(() => {
     <Header />
     <Drawer />
     <q-page-container>
+      <Banner />
       <div class="row">
         <div class="col-0 col-sm-3"></div>
         <div class="col-12 col-sm-6">

@@ -119,11 +119,11 @@ onMounted(() => {
 function submitForm() {
   $q.dialog({
     title: "Confirm",
-    message: "This will restart the device.",
+    message: "Are you sure?",
     cancel: true,
     persistent: true
   }).onOk(() => {
-    settingsStore.updateSettings();
+    settingsStore.updateSettings(true);
   });
 }
 

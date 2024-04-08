@@ -175,37 +175,20 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useSettingsStore } from "../stores/settings";
-import { useQuasar } from "quasar";
 import { BeaconMode } from "../types/Settings";
 
 const settingsStore = useSettingsStore();
-const $q = useQuasar();
 
 onMounted(() => {
   settingsStore.fetchSettings();
 });
 
 const beaconMode = computed(() => {
-  return settingsStore['beacon.mode'];
+  return settingsStore["beacon.mode"];
 });
 
-// const isMorseMode = computed(() => {
-//   return settingsStore['beacon.mode'] != BeaconMode.MORSE_CODE;
-// });
-
-// const isMorseMode = computed(() => {
-//   return settingsStore['beacon.mode'] != BeaconMode.MORSE_CODE;
-// });
-
 function submitForm() {
-  $q.dialog({
-    title: "Confirm",
-    message: "This will restart the device.",
-    cancel: true,
-    persistent: true
-  }).onOk(() => {
-    settingsStore.updateSettings();
-  });
+  settingsStore.updateSettings();
 }
 
 const beaconModeOptions = ref([
