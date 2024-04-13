@@ -20,6 +20,7 @@ export const useSettingsStore = defineStore({
     "gpio.audio_in": 35,
     "gpio.audio_out": 18,
     "gpio.ptt": 13,
+    "audio.out.volume": 100,
     "beacon.mode": BeaconMode.MORSE_CODE,
     "beacon.text": "-..--.",
     "beacon.delay_seconds": 12,

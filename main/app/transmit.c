@@ -85,7 +85,7 @@ void TRANSMIT_Afsk(void *pvParameters)
     ESP_LOGI(TAG, "Transmitting <Afsk>: %s", param->input);
 
     AUDIO_PlayAFSK(
-        param->input,
+        (const uint8_t *)param->input,
         param->len,
         param->baud,
         param->zero_freq,

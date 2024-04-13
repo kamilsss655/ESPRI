@@ -79,15 +79,15 @@ extern AudioState_t gAudioState;
 #define AUDIO_BUFFER_SIZE 2048
 // 16kHz seems fine with filtering
 #define AUDIO_PDM_TX_FREQ_HZ 32000
-// 1~32767, affects the volume
-#define AUDIO_WAVE_AMPLITUDE (1000.0)
+// volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
+#define AUDIO_VOLUME_MULTIPLIER (320.0)
 #define CONST_PI (3.1416f)
 
 esp_err_t AUDIO_TransmitStart(void);
 esp_err_t AUDIO_TransmitStop(void);
 void AUDIO_Listen(void *pvParameters);
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
-void AUDIO_PlayAFSK(uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq);
+void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq);
 void AUDIO_Init(void);
 void AUDIO_AdcStop();
 

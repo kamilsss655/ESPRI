@@ -14,6 +14,7 @@
               <q-tabs v-model="currentTab" vertical>
                 <q-tab name="wifi" icon="ion-wifi" label="Wifi" />
                 <q-tab name="gpio" icon="ion-swap" label="GPIO" />
+                <q-tab name="audio" icon="ion-musical-notes" label="Audio" />
                 <q-tab name="advanced" icon="ion-build" label="Advanced" />
               </q-tabs>
             </template>
@@ -125,6 +126,24 @@
                       filled
                     />
                   </div>
+                </q-tab-panel>
+                <q-tab-panel name="audio">
+                  <q-field
+                    filled
+                    label="Volume out"
+                    :hint="'Define output volume'"
+                    clearable
+                  >
+                    <template v-slot:control>
+                      <q-slider
+                        v-model="settingsStore['audio.out.volume']"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        label
+                      />
+                    </template>
+                  </q-field>
                 </q-tab-panel>
                 <q-tab-panel name="advanced">
                   <div class="q-mb-md text-center">

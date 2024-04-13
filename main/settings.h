@@ -103,6 +103,18 @@ typedef struct
     SETTINGS_INTEGER_TYPE one_freq;
 } SETTINGS_AfskBeaconConfig_t;
 
+// Audio out settings
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE volume; // 0-100
+} SETTINGS_AudioOutConfig_t;
+
+// Audio settings
+typedef struct
+{
+    SETTINGS_AudioOutConfig_t out;
+} SETTINGS_AudioConfig_t;
+
 // Beacon settings
 typedef struct
 {
@@ -119,6 +131,7 @@ typedef struct
     char                             padding[4];
     SETTINGS_WifiConfig_t            wifi;
     SETTINGS_GpioConfig_t            gpio;
+    SETTINGS_AudioConfig_t           audio;
     SETTINGS_BeaconConfig_t          beacon;
 } SETTINGS_Config_t;
 

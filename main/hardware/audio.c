@@ -311,7 +311,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     for (int i = 0; i < duration_sine; i++)
     {
-        w_buf[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine)) * AUDIO_WAVE_AMPLITUDE);
+        w_buf[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
     }
 
     // Multiply single sinewave to desired duration
@@ -340,7 +340,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 // Play AFSK coded data
 // TODO: Works but needs refactor to be cleaner
 // AUDIO_PlayAFSK((uint8_t *)msg, strlen(msg), 1200, 2200, 1200);
-void AUDIO_PlayAFSK(uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq)
+void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq)
 {
     uint16_t zero_freq_p;
     uint16_t one_freq_p;
@@ -378,7 +378,7 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq
 
     for (int i = 0; i < duration_sine_zero; i++)
     {
-        w_buf_zero[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_zero)) * AUDIO_WAVE_AMPLITUDE);
+        w_buf_zero[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_zero)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
     }
 
     /* Generate the tone buffer */
@@ -386,7 +386,7 @@ void AUDIO_PlayAFSK(uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq
 
     for (int i = 0; i < duration_sine_one; i++)
     {
-        w_buf_one[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_one)) * AUDIO_WAVE_AMPLITUDE);
+        w_buf_one[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_one)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
     }
 
     // Multiply single sinewave to desired duration

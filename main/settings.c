@@ -77,6 +77,8 @@ esp_err_t SETTINGS_FactoryReset(void)
     gSettings.gpio.audio_in   = CONFIG_AUDIO_IN_GPIO;
     gSettings.gpio.status_led = CONFIG_STATUS_LED_GPIO;
     gSettings.gpio.ptt        = CONFIG_PTT_GPIO;
+    // Audio
+    gSettings.audio.out.volume = CONFIG_AUDIO_OUT_VOLUME;
     // Beacon
     gSettings.beacon.mode = CONFIG_BEACON_MODE;
     gSettings.beacon.delay_seconds = CONFIG_BEACON_DELAY_SECONDS;

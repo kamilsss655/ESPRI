@@ -47,6 +47,13 @@ menu "Project configuration"
         help
             Audio OUT GPIO Pin to use.
 
+    config AUDIO_OUT_VOLUME
+        int "Audio OUT volume"
+        range 0 100
+        default 5
+        help
+            Audio OUT volume.
+
     config PTT_GPIO
         int "PTT GPIO Pin"
         range 1 30
