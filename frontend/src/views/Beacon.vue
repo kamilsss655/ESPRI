@@ -12,7 +12,7 @@
           filled
           v-model="settingsStore['beacon.mode']"
           :options="beaconModeOptions"
-          label="Wifi mode"
+          label="Beacon mode"
           behavior="dialog"
           emit-value
           map-options
@@ -33,7 +33,7 @@
         <q-input
           v-model="settingsStore['beacon.text']"
           label="Text"
-          hint="Define what Morse code message will be transmitted"
+          hint="Define what message will be transmitted"
           v-if="beaconMode != BeaconMode.OFF"
           filled
         />
