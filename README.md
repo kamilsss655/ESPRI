@@ -78,6 +78,10 @@ Once flashed:
 - Connect to WIFI access point `NOKIA-3K9N4H1` with password `mypassword`
 - Go to `http://192.168.4.1`
 
+## Manual
+
+Please take a look at the [Wiki](https://github.com/kamilsss655/ESPRI/wiki) section for instructions, tips and more.
+
 ## Development
 
 ### With Visual Studio Code and ESP-IDF extension (recommended)
