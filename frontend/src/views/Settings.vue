@@ -29,7 +29,7 @@
                 transition-next="jump-up"
               >
                 <q-tab-panel name="wifi">
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-select
                       filled
                       v-model="settingsStore['wifi.mode']"
@@ -54,14 +54,14 @@
                       </template>
                     </q-select>
                   </div>
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-input
                       v-model="settingsStore['wifi.ssid']"
                       label="SSID"
                       filled
                     />
                   </div>
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-input
                       v-model="settingsStore['wifi.password']"
                       label="Password"
@@ -77,7 +77,7 @@
                       </template>
                     </q-input>
                   </div>
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-select
                       v-model="settingsStore['wifi.channel']"
                       :options="wifiChannelOptions"
@@ -90,7 +90,7 @@
                 </q-tab-panel>
 
                 <q-tab-panel name="gpio">
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-select
                       v-model.number="settingsStore['gpio.status_led']"
                       :options="gpioOptions"
@@ -99,7 +99,7 @@
                       filled
                     />
                   </div>
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-select
                       v-model.number="settingsStore['gpio.audio_in']"
                       :options="gpioOptions"
@@ -108,7 +108,7 @@
                       filled
                     />
                   </div>
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-select
                       v-model.number="settingsStore['gpio.audio_out']"
                       :options="gpioOptions"
@@ -117,7 +117,7 @@
                       filled
                     />
                   </div>
-                  <div class="q-mb-md">
+                  <div class="q-pa-md">
                     <q-select
                       v-model.number="settingsStore['gpio.ptt']"
                       :options="gpioOptions"
@@ -128,25 +128,30 @@
                   </div>
                 </q-tab-panel>
                 <q-tab-panel name="audio">
-                  <q-field
-                    filled
-                    label="Volume out"
-                    :hint="'Define output volume'"
-                    clearable
-                  >
-                    <template v-slot:control>
-                      <q-slider
-                        v-model="settingsStore['audio.out.volume']"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        label
-                      />
-                    </template>
-                  </q-field>
+                  <div class="q-pa-md">
+                    <q-list>
+                      <q-item>
+                        <q-item-section :side="true">
+                          <q-icon name="ion-volume-high" />
+                        </q-item-section>
+                        <q-item-section :side="true">Out</q-item-section>
+                        <q-item-section>
+                          <q-slider
+                            v-model="settingsStore['audio.out.volume']"
+                            :label-value="
+                              settingsStore['audio.out.volume'] + '%'
+                            "
+                            :min="0"
+                            :max="100"
+                            label
+                          />
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </div>
                 </q-tab-panel>
                 <q-tab-panel name="advanced">
-                  <div class="q-mb-md text-center">
+                  <div class="q-pa-md text-center">
                     <q-btn
                       icon="ion-build"
                       label="Factory reset"
