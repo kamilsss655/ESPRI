@@ -50,10 +50,10 @@ void SYSTEM_InfoInit(void)
 
     // SPIFFS /storage size
     size_t storage_total_bytes;
-    size_t storage_free_bytes;
+    size_t storage_used_bytes;
 
-    esp_spiffs_info(NULL, &storage_total_bytes, &storage_free_bytes);
+    esp_spiffs_info(NULL, &storage_total_bytes, &storage_used_bytes);
 
     gSystemInfo.storage.total = (SYSTEM_INTEGER_TYPE)storage_total_bytes;
-    gSystemInfo.storage.free = (SYSTEM_INTEGER_TYPE)storage_free_bytes;
+    gSystemInfo.storage.used = (SYSTEM_INTEGER_TYPE)storage_used_bytes;
 }

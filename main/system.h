@@ -34,7 +34,7 @@ typedef struct
 typedef struct
 {
     SYSTEM_INTEGER_TYPE total;
-    SYSTEM_INTEGER_TYPE free;
+    SYSTEM_INTEGER_TYPE used;
 } SYSTEM_StorageInfo_t;
 
 // Global system info

@@ -34,7 +34,7 @@ SystemInfo_t systemInfo[] = {
     {"heap.total",    &gSystemInfo.heap.total,    1},
     {"heap.free",     &gSystemInfo.heap.free,     1},
     {"heap.min_free", &gSystemInfo.heap.min_free, 1},
-    {"storage.free",  &gSystemInfo.storage.free,  1},
+    {"storage.used",  &gSystemInfo.storage.used,  1},
     {"storage.total", &gSystemInfo.storage.total, 1},
     {"uptime",        &gSystemInfo.uptime,        1},
     {"version",       &gSystemInfo.version,       0}
