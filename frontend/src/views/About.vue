@@ -6,20 +6,19 @@
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        As such following features would be enabled:
-
-    time domain scrambling (based on the HEKTOR 128 project)
-    custom digital modes (modulated and demodulated by the ESP chip)
-        more advanced messaging
-            could be served as webpage by the esp chip itself
-            or have a mobile client as Meshtastic
-    wireless UART connection to the radio
-    turning any radio into IoT device via JSON API served from the ESP
-
-The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
-
-The audio input and output (for the means of time domain scrambling) would be through the Kenwood connector.
+        "heap.total": {{ systemStore.info["heap.total"] }}
+        "heap.free": {{ systemStore.info['heap.free'] }}
+        "heap.min_free": {{ systemStore.info['heap.min_free'] }}
+        "storage.free": {{ systemStore.info['storage.free'] }}
+        "storage.total": {{ systemStore.info['heap.total'] }}
+        "uptime": {{ systemStore.info['uptime'] }}
+        "version": {{ systemStore.info['version'] }}
       </q-card-section>
     </q-card>
   </div>
 </template>
+<script setup lang="ts">
+import { useSystemStore } from "../stores/system";
+
+const systemStore = useSystemStore();
+</script>
