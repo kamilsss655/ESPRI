@@ -4,6 +4,18 @@
       <q-card-section>
         <div class="text-h4 text-center">About</div>
       </q-card-section>
+      <q-separator />
+      <q-card-section>
+        <q-item tag="label" v-ripple>
+          <q-item-section>
+            <q-item-label>Live update</q-item-label>
+          </q-item-section>
+          <q-item-section avatar>
+            <q-toggle v-model="systemStore.systemInfoLiveUpdate" />
+          </q-item-section>
+        </q-item>
+      </q-card-section>
+      <q-separator />
       <q-card-section class="q-pt-none">
         <q-list>
           <q-item>
@@ -56,7 +68,7 @@
             <q-item-section>
               <q-linear-progress
                 size="25px"
-                :value="heapMemoryUsageProgress"
+                :value="storageUsageProgress"
                 color="accent"
               >
                 <div class="absolute-full flex flex-center">
@@ -93,10 +105,43 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useSystemStore } from "../stores/system";
 
 const systemStore = useSystemStore();
+
+let liveFetchSystemInfo: number;
+
+function enableLiveUpdate() {
+  liveFetchSystemInfo = setInterval(systemStore.fetchSystemInfo, 1000);
+}
+
+function disableLiveUpdate() {
+  clearInterval(liveFetchSystemInfo);
+}
+
+onMounted(() => {
+  if (systemStore.systemInfoLiveUpdate) {
+    enableLiveUpdate();
+  } else {
+    systemStore.fetchSystemInfo();
+  }
+});
+
+onUnmounted(() => {
+  disableLiveUpdate();
+});
+
+watch(
+  () => systemStore.systemInfoLiveUpdate,
+  (newValue, _oldValue) => {
+    if (newValue === true) {
+      enableLiveUpdate();
+    } else {
+      disableLiveUpdate();
+    }
+  }
+);
 
 const heapMemoryUsageProgress: any = computed(() => {
   return systemStore.heapUsagePercent / 100;
@@ -130,6 +175,10 @@ const heapMaxMemoryUsageLabel = computed(() => {
     systemStore.heapMaxUsagePercent.toFixed(2) +
     "%"
   );
+});
+
+const storageUsageProgress: any = computed(() => {
+  return systemStore.storageUsagePercent / 100;
 });
 
 const storageUsageLabel = computed(() => {

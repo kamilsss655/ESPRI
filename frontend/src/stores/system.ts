@@ -1,5 +1,11 @@
 import { defineStore } from "pinia";
+import { ApiPaths } from "../types/Api";
+import { Notify } from "quasar";
 import { SystemInfo } from "../types/System";
+import axios from "axios";
+
+const axiosInstance = axios.create();
+axiosInstance.defaults.timeout = 600;
 
 export const useSystemStore = defineStore({
   id: "system",
@@ -14,7 +20,8 @@ export const useSystemStore = defineStore({
       "storage.total": 2462561,
       uptime: 168,
       version: "v0.5.6-4"
-    } as SystemInfo
+    } as SystemInfo,
+    systemInfoLiveUpdate: false as Boolean
   }),
   actions: {
     handle(event: any) {
@@ -27,6 +34,18 @@ export const useSystemStore = defineStore({
     },
     setRebootRequiredFlag() {
       this.$state.rebootRequired = true;
+    },
+    async fetchSystemInfo() {
+      try {
+        const data = await axiosInstance.get(ApiPaths.SystemInfo);
+        this.$state.info = data.data;
+      } catch (error) {
+        Notify.create({
+          message: "Failed to fetch up-to date data.",
+          color: "negative"
+        });
+        console.log(error);
+      }
     }
   },
   getters: {

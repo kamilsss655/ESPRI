@@ -1,5 +1,6 @@
 export enum ApiPaths {
   Settings = "/api/settings",
+  SystemInfo = "/api/system/info",
   Event = "/api/event",
   Reboot = "/api/system/reboot",
   DeepSleep = "/api/system/deep_sleep",

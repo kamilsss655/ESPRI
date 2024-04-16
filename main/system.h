@@ -20,7 +20,7 @@
 #include <stdint.h>
 
 #define SYSTEM_INTEGER_TYPE uint32_t
-#define SYSTEM_TOTAL_HEAP_SIZE 160000
+#define SYSTEM_TOTAL_HEAP_SIZE 320000
 
 // Heap info
 typedef struct
