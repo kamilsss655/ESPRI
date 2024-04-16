@@ -32,6 +32,10 @@ Notifications (real-time communication via Websocket):
 
 ![notifications](https://github.com/kamilsss655/ESPRI/assets/8842065/48d81130-c0fc-4a62-a131-9cc244b71f9f)
 
+System info:
+
+![system_info](https://github.com/kamilsss655/ESPRI/assets/8842065/6999a073-0c38-4b09-bf68-9d1092bb59dd)
+
 
 ESP Log:
 ```
