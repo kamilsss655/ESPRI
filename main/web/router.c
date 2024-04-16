@@ -51,6 +51,13 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     httpd_register_uri_handler(server, &websocket_uri);
 
     // API System
+    httpd_uri_t api_system_info_uri = {
+        .uri = "/api/system",
+        .method = HTTP_GET,
+        .handler = API_SYSTEM_Info,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &api_system_info_uri);
+
     httpd_uri_t api_system_reboot_uri = {
         .uri = "/api/system/reboot",
         .method = HTTP_PUT,

@@ -14,22 +14,22 @@
  *     limitations under the License.
  */
 
-#ifndef API_SYSTEM_H
-#define API_SYSTEM_H
+#include <freertos/FreeRTOS.h>
 
-#include <esp_err.h>
-#include <esp_http_server.h>
+#include "system.h"
 
-typedef struct
+SYSTEM_Info_t gSystemInfo;
+
+// Refresh gSystemInfo task
+void SYSTEM_InfoRefresh(void)
 {
-    char  *attr;     // json attr representing given value 
-    void  *val;      // pointer to value
-    bool  isInteger; // determines whether value is integer or string
-} SystemInfo_t;
+    while (1)
+    {
 
-esp_err_t API_SYSTEM_Info(httpd_req_t *req);
-esp_err_t API_SYSTEM_Reboot(httpd_req_t *req);
-esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req);
-esp_err_t API_SYSTEM_FactoryReset(httpd_req_t *req);
+        gSystemInfo.heap.free = esp_get_free_heap_size();
+        gSystemInfo.heap.min_free = esp_get_minimum_free_heap_size();
+        gSystemInfo.heap.total = SYSTEM_TOTAL_HEAP_SIZE;
 
-#endif
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}

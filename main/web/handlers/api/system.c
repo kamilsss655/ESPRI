@@ -19,12 +19,52 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 #include <esp_log.h>
+#include <cJSON.h>
 
+#include "system.h"
+#include "../../main/system.h"
 #include "../../main/settings.h"
 #include "helper/api.h"
 #include "helper/rtos.h"
 
 static const char *TAG = "WEB/API/SYSTEM";
+
+// List of supported settings
+SystemInfo_t systemInfo[] = {
+    {"heap.total", &gSystemInfo.heap.total, 1},
+    {"heap.free", &gSystemInfo.heap.free, 1},
+    {"heap.min_free", &gSystemInfo.heap.min_free, 1}};
+
+// System info
+esp_err_t API_SYSTEM_Info(httpd_req_t *req)
+{
+
+    cJSON *root = cJSON_CreateObject();
+
+    // Add all system info to JSON object
+    for (u_int8_t i = 0; i < (sizeof(systemInfo) / sizeof(systemInfo[0])); i++)
+    {
+        if (systemInfo[i].isInteger)
+        {
+            cJSON_AddNumberToObject(root, systemInfo[i].attr, *(SYSTEM_INTEGER_TYPE *)systemInfo[i].val);
+        }
+        else
+        {
+            cJSON_AddStringToObject(root, systemInfo[i].attr, (const char *)systemInfo[i].val);
+        }
+    }
+
+    httpd_resp_set_type(req, "application/json");
+    const char *json_str = cJSON_Print(root);
+
+    // Send response
+    httpd_resp_sendstr(req, json_str);
+
+    // Free memory, it handles all the objects belonging to root
+    cJSON_Delete(root);
+
+    return ESP_OK;
+}
 
 // Reboot the device
 esp_err_t API_SYSTEM_Reboot(httpd_req_t *req)
@@ -41,7 +81,7 @@ esp_err_t API_SYSTEM_Reboot(httpd_req_t *req)
     return ESP_OK;
 }
 
-// Reboot the device
+// Deep sleep
 esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req)
 {
     ESP_LOGW(TAG, "Going into deep sleep..");
@@ -56,7 +96,7 @@ esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req)
     return ESP_OK;
 }
 
-// Reboot the device
+// Perform factory reset
 esp_err_t API_SYSTEM_FactoryReset(httpd_req_t *req)
 {
     ESP_LOGW(TAG, "Performing factory reset..");

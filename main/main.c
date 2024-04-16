@@ -17,6 +17,7 @@
 #include <freertos/FreeRTOS.h>
 
 #include "board.h"
+#include "system.h"
 #include "app/beacon.h"
 #include "helper/rtos.h"
 #include "hardware/audio.h"
@@ -59,5 +60,8 @@ void app_main()
 
     // Create websocket ping task
     xTaskCreate(WEBSOCKET_Ping, "WEBSOCKET_Ping", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
+    
+    // Create system info refresh task
+    xTaskCreate(SYSTEM_InfoRefresh, "SYSTEM_InfoRefresh", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
     
 }

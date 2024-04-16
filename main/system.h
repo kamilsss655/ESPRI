@@ -14,22 +14,32 @@
  *     limitations under the License.
  */
 
-#ifndef API_SYSTEM_H
-#define API_SYSTEM_H
+#ifndef SYSTEM_H
+#define SYSTEM_H
 
-#include <esp_err.h>
-#include <esp_http_server.h>
+#include <stdint.h>
 
+#define SYSTEM_INTEGER_TYPE uint32_t
+#define SYSTEM_TOTAL_HEAP_SIZE 160000
+
+// Heap info
 typedef struct
 {
-    char  *attr;     // json attr representing given value 
-    void  *val;      // pointer to value
-    bool  isInteger; // determines whether value is integer or string
-} SystemInfo_t;
+    SYSTEM_INTEGER_TYPE total;
+    SYSTEM_INTEGER_TYPE free;
+    SYSTEM_INTEGER_TYPE min_free;
+} SYSTEM_HeapInfo_t;
 
-esp_err_t API_SYSTEM_Info(httpd_req_t *req);
-esp_err_t API_SYSTEM_Reboot(httpd_req_t *req);
-esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req);
-esp_err_t API_SYSTEM_FactoryReset(httpd_req_t *req);
+// Global system info
+typedef struct
+{
+    SYSTEM_HeapInfo_t heap;
+    SYSTEM_INTEGER_TYPE uptime; // in seconds
+    const char *verion;
+} SYSTEM_Info_t;
+
+extern SYSTEM_Info_t gSystemInfo;
+
+void SYSTEM_InfoRefresh(void);
 
 #endif

@@ -3,6 +3,7 @@ set(srcs
     "board.c"
     "main.c"
     "settings.c"
+    "system.c"
     "app/button.c"
     "app/beacon.c"
     "app/transmit.c"
