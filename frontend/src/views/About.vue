@@ -25,14 +25,15 @@
             <q-item-section>Memory</q-item-section>
             <q-item-section>
               <q-linear-progress
+                rounded
                 size="25px"
                 :value="heapMemoryUsageProgress"
-                color="accent"
+                color="secondary"
               >
                 <div class="absolute-full flex flex-center">
                   <q-badge
                     color="white"
-                    text-color="accent"
+                    text-color="black"
                     :label="heapMemoryUsageLabel"
                   />
                 </div>
@@ -46,14 +47,15 @@
             <q-item-section>Max memory usage</q-item-section>
             <q-item-section>
               <q-linear-progress
+                rounded
                 size="25px"
                 :value="heapMaxMemoryUsageProgress"
-                color="accent"
+                color="secondary"
               >
                 <div class="absolute-full flex flex-center">
                   <q-badge
                     color="white"
-                    text-color="accent"
+                    text-color="black"
                     :label="heapMaxMemoryUsageLabel"
                   />
                 </div>
@@ -67,14 +69,15 @@
             <q-item-section>Storage</q-item-section>
             <q-item-section>
               <q-linear-progress
+                rounded
                 size="25px"
                 :value="storageUsageProgress"
-                color="accent"
+                color="secondary"
               >
                 <div class="absolute-full flex flex-center">
                   <q-badge
                     color="white"
-                    text-color="accent"
+                    text-color="black"
                     :label="storageUsageLabel"
                   />
                 </div>
