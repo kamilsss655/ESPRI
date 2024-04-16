@@ -14,6 +14,7 @@
  *     limitations under the License.
  */
 
+#include "board.h"
 #include "hardware/audio.h"
 #include "hardware/http_server.h"
 #include "hardware/uart.h"
@@ -22,26 +23,35 @@
 #include "hardware/spiffs.h"
 #include "hardware/ptt.h"
 #include "settings.h"
-#include "board.h"
+#include "system.h"
 
 // Initialize the board
 void BOARD_Init(void)
 {
     // Initialize SPIFFS
     ESP_ERROR_CHECK(SPIFFS_Init(STORAGE_BASE_PATH));
+
     // Load SETTINGS
     ESP_ERROR_CHECK(SETTINGS_Load());
 
     // Initialize UART
     UART_Init();
+
     // Initialize WIFI
     WIFI_Init();
+
     // Initialize HTTP Server
     ESP_ERROR_CHECK(HTTP_SERVER_Init(STORAGE_BASE_PATH));
-    // Initialize button
 
+    // Initialize BUTTON
     BUTTON_Init();
+
     // Initialize PTT
     ESP_ERROR_CHECK(PTT_Init());
+
+    // Initialize AUDIO
     AUDIO_Init();
+
+    // Initialize SYSTEM info data
+    SYSTEM_InfoInit();
 }

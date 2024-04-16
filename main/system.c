@@ -15,6 +15,8 @@
  */
 
 #include <freertos/FreeRTOS.h>
+#include <esp_app_desc.h>
+#include <string.h>
 
 #include "system.h"
 
@@ -28,8 +30,19 @@ void SYSTEM_InfoRefresh(void)
 
         gSystemInfo.heap.free = esp_get_free_heap_size();
         gSystemInfo.heap.min_free = esp_get_minimum_free_heap_size();
-        gSystemInfo.heap.total = SYSTEM_TOTAL_HEAP_SIZE;
+        gSystemInfo.uptime += 1;
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
+}
+
+void SYSTEM_InfoInit(void)
+{
+    // Version
+    const esp_app_desc_t *app_desc;
+    app_desc = esp_app_get_description();
+    memcpy(gSystemInfo.version, app_desc->version, sizeof(gSystemInfo.version));
+
+    // Total heap memory size
+    gSystemInfo.heap.total = SYSTEM_TOTAL_HEAP_SIZE;
 }

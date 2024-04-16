@@ -33,7 +33,9 @@ static const char *TAG = "WEB/API/SYSTEM";
 SystemInfo_t systemInfo[] = {
     {"heap.total", &gSystemInfo.heap.total, 1},
     {"heap.free", &gSystemInfo.heap.free, 1},
-    {"heap.min_free", &gSystemInfo.heap.min_free, 1}};
+    {"heap.min_free", &gSystemInfo.heap.min_free, 1},
+    {"uptime", &gSystemInfo.uptime, 1},
+    {"version", &gSystemInfo.version, 0}};
 
 // System info
 esp_err_t API_SYSTEM_Info(httpd_req_t *req)

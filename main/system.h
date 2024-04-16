@@ -35,11 +35,12 @@ typedef struct
 {
     SYSTEM_HeapInfo_t heap;
     SYSTEM_INTEGER_TYPE uptime; // in seconds
-    const char *verion;
+    char version[32];
 } SYSTEM_Info_t;
 
 extern SYSTEM_Info_t gSystemInfo;
 
 void SYSTEM_InfoRefresh(void);
+void SYSTEM_InfoInit(void);
 
 #endif
