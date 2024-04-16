@@ -30,17 +30,25 @@ typedef struct
     SYSTEM_INTEGER_TYPE min_free;
 } SYSTEM_HeapInfo_t;
 
+// Storage info
+typedef struct
+{
+    SYSTEM_INTEGER_TYPE total;
+    SYSTEM_INTEGER_TYPE free;
+} SYSTEM_StorageInfo_t;
+
 // Global system info
 typedef struct
 {
-    SYSTEM_HeapInfo_t heap;
-    SYSTEM_INTEGER_TYPE uptime; // in seconds
-    char version[32];
+    SYSTEM_HeapInfo_t    heap;    // memory
+    SYSTEM_StorageInfo_t storage; // flash storage for SPIFFS
+    SYSTEM_INTEGER_TYPE  uptime;  // in seconds
+    char                 version[32];
 } SYSTEM_Info_t;
 
 extern SYSTEM_Info_t gSystemInfo;
 
-void SYSTEM_InfoRefresh(void);
+void SYSTEM_InfoRefresh(void *pvParameters);
 void SYSTEM_InfoInit(void);
 
 #endif

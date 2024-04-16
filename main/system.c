@@ -16,14 +16,16 @@
 
 #include <freertos/FreeRTOS.h>
 #include <esp_app_desc.h>
+#include <esp_spiffs.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "system.h"
 
 SYSTEM_Info_t gSystemInfo;
 
 // Refresh gSystemInfo task
-void SYSTEM_InfoRefresh(void)
+void SYSTEM_InfoRefresh(void *pvParameters)
 {
     while (1)
     {
@@ -45,4 +47,13 @@ void SYSTEM_InfoInit(void)
 
     // Total heap memory size
     gSystemInfo.heap.total = SYSTEM_TOTAL_HEAP_SIZE;
+
+    // SPIFFS /storage size
+    size_t storage_total_bytes;
+    size_t storage_free_bytes;
+
+    esp_spiffs_info(NULL, &storage_total_bytes, &storage_free_bytes);
+
+    gSystemInfo.storage.total = (SYSTEM_INTEGER_TYPE)storage_total_bytes;
+    gSystemInfo.storage.free = (SYSTEM_INTEGER_TYPE)storage_free_bytes;
 }

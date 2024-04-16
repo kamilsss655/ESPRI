@@ -52,7 +52,7 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
 
     // API System
     httpd_uri_t api_system_info_uri = {
-        .uri = "/api/system",
+        .uri = "/api/system/info",
         .method = HTTP_GET,
         .handler = API_SYSTEM_Info,
         .user_ctx = server_data};
