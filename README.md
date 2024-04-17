@@ -63,10 +63,11 @@ Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cab
 
 Custom PCB:
 
-![espri-pcb-v1](https://github.com/kamilsss655/ESPRI/assets/8842065/05645503-235e-4e15-8238-9999271f34e0)
+![board-corrected](https://github.com/kamilsss655/ESPRI/assets/8842065/32c43c5b-be82-4ada-a294-97c2a03125fd)
+
 
 > [!WARNING]
-> Please take extra care in regards to the polarity of tantalum capacitors. The above picture is wrong, as it seems only C1 has correct polarity. Reference schematic when in doubt. 
+> Please take extra care in regards to the polarity of tantalum capacitors. Markings in red are the correct polarity. More info [here](https://github.com/kamilsss655/ESPRI/issues/23)
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
