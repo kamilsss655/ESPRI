@@ -65,6 +65,9 @@ Custom PCB:
 
 ![espri-pcb-v1](https://github.com/kamilsss655/ESPRI/assets/8842065/05645503-235e-4e15-8238-9999271f34e0)
 
+> [!WARNING]
+> Please take extra care in regards to the polarity of tantalum capacitors. The above picture is wrong, as it seems only C1 has correct polarity. Reference schematic when in doubt. 
+
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
 
