@@ -1,0 +1,12 @@
+Comment,Designator,Footprint,LCSC
+100uF,"C1,C4,C6,C7",Capacitor_Tantalum_SMD:CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,C11375
+100nF,C2,Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,C28233
+0.1uF,"C3,C5",Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,C28233
+5nF,"C8,C9",Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,C1744
+LED,D1,Diode_SMD:D_0805_2012Metric_Pad1.15x1.40mm_HandSolder,C2297
+2N7002,Q1,Package_TO_SOT_SMD:SOT-23,C8545
+330,R1,Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,C17617
+1k,R2,Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,C17513
+10k,R6,Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,C17414
+100k,"R7,R14",Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,C149504
+HT7333,U2,Package_TO_SOT_SMD:SOT-89-3,C5451671
