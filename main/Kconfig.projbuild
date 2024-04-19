@@ -71,7 +71,7 @@ menu "Project configuration"
     config STATUS_LED_GPIO
         int "Status LED GPIO Pin"
         range 1 30
-        default 22 if IDF_TARGET="esp32"
+        default 19 if IDF_TARGET="esp32"
         default 21 if IDF_TARGET="esp32s3"
         help
             Audio OUT GPIO Pin to use.

@@ -32,10 +32,10 @@ void LED_Blink(void *pvParameters)
 
     while (1)
     {
-        gpio_set_level(gSettings.gpio.status_led, 0);
+        gpio_set_level(gSettings.gpio.status_led, 1);
         vTaskDelay(LED_ON_MS / portTICK_PERIOD_MS);
 
-        gpio_set_level(gSettings.gpio.status_led, 1);
+        gpio_set_level(gSettings.gpio.status_led, 0);
         vTaskDelay(LED_OFF_MS / portTICK_PERIOD_MS);
     }
 }
