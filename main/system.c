@@ -14,13 +14,15 @@
  *     limitations under the License.
  */
 
+#include <string.h>
+#include <stdint.h>
 #include <freertos/FreeRTOS.h>
 #include <esp_app_desc.h>
 #include <esp_spiffs.h>
-#include <string.h>
-#include <stdint.h>
+#include <driver/gpio.h>
 
 #include "system.h"
+#include "settings.h"
 
 SYSTEM_Info_t gSystemInfo;
 
@@ -56,4 +58,16 @@ void SYSTEM_InfoInit(void)
 
     gSystemInfo.storage.total = (SYSTEM_INTEGER_TYPE)storage_total_bytes;
     gSystemInfo.storage.used = (SYSTEM_INTEGER_TYPE)storage_used_bytes;
+}
+
+// Gracefully take care of all the running tasks, gpio, spiffs before shutdown
+void SYSTEM_Shutdown(void)
+{
+    // Reset GPIO pins to prevent LED or PTT on during deep sleep etc.
+    gpio_reset_pin(gSettings.gpio.status_led);
+    gpio_reset_pin(gSettings.gpio.audio_out);
+    gpio_reset_pin(gSettings.gpio.ptt);
+
+    // Unregister SPIFFS
+    esp_vfs_spiffs_unregister(NULL);
 }

@@ -81,6 +81,8 @@ esp_err_t API_SYSTEM_Reboot(httpd_req_t *req)
     // Delay to respond to client gracefully
     vTaskDelay(10);
 
+    SYSTEM_Shutdown();
+
     esp_restart();
 
     return ESP_OK;
@@ -96,6 +98,8 @@ esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req)
     // Delay to respond to client gracefully
     vTaskDelay(10);
 
+    SYSTEM_Shutdown();
+
     esp_deep_sleep_start();
 
     return ESP_OK;
@@ -110,6 +114,8 @@ esp_err_t API_SYSTEM_FactoryReset(httpd_req_t *req)
 
     // Delay to respond to client gracefully
     vTaskDelay(10);
+
+    SYSTEM_Shutdown();
 
     SETTINGS_FactoryReset();
 
