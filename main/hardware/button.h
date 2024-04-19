@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 
-#define BUTTON_GPIO_PIN 36
+#define BUTTON_GPIO_PIN 15
 
 // Button event type
 typedef enum

@@ -136,7 +136,10 @@ void WIFI_InitSta(void)
 
     // This is workaround to prevent constant interrupt flood on button pin GPIO 36
     // if the the GPIO 36 is not used this can be removed
-    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+    // ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+
+    // Set wifi power save mode
+    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_MIN_MODEM));
 }
 
 // Initialize in Access Point mode
