@@ -143,7 +143,6 @@ void AUDIO_Listen(void *pvParameters)
     uint8_t result[AUDIO_INPUT_CHUNK_SIZE] = {0};
     memset(result, 0xcc, AUDIO_INPUT_CHUNK_SIZE);
     audioListenTaskHandle = xTaskGetCurrentTaskHandle();
-    // char unit[] = "#unit";
     EventBits_t audioEventGroupBits;
 
     AUDIO_AdcInit();
@@ -187,18 +186,18 @@ void AUDIO_Listen(void *pvParameters)
                 // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
                 for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
                 {
-                    // adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
-                    // uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
-                    // uint32_t data = AUDIO_ADC_GET_DATA(p);
+                    adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
+                    uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
+                    uint16_t data = AUDIO_ADC_GET_DATA(p);
                     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
-                    // if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
-                    // {
-                    //     ESP_LOGI(TAG, "Unit: %s, Channel: %" PRIu32 ", Value: %" PRIx32, unit, chan_num, data);
-                    // }
-                    // else
-                    // {
-                    //     ESP_LOGW(TAG, "Invalid data [%s_%" PRIu32 "_%" PRIx32 "]", unit, chan_num, data);
-                    // }
+                    if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
+                    {
+                        ESP_LOGI(TAG, "Channel: %" PRIu32 ", Value: %u", chan_num, data);
+                    }
+                    else
+                    {
+                        ESP_LOGW(TAG, "Invalid data");
+                    }
                 }
                 /**
                  * Because printing is slow, so every time you call `ulTaskNotifyTake`, it will immediately return.
