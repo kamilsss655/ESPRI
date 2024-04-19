@@ -20,11 +20,12 @@
 
 #include "led.h"
 #include "settings.h"
+#include "audio.h"
 
 static const char *TAG = "HW/LED";
 
-// Blinks LED
-void LED_Blink(void *pvParameters)
+// Show status of the device via LED
+void LED_Status(void *pvParameters)
 {
     gpio_reset_pin(gSettings.gpio.status_led);
     gpio_set_direction(gSettings.gpio.status_led, GPIO_MODE_OUTPUT);
@@ -32,10 +33,23 @@ void LED_Blink(void *pvParameters)
 
     while (1)
     {
-        gpio_set_level(gSettings.gpio.status_led, 1);
-        vTaskDelay(LED_ON_MS / portTICK_PERIOD_MS);
 
-        gpio_set_level(gSettings.gpio.status_led, 0);
-        vTaskDelay(LED_OFF_MS / portTICK_PERIOD_MS);
+        // TODO: This uses to big delays, so the LED doesn't immediatelly reflect state changes
+        switch (gAudioState)
+        {
+        case AUDIO_TRANSMITTING:
+            gpio_set_level(gSettings.gpio.status_led, 1);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+            break;
+        default:
+            gpio_set_level(gSettings.gpio.status_led, 0);
+            vTaskDelay(LED_OFF_MS / portTICK_PERIOD_MS);
+
+            gpio_set_level(gSettings.gpio.status_led, 1);
+            vTaskDelay(LED_ON_MS / portTICK_PERIOD_MS);
+
+            break;
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }

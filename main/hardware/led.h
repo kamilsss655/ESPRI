@@ -20,6 +20,6 @@
 #define LED_ON_MS 10
 #define LED_OFF_MS 2000
 
-void LED_Blink(void *pvParameters);
+void LED_Status(void *pvParameters);
 
 #endif

@@ -35,15 +35,12 @@ void app_main()
     // Init board
     BOARD_Init();
 
-    // TODO: Reorganize code as such:
-    // Init tasks
-    // TASKS_init();
 
-    // Create LED_Blink task
+    // Create LED_Status task
     #ifdef CONFIG_STATUS_LED_WS2812B
         xTaskCreate(WS2812B_Blink, "WS2812B_Blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
     #else
-        xTaskCreate(LED_Blink, "LED_Blink", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
+        xTaskCreate(LED_Status, "LED_Status", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
     #endif
 
     // Create button monitor task
