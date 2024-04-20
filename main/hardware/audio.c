@@ -184,21 +184,21 @@ void AUDIO_Listen(void *pvParameters)
             if (ret == ESP_OK)
             {
                 // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
-                for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
-                {
-                    adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
-                    uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
-                    uint16_t data = AUDIO_ADC_GET_DATA(p);
-                    /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
-                    if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
-                    {
-                        ESP_LOGI(TAG, "Channel: %" PRIu32 ", Value: %u", chan_num, data);
-                    }
-                    else
-                    {
-                        ESP_LOGW(TAG, "Invalid data");
-                    }
-                }
+                // for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
+                // {
+                //     adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
+                //     uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
+                //     uint16_t data = AUDIO_ADC_GET_DATA(p);
+                //     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
+                //     if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
+                //     {
+                //         ESP_LOGI(TAG, "Channel: %" PRIu32 ", Value: %u", chan_num, data);
+                //     }
+                //     else
+                //     {
+                //         ESP_LOGW(TAG, "Invalid data");
+                //     }
+                // }
                 /**
                  * Because printing is slow, so every time you call `ulTaskNotifyTake`, it will immediately return.
                  * To avoid a task watchdog timeout, add a delay here. When you replace the way you process the data,
