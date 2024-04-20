@@ -16,6 +16,8 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <esp_system.h>
+#include <esp_sleep.h>
 #include <freertos/FreeRTOS.h>
 #include <esp_app_desc.h>
 #include <esp_spiffs.h>
@@ -61,7 +63,7 @@ void SYSTEM_InfoInit(void)
 }
 
 // Gracefully take care of all the running tasks, gpio, spiffs before shutdown
-void SYSTEM_Shutdown(void)
+void before_shutdown(void)
 {
     // Reset GPIO pins to prevent LED or PTT on during deep sleep etc.
     gpio_reset_pin(gSettings.gpio.status_led);
@@ -70,4 +72,22 @@ void SYSTEM_Shutdown(void)
 
     // Unregister SPIFFS
     esp_vfs_spiffs_unregister(NULL);
+}
+
+void SYSTEM_DeepSleep(void)
+{
+    before_shutdown();
+
+    // Enable wake-up with touch button
+    ESP_ERROR_CHECK(esp_sleep_enable_touchpad_wakeup());
+    ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON));
+
+    esp_deep_sleep_start();
+}
+
+void SYSTEM_Reboot(void)
+{
+    before_shutdown();
+
+    esp_restart();
 }

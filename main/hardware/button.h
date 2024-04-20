@@ -19,8 +19,6 @@
 
 #include <stdint.h>
 
-#define BUTTON_GPIO_PIN 15
-
 // Button event type
 typedef enum
 {
@@ -28,11 +26,17 @@ typedef enum
     BUTTON_HELD
 } BUTTON_EventType_t;
 
+// Button event type
+typedef enum
+{
+    BUTTON_1 = 1
+} BUTTON_Number_t;
+
 // Button event
 typedef struct
 {
-    BUTTON_EventType_t type;
-    uint8_t            pin_number;
+    BUTTON_EventType_t type;   // button event type
+    BUTTON_Number_t    number; // button number
 } BUTTON_Event_t;
 
 void BUTTON_Monitor(void *pvParameters);

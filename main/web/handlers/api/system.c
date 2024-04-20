@@ -14,8 +14,6 @@
  *     limitations under the License.
  */
 
-#include <esp_system.h>
-#include <esp_sleep.h>
 #include <esp_err.h>
 #include <esp_http_server.h>
 #include <esp_log.h>
@@ -81,9 +79,7 @@ esp_err_t API_SYSTEM_Reboot(httpd_req_t *req)
     // Delay to respond to client gracefully
     vTaskDelay(10);
 
-    SYSTEM_Shutdown();
-
-    esp_restart();
+    SYSTEM_Reboot();
 
     return ESP_OK;
 }
@@ -93,18 +89,12 @@ esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req)
 {
     ESP_LOGW(TAG, "Going into deep sleep..");
 
-    httpd_json_resp_send(req, HTTPD_200, "OK. Going into deep sleep.");
+    httpd_json_resp_send(req, HTTPD_200, "OK, going into deep sleep. Touch button 1 to wake up.");
 
     // Delay to respond to client gracefully
     vTaskDelay(10);
 
-    SYSTEM_Shutdown();
-
-    // Enable wake-up with touch button
-    ESP_ERROR_CHECK(esp_sleep_enable_touchpad_wakeup());
-    ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON));
-
-    esp_deep_sleep_start();
+    SYSTEM_DeepSleep();
 
     return ESP_OK;
 }
@@ -118,8 +108,6 @@ esp_err_t API_SYSTEM_FactoryReset(httpd_req_t *req)
 
     // Delay to respond to client gracefully
     vTaskDelay(10);
-
-    SYSTEM_Shutdown();
 
     SETTINGS_FactoryReset();
 

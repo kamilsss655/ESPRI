@@ -14,15 +14,22 @@
  *     limitations under the License.
  */
 
+#include <freertos/FreeRTOS.h>
+
 #include "button.h"
-#include "app/uvk5.h"
+#include "system.h"
 #include "external/printf/printf.h"
 
 // Button event handler
 void BUTTON_Handle(BUTTON_Event_t buttonEvent)
 {
     // Send SMS
-    char String[30];
-    snprintf(String, sizeof(String), "Button %d pressed on ESP.", buttonEvent.pin_number);
-    UVK5_SendMessage(String, sizeof(String));
+    // char String[30];
+    // snprintf(String, sizeof(String), "Button %d pressed on ESP.", buttonEvent.number);
+    // UVK5_SendMessage(String, sizeof(String));
+
+    // Slight delay to prevent boot-loop issue
+    vTaskDelay(10);
+    // Go into deep sleep
+    SYSTEM_DeepSleep();
 }

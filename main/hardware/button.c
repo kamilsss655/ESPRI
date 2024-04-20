@@ -25,13 +25,17 @@ static const char *TAG = "HW/BUTTON";
 QueueHandle_t buttonQueue;
 
 // button pressed interrupt function
-// static void IRAM_ATTR BUTTON_isr_handler(void *arg)
-// {
-//     // pin number of the button pressed
-//     uint8_t pinNumber = (int)arg;
-//     // send button pressed event to the button queue
-//     xQueueSendFromISR(buttonQueue, &pinNumber, NULL);
-// }
+static void IRAM_ATTR BUTTON_isr_handler(void *arg)
+{
+    // get active touch pads mask
+    uint32_t pad_status = touch_pad_get_status();
+    // clear active pads
+    touch_pad_clear_status();
+    // send to queue
+    xQueueSendFromISR(buttonQueue, &pad_status, NULL);
+    // disable interrupts to debounce
+    touch_pad_intr_disable();
+}
 
 static void calibrate_touch_pad(touch_pad_t pad)
 {
@@ -49,8 +53,8 @@ static void calibrate_touch_pad(touch_pad_t pad)
     if (avg < min_reading)
     {
         ESP_LOGE(TAG, "Touch pad #%d average reading is too low: %d (expecting at least %d). "
-               "Not using for deep sleep wakeup.",
-               pad, avg, min_reading);
+                      "Not using for deep sleep wakeup.",
+                 pad, avg, min_reading);
         touch_pad_config(pad, 0);
     }
     else
@@ -69,7 +73,7 @@ void BUTTON_InitTouchPad(touch_pad_t num)
     ESP_ERROR_CHECK(touch_pad_init());
     // If use touch pad wake up, should set touch sensor FSM mode at 'TOUCH_FSM_MODE_TIMER'.
     touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
-  
+
     touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
     // init RTC IO and mode for touch pad.
     touch_pad_config(num, 400);
@@ -80,9 +84,13 @@ void BUTTON_InitTouchPad(touch_pad_t num)
 // initialize button handling
 void BUTTON_Init()
 {
-    buttonQueue = xQueueCreate(10, sizeof(uint8_t));
-
+    buttonQueue = xQueueCreate(10, sizeof(uint32_t));
+    // init and configure touch button 1
     BUTTON_InitTouchPad(CONFIG_TOUCH_BUTTON_1_NUMBER);
+    // register interrupt callback function
+    touch_pad_isr_register(BUTTON_isr_handler, NULL);
+    // enable interrupts
+    touch_pad_intr_enable();
 }
 
 // monitor button pressed queue
@@ -90,16 +98,29 @@ void BUTTON_Monitor(void *pvParameters)
 {
     BUTTON_Event_t buttonEvent;
 
+    uint32_t buttonMask;
+
     while (true)
     {
-        if (xQueueReceive(buttonQueue, &buttonEvent.pin_number, portMAX_DELAY))
+        if (xQueueReceive(buttonQueue, &buttonMask, portMAX_DELAY))
         {
             buttonEvent.type = BUTTON_PRESSED;
 
-            ESP_LOGI(TAG, "GPIO %d was pressed.", buttonEvent.pin_number);
+            if (buttonMask & (1 << CONFIG_TOUCH_BUTTON_1_NUMBER))
+            {
+                buttonEvent.number = BUTTON_1;
+            }
+
+            ESP_LOGI(TAG, "Button %d was pressed.", buttonEvent.number);
 
             // Handle button event
             BUTTON_Handle(buttonEvent);
+
+            // Wait before enabling interrupts to debounce the key
+            vTaskDelay(2000 / portTICK_PERIOD_MS);
+
+            touch_pad_intr_clear();
+            touch_pad_intr_enable();
         }
     }
 }

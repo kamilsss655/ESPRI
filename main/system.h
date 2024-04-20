@@ -50,6 +50,7 @@ extern SYSTEM_Info_t gSystemInfo;
 
 void SYSTEM_InfoRefresh(void *pvParameters);
 void SYSTEM_InfoInit(void);
-void SYSTEM_Shutdown(void);
+void SYSTEM_DeepSleep(void);
+void SYSTEM_Reboot(void);
 
 #endif

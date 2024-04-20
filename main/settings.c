@@ -15,10 +15,11 @@
  */
 
 #include <string.h>
-#include <esp_system.h>
 #include <esp_log.h>
 #include <esp_spiffs.h>
+
 #include "settings.h"
+#include "system.h"
 
 static const char *TAG = "SETTINGS";
 
@@ -93,7 +94,7 @@ esp_err_t SETTINGS_FactoryReset(void)
 
     SETTINGS_Save();
     
-    esp_restart();
+    SYSTEM_Reboot();
     
     return ESP_OK;
 }
