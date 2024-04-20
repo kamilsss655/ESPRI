@@ -16,6 +16,7 @@
 
 #include "board.h"
 #include "hardware/audio.h"
+#include "hardware/led.h"
 #include "hardware/http_server.h"
 #include "hardware/uart.h"
 #include "hardware/wifi.h"
@@ -33,6 +34,9 @@ void BOARD_Init(void)
 
     // Load SETTINGS
     ESP_ERROR_CHECK(SETTINGS_Load());
+
+    // Init LED
+    LED_Init();
 
     // Initialize UART
     UART_Init();

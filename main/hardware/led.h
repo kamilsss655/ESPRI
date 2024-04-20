@@ -21,5 +21,6 @@
 #define LED_OFF_MS 2000
 
 void LED_Status(void *pvParameters);
+void LED_Init(void);
 
 #endif

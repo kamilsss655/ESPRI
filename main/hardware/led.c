@@ -24,13 +24,23 @@
 
 static const char *TAG = "HW/LED";
 
-// Show status of the device via LED
-void LED_Status(void *pvParameters)
+void LED_Init(void)
 {
     gpio_reset_pin(gSettings.gpio.status_led);
     gpio_set_direction(gSettings.gpio.status_led, GPIO_MODE_OUTPUT);
+    
     ESP_LOGI(TAG, "Initialized at pin: %d", gSettings.gpio.status_led);
 
+    // Blink once to indicate boot
+    gpio_set_level(gSettings.gpio.status_led, 1);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    gpio_set_level(gSettings.gpio.status_led, 0);
+
+}
+
+// Show status of the device via LED
+void LED_Status(void *pvParameters)
+{
     while (1)
     {
 
