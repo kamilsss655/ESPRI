@@ -76,6 +76,12 @@ menu "Project configuration"
         help
             Audio OUT GPIO Pin to use.
 
+    config TOUCH_BUTTON_1_NUMBER
+        int "Touch button 1 number"
+        default 3
+        help
+            Touch button 1 number.
+
     config BEACON_MODE
         int "Beacon mode"
         default 1

@@ -14,7 +14,7 @@
  *     limitations under the License.
  */
 #include <freertos/FreeRTOS.h>
-#include <driver/gpio.h>
+#include "driver/touch_pad.h"
 #include <esp_log.h>
 
 #include "button.h"
@@ -25,12 +25,56 @@ static const char *TAG = "HW/BUTTON";
 QueueHandle_t buttonQueue;
 
 // button pressed interrupt function
-static void IRAM_ATTR BUTTON_isr_handler(void *arg)
+// static void IRAM_ATTR BUTTON_isr_handler(void *arg)
+// {
+//     // pin number of the button pressed
+//     uint8_t pinNumber = (int)arg;
+//     // send button pressed event to the button queue
+//     xQueueSendFromISR(buttonQueue, &pinNumber, NULL);
+// }
+
+static void calibrate_touch_pad(touch_pad_t pad)
 {
-    // pin number of the button pressed
-    uint8_t pinNumber = (int)arg;
-    // send button pressed event to the button queue
-    xQueueSendFromISR(buttonQueue, &pinNumber, NULL);
+    int avg = 0;
+    const size_t calibration_count = 128;
+
+    for (int i = 0; i < calibration_count; ++i)
+    {
+        uint16_t val;
+        touch_pad_read(pad, &val);
+        avg += val;
+    }
+    avg /= calibration_count;
+    const int min_reading = 300;
+    if (avg < min_reading)
+    {
+        ESP_LOGE(TAG, "Touch pad #%d average reading is too low: %d (expecting at least %d). "
+               "Not using for deep sleep wakeup.",
+               pad, avg, min_reading);
+        touch_pad_config(pad, 0);
+    }
+    else
+    {
+        int threshold = avg - 100;
+        ESP_LOGI(TAG, "Calibrated touch pad #%d. Count average: %d, wakeup threshold set to %d.", pad, avg, threshold);
+        touch_pad_config(pad, threshold);
+    }
+}
+
+// Initialize touch pad
+void BUTTON_InitTouchPad(touch_pad_t num)
+{
+    // Initialize touch pad peripheral.
+    // The default fsm mode is software trigger mode.
+    ESP_ERROR_CHECK(touch_pad_init());
+    // If use touch pad wake up, should set touch sensor FSM mode at 'TOUCH_FSM_MODE_TIMER'.
+    touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
+  
+    touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
+    // init RTC IO and mode for touch pad.
+    touch_pad_config(num, 400);
+    // touch_pad_config(num, TOUCH_THRESH_NO_USE);
+    calibrate_touch_pad(num);
 }
 
 // initialize button handling
@@ -38,11 +82,7 @@ void BUTTON_Init()
 {
     buttonQueue = xQueueCreate(10, sizeof(uint8_t));
 
-    gpio_reset_pin(BUTTON_GPIO_PIN);
-    gpio_set_direction(BUTTON_GPIO_PIN, GPIO_MODE_INPUT);
-    gpio_set_intr_type(BUTTON_GPIO_PIN, GPIO_INTR_NEGEDGE);
-    gpio_install_isr_service(0);
-    gpio_isr_handler_add(BUTTON_GPIO_PIN, BUTTON_isr_handler, (void *)BUTTON_GPIO_PIN);
+    BUTTON_InitTouchPad(CONFIG_TOUCH_BUTTON_1_NUMBER);
 }
 
 // monitor button pressed queue
@@ -57,8 +97,6 @@ void BUTTON_Monitor(void *pvParameters)
             buttonEvent.type = BUTTON_PRESSED;
 
             ESP_LOGI(TAG, "GPIO %d was pressed.", buttonEvent.pin_number);
-
-            // TODO: Disable interrupt for a while to debounce
 
             // Handle button event
             BUTTON_Handle(buttonEvent);

@@ -100,6 +100,10 @@ esp_err_t API_SYSTEM_DeepSleep(httpd_req_t *req)
 
     SYSTEM_Shutdown();
 
+    // Enable wake-up with touch button
+    ESP_ERROR_CHECK(esp_sleep_enable_touchpad_wakeup());
+    ESP_ERROR_CHECK(esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON));
+
     esp_deep_sleep_start();
 
     return ESP_OK;
