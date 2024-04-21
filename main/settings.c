@@ -80,6 +80,8 @@ esp_err_t SETTINGS_FactoryReset(void)
     gSettings.gpio.ptt        = CONFIG_PTT_GPIO;
     // Audio
     gSettings.audio.out.volume = CONFIG_AUDIO_OUT_VOLUME;
+    // LED
+    gSettings.led.max_brightness = CONFIG_STATUS_LED_GPIO_MAX_BRIGHTNESS;
     // Beacon
     gSettings.beacon.mode = CONFIG_BEACON_MODE;
     gSettings.beacon.delay_seconds = CONFIG_BEACON_DELAY_SECONDS;

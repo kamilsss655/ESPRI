@@ -115,6 +115,12 @@ typedef struct
     SETTINGS_AudioOutConfig_t out;
 } SETTINGS_AudioConfig_t;
 
+// LED settings
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE max_brightness;
+} SETTINGS_LedConfig_t;
+
 // Beacon settings
 typedef struct
 {
@@ -132,6 +138,7 @@ typedef struct
     SETTINGS_WifiConfig_t            wifi;
     SETTINGS_GpioConfig_t            gpio;
     SETTINGS_AudioConfig_t           audio;
+    SETTINGS_LedConfig_t             led;
     SETTINGS_BeaconConfig_t          beacon;
 } SETTINGS_Config_t;
 

@@ -101,9 +101,7 @@ esp_err_t LED_Fade(uint8_t target_brightness, LED_Time_t duration_ms, bool wait_
         return ESP_FAIL;
     }
 
-    // TODO: Replace LED_VALUE_MAX with max brightness from settings
-    // int target_duty = LED_VALUE_MAX * target_brightness / 100;
-    int target_duty = LED_VALUE_MAX / 10 * target_brightness / 100;
+    int target_duty = ((LED_VALUE_MAX * gSettings.led.max_brightness / 100) * target_brightness / 100);
 
     ledc_fade_mode_t fade_mode = wait_to_finish ? LEDC_FADE_WAIT_DONE : LEDC_FADE_NO_WAIT;
 
