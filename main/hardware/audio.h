@@ -53,8 +53,6 @@
 #define AUDIO_AFSK_MIN_BAUD 50
 #define AUDIO_AFSK_MAX_BAUD 2400
 
-// I2S PDM TX clock io number (not used, but needs to be assigned)
-#define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_21
 #define AUDIO_BUFFER_SIZE 2048
 // 16kHz seems fine with filtering
 #define AUDIO_PDM_TX_FREQ_HZ 16000

@@ -258,7 +258,7 @@ esp_err_t AUDIO_TransmitStart(void)
         /* The data bit-width of PDM mode is fixed to 16 */
         .slot_cfg = I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
         .gpio_cfg = {
-            .clk = AUDIO_PDM_TX_CLK_GPIO,
+            .clk = I2S_GPIO_UNUSED,
             .dout = gSettings.gpio.audio_out,
             .invert_flags = {
                 .clk_inv = false,
