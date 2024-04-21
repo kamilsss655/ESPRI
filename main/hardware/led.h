@@ -36,6 +36,14 @@ typedef enum {
     LED_TIME_MAX     = 1200 // max time to wait (block) in ms for fade function to finish
 } LED_Time_t;
 
+// Led brightness 0-100%
+typedef enum {
+    LED_BRIGHTNESS_OFF    = 0,
+    LED_BRIGHTNESS_LOW    = 10,
+    LED_BRIGHTNESS_MEDIUM = 25,
+    LED_BRIGHTNESS_MAX    = 100
+} LED_Brightness_t;
+
 // Blink count indicates whether there is issue or not
 typedef enum {
     LED_BLINK_OK = 1,
@@ -48,7 +56,7 @@ extern SemaphoreHandle_t gLedSemaphore;
 
 void LED_Status(void *pvParameters);
 void LED_Init(void);
-esp_err_t LED_Fade(uint8_t target_brightness, LED_Time_t duration_ms, bool wait_to_finish);
-esp_err_t LED_Blink(LED_BlinkCount_t times, LED_Time_t duration_ms);
+esp_err_t LED_Fade(LED_Brightness_t target_brightness, LED_Time_t duration_ms, bool wait_to_finish);
+esp_err_t LED_Blink(LED_BlinkCount_t times, LED_Time_t duration_ms, LED_Brightness_t max_brightness);
 
 #endif

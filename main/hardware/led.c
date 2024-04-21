@@ -80,11 +80,11 @@ static void init_semaphore(void)
 /// @param duration_ms duration of the fade transition in ms
 /// @param wait_to_finish determines whether it should wait (block) until fade is complete
 /// @return
-esp_err_t LED_Fade(uint8_t target_brightness, LED_Time_t duration_ms, bool wait_to_finish)
+esp_err_t LED_Fade(LED_Brightness_t target_brightness, LED_Time_t duration_ms, bool wait_to_finish)
 {
-    if (target_brightness > 100)
+    if (target_brightness > LED_BRIGHTNESS_MAX)
     {
-        ESP_LOGE(TAG, "Target brightness %d exceeds max of %d", target_brightness, 100);
+        ESP_LOGE(TAG, "Target brightness %d exceeds max of %d", target_brightness, LED_BRIGHTNESS_MAX);
         return ESP_FAIL;
     }
 
@@ -114,14 +114,15 @@ esp_err_t LED_Fade(uint8_t target_brightness, LED_Time_t duration_ms, bool wait_
 /// @brief Blink LED
 /// @param times define how many times the LED will be blinked
 /// @param duration_ms define the on and off duration in ms
+/// @param max_brightness led on brightness (0-100)%
 /// @return 
-esp_err_t LED_Blink(LED_BlinkCount_t times, LED_Time_t duration_ms)
+esp_err_t LED_Blink(LED_BlinkCount_t times, LED_Time_t duration_ms, LED_Brightness_t max_brightness)
 {
     for (uint8_t i = 0; i < times; i++)
     {
-        LED_Fade(100, LED_TIME_FASTEST, true);
+        LED_Fade(max_brightness, LED_TIME_FASTEST, true);
         vTaskDelay(duration_ms / portTICK_PERIOD_MS);
-        LED_Fade(0, LED_TIME_FASTEST, true);
+        LED_Fade(LED_BRIGHTNESS_OFF, LED_TIME_FASTEST, true);
         vTaskDelay(duration_ms / portTICK_PERIOD_MS);
     }
 
@@ -134,7 +135,7 @@ void LED_Init(void)
 
     init_pwm();
 
-    LED_Blink(LED_BLINK_OK, LED_TIME_FAST);
+    LED_Blink(LED_BLINK_OK, LED_TIME_FAST, LED_BRIGHTNESS_MAX);
 }
 
 // Show status of the device via LED
@@ -142,7 +143,7 @@ void LED_Status(void *pvParameters)
 {
     while (1)
     {
-        LED_Blink(LED_BLINK_OK, LED_TIME_FAST);
+        LED_Blink(LED_BLINK_OK, LED_TIME_FAST, LED_BRIGHTNESS_LOW);
         vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }

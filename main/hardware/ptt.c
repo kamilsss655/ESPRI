@@ -38,7 +38,7 @@ esp_err_t PTT_Init(void)
 // Press PTT
 void PTT_Press()
 {
-    LED_Fade(100, LED_TIME_FAST, false);
+    LED_Fade(LED_BRIGHTNESS_MAX, LED_TIME_FAST, false);
     // Take LED semaphore to prevent other tasks interacting with the LED
     xSemaphoreTake(gLedSemaphore, LED_TIME_MAX / portTICK_PERIOD_MS);
 
@@ -51,7 +51,7 @@ void PTT_Release()
 {
     // Give LED semaphore to allow other tasks interacting with the LED
     xSemaphoreGive(gLedSemaphore);
-    LED_Fade(0, LED_TIME_FAST, false);
+    LED_Fade(LED_BRIGHTNESS_OFF, LED_TIME_FAST, false);
 
     gpio_set_level(gSettings.gpio.ptt, 0);
     ESP_LOGI(TAG, "PTT released!");

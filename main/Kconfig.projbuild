@@ -70,7 +70,7 @@ menu "Project configuration"
     config STATUS_LED_GPIO_MAX_BRIGHTNESS 
         int "Status LED max brightness"
         range 0 100
-        default 5
+        default 20
         help
             Status LED max brightness.
 

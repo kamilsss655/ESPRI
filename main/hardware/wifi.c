@@ -218,7 +218,7 @@ static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         // Indicate there is a problem
-        LED_Blink(LED_BLINK_WIFI_ERROR, LED_TIME_SLOW);
+        LED_Blink(LED_BLINK_WIFI_ERROR, LED_TIME_SLOW, LED_BRIGHTNESS_MAX);
 
         if (s_retry_num < WIFI_CONNECT_MAX_RETRY) {
             // vTaskDelay(5000 / portTICK_PERIOD_MS);
@@ -235,6 +235,6 @@ static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
         // Indicate connection ok
-        LED_Blink(LED_BLINK_OK, LED_TIME_FAST);
+        LED_Blink(LED_BLINK_OK, LED_TIME_FAST, LED_BRIGHTNESS_MAX);
     }
 }
