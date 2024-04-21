@@ -235,6 +235,6 @@ static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
         // Indicate connection ok
-        LED_Blink(LED_BLINK_OK, LED_TIME_FAST, LED_BRIGHTNESS_MAX);
+        // LED_Blink(LED_BLINK_OK, LED_TIME_FAST, LED_BRIGHTNESS_MAX);
     }
 }
