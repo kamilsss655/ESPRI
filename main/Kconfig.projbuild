@@ -61,13 +61,6 @@ menu "Project configuration"
         help
             PTT GPIO Pin to use.
 
-    config STATUS_LED_WS2812B
-        bool "Use WS2812B for status LED. Otherwise regular LED will be used."
-        default n if IDF_TARGET="esp32"
-        default y if IDF_TARGET="esp32s3"
-        help
-            Use WS2812B for status LED. Otherwise regular LED will be used.
-
     config STATUS_LED_GPIO
         int "Status LED GPIO Pin"
         range 1 30

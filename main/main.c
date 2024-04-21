@@ -24,11 +24,7 @@
 #include "hardware/button.h"
 #include "hardware/uart.h"
 #include "web/handlers/websocket.h"
-#ifdef CONFIG_STATUS_LED_WS2812B
-    #include "hardware/ws2812b.h"
-#else
-    #include "hardware/led.h"
-#endif
+#include "hardware/led.h"
 
 void app_main()
 {
@@ -36,11 +32,7 @@ void app_main()
     BOARD_Init();
 
     // Create LED_Status task
-    #ifdef CONFIG_STATUS_LED_WS2812B
-        xTaskCreate(WS2812B_Blink, "WS2812B_Blink", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
-    #else
-        xTaskCreate(LED_Status, "LED_Status", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
-    #endif
+    xTaskCreate(LED_Status, "LED_Status", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Create button monitor task
     xTaskCreate(BUTTON_Monitor, "BUTTON_Monitor", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
