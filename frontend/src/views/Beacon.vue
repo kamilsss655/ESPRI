@@ -1,13 +1,15 @@
 <template>
   <q-card flat bordered>
     <q-card-section>
+      <div class="text-h4 text-center">Beacon</div>
+    </q-card-section>
+    <q-separator />
+    <q-card-section>
       <q-form
         @submit="submitForm"
         @reset="settingsStore.fetchSettings"
         class="q-gutter-md"
       >
-        <div class="text-h4 text-center">Beacon</div>
-
         <q-select
           filled
           v-model="settingsStore['beacon.mode']"

@@ -1,13 +1,15 @@
 <template>
   <q-card flat bordered>
     <q-card-section>
+      <div class="text-h4 text-center">Settings</div>
+    </q-card-section>
+    <q-separator />
+    <q-card-section>
       <q-form
         @submit="submitForm"
         @reset="settingsStore.fetchSettings"
         class="q-gutter-md"
       >
-        <div class="text-h4 text-center">Settings</div>
-
         <div>
           <q-splitter v-model="splitterModel" style="height: 50vh">
             <template v-slot:before>
