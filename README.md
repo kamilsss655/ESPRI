@@ -24,6 +24,8 @@ Here is a screenshot of a web control panel being served from the ESP:
 
 ![espri-new-ui](https://github.com/kamilsss655/ESPRI/assets/8842065/a17e3bd1-4b6b-48cd-8fb4-0371cf43ec07)
 
+![settings-general](https://github.com/kamilsss655/ESPRI/assets/8842065/41b0f9ab-ac00-4cfb-bd1b-cf8807d060fa)
+
 Morse code beacon config:
 
 ![morse](https://github.com/kamilsss655/ESPRI/assets/8842065/c34a8f98-b447-408b-ab64-517cab04be98)
