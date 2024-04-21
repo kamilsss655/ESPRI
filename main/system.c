@@ -66,8 +66,12 @@ void SYSTEM_InfoInit(void)
 // Gracefully take care of all the running tasks, gpio, spiffs before shutdown
 void before_shutdown(void)
 {
+    // We forcefully take semaphore in case other tasks are using the LED (i.e PTT)
+    xSemaphoreGive(gLedSemaphore);
     // Fade off the LED
-    LED_Fade(0, 600);
+    LED_Fade(0, LED_FADE_SLOW, true);
+    // Take LED semaphore to prevent other tasks interacting with the LED
+    xSemaphoreTake(gLedSemaphore, LED_FADE_TIME_MAX / portTICK_PERIOD_MS);
 
     // Reset GPIO pins to prevent LED or PTT on during deep sleep etc.
     gpio_config_t io_conf = {

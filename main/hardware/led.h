@@ -17,10 +17,31 @@
 #ifndef HARDWARE_LED_H
 #define HARDWARE_LED_H
 
-#define LED_ON_MS 10
-#define LED_OFF_MS 2000
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+
+#define LED_PWM_RESOLUTION LEDC_TIMER_10_BIT
+#define LED_PWM_SPEED_MODE LEDC_HIGH_SPEED_MODE
+#define LED_PWM_CHANNEL    LEDC_CHANNEL_0
+#define LED_PWM_TIMER      LEDC_TIMER_0
+#define LED_PWM_FREQ_HZ    10000
+#define LED_VALUE_MAX      (1 << LED_PWM_RESOLUTION) // max LED brightness
+#define LED_VALUE_MIN      0 // min LED brightness
+#define LED_FADE_TIME_MAX LED_FADE_SLOWEST // max time to wait (block) in ms for fade function to finish
+
+// Fade transition times in ms
+enum {
+    LED_FADE_FASTEST = 50,
+    LED_FADE_FAST    = 300,
+    LED_FADE_SLOW    = 600,
+    LED_FADE_SLOWEST = 1200 
+};
+
+// Global LED semaphore for shared resource allocation
+extern SemaphoreHandle_t gLedSemaphore;
 
 void LED_Status(void *pvParameters);
 void LED_Init(void);
+esp_err_t LED_Fade(uint8_t target_brightness, int time_ms, bool wait_to_finish);
 
 #endif
