@@ -21,6 +21,7 @@ export interface Settings {
   "gpio.audio_out": number;
   "gpio.ptt": number;
   "audio.out.volume": number;
+  "led.max_brightness": number;
   "beacon.mode": BeaconMode;
   "beacon.text": string;
   "beacon.delay_seconds": number;

@@ -12,9 +12,9 @@
           <q-splitter v-model="splitterModel" style="height: 50vh">
             <template v-slot:before>
               <q-tabs v-model="currentTab" vertical>
+                <q-tab name="general" icon="ion-settings" label="General" />
                 <q-tab name="wifi" icon="ion-wifi" label="Wifi" />
                 <q-tab name="gpio" icon="ion-swap" label="GPIO" />
-                <q-tab name="audio" icon="ion-musical-notes" label="Audio" />
                 <q-tab name="advanced" icon="ion-build" label="Advanced" />
               </q-tabs>
             </template>
@@ -28,6 +28,46 @@
                 transition-prev="jump-up"
                 transition-next="jump-up"
               >
+                <q-tab-panel name="general">
+                  <div class="q-pa-md">
+                    <q-list>
+                      <q-item>
+                        <q-item-section :side="true">
+                          <q-icon name="ion-volume-high" />
+                        </q-item-section>
+                        <q-item-section :side="true">Out</q-item-section>
+                        <q-item-section>
+                          <q-slider
+                            v-model="settingsStore['audio.out.volume']"
+                            :label-value="
+                              settingsStore['audio.out.volume'] + '%'
+                            "
+                            :min="0"
+                            :max="100"
+                            label
+                          />
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section :side="true">
+                          <q-icon name="ion-sunny" />
+                        </q-item-section>
+                        <q-item-section :side="true">LED</q-item-section>
+                        <q-item-section>
+                          <q-slider
+                            v-model="settingsStore['led.max_brightness']"
+                            :label-value="
+                              settingsStore['led.max_brightness'] + '%'
+                            "
+                            :min="0"
+                            :max="100"
+                            label
+                          />
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </div>
+                </q-tab-panel>
                 <q-tab-panel name="wifi">
                   <div class="q-pa-md">
                     <q-select
@@ -127,29 +167,6 @@
                     />
                   </div>
                 </q-tab-panel>
-                <q-tab-panel name="audio">
-                  <div class="q-pa-md">
-                    <q-list>
-                      <q-item>
-                        <q-item-section :side="true">
-                          <q-icon name="ion-volume-high" />
-                        </q-item-section>
-                        <q-item-section :side="true">Out</q-item-section>
-                        <q-item-section>
-                          <q-slider
-                            v-model="settingsStore['audio.out.volume']"
-                            :label-value="
-                              settingsStore['audio.out.volume'] + '%'
-                            "
-                            :min="0"
-                            :max="100"
-                            label
-                          />
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </div>
-                </q-tab-panel>
                 <q-tab-panel name="advanced">
                   <div class="q-pa-md text-center">
                     <q-btn
@@ -192,7 +209,7 @@ import { systemFactoryReset } from "../helpers/System";
 const hideWifiPassword = ref(true);
 const settingsStore = useSettingsStore();
 const $q = useQuasar();
-const currentTab = ref("wifi");
+const currentTab = ref("general");
 const splitterModel = ref(20);
 
 onMounted(() => {
