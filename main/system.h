@@ -21,6 +21,8 @@
 
 #define SYSTEM_INTEGER_TYPE uint32_t
 #define SYSTEM_TOTAL_HEAP_SIZE 320000
+// Define GPIO pin mask of all the available pins on the board
+#define SYSTEM_GPIO_PIN_MASK ((1ULL << 13) | (1ULL << 15) | (1ULL << 2) | (1ULL << 0) | (1ULL << 4) | (1ULL << 16) | (1ULL << 17) | (1ULL << 5) | (1ULL << 18) | (1ULL << 23) | (1ULL << 19) | (1ULL << 22) | (1ULL << 34) | (1ULL << 35) | (1ULL << 32) | (1ULL << 33) | (1ULL << 25) | (1ULL << 26) | (1ULL << 27) | (1ULL << 14) | (1ULL << 12))
 
 // Heap info
 typedef struct

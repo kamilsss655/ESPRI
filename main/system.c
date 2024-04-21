@@ -25,6 +25,7 @@
 
 #include "system.h"
 #include "settings.h"
+#include "hardware/led.h"
 
 SYSTEM_Info_t gSystemInfo;
 
@@ -65,10 +66,19 @@ void SYSTEM_InfoInit(void)
 // Gracefully take care of all the running tasks, gpio, spiffs before shutdown
 void before_shutdown(void)
 {
+    // Fade off the LED
+    LED_Fade(0, 600);
+
     // Reset GPIO pins to prevent LED or PTT on during deep sleep etc.
-    gpio_reset_pin(gSettings.gpio.status_led);
-    gpio_reset_pin(gSettings.gpio.audio_out);
-    gpio_reset_pin(gSettings.gpio.ptt);
+    gpio_config_t io_conf = {
+        .intr_type = GPIO_INTR_DISABLE,
+        .mode = GPIO_MODE_INPUT,
+        .pin_bit_mask = SYSTEM_GPIO_PIN_MASK, // Set all GPIO pins
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+    };
+
+    gpio_config(&io_conf);
 
     // Unregister SPIFFS
     esp_vfs_spiffs_unregister(NULL);
