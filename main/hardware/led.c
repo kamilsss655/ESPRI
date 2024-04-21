@@ -77,10 +77,10 @@ static void init_semaphore(void)
 
 /// @brief Fade the LED
 /// @param target_brightness target brightness (0-100)%
-/// @param time_ms duration of the fade transition in ms
+/// @param duration_ms duration of the fade transition in ms
 /// @param wait_to_finish determines whether it should wait (block) until fade is complete
 /// @return
-esp_err_t LED_Fade(uint8_t target_brightness, int time_ms, bool wait_to_finish)
+esp_err_t LED_Fade(uint8_t target_brightness, LED_Time_t duration_ms, bool wait_to_finish)
 {
     if (target_brightness > 100)
     {
@@ -88,30 +88,47 @@ esp_err_t LED_Fade(uint8_t target_brightness, int time_ms, bool wait_to_finish)
         return ESP_FAIL;
     }
 
-    if (time_ms > LED_FADE_TIME_MAX)
+    if (duration_ms > LED_TIME_MAX)
     {
-        ESP_LOGE(TAG, "Fade time %d exceeds LED_FADE_TIME_MAX of %d", time_ms, LED_FADE_TIME_MAX);
+        ESP_LOGE(TAG, "Fade time %d exceeds LED_TIME_TIME_MAX of %d", duration_ms, LED_TIME_MAX);
         return ESP_FAIL;
     }
 
-    if (xSemaphoreTake(gLedSemaphore, LED_FADE_TIME_MAX / portTICK_PERIOD_MS) == pdFALSE)
+    if (xSemaphoreTake(gLedSemaphore, LED_TIME_MAX / portTICK_PERIOD_MS) == pdFALSE)
     {
         // Fade in progress
-        ESP_LOGW(TAG, "Overlapping fade operations detected.");
+        // ESP_LOGW(TAG, "Overlapping LED operations detected.");
         return ESP_FAIL;
     }
 
     // TODO: Replace LED_VALUE_MAX with max brightness from settings
-    int target_duty = LED_VALUE_MAX * target_brightness / 100;
+    // int target_duty = LED_VALUE_MAX * target_brightness / 100;
+    int target_duty = LED_VALUE_MAX / 10 * target_brightness / 100;
 
     ledc_fade_mode_t fade_mode = wait_to_finish ? LEDC_FADE_WAIT_DONE : LEDC_FADE_NO_WAIT;
 
-    ledc_set_fade_with_time(LED_PWM_SPEED_MODE, LED_PWM_CHANNEL, target_duty, time_ms);
+    ledc_set_fade_with_time(LED_PWM_SPEED_MODE, LED_PWM_CHANNEL, target_duty, duration_ms);
     ledc_fade_start(LED_PWM_SPEED_MODE, LED_PWM_CHANNEL, fade_mode);
 
     return ESP_OK;
 }
 
+/// @brief Blink LED
+/// @param times define how many times the LED will be blinked
+/// @param duration_ms define the on and off duration in ms
+/// @return 
+esp_err_t LED_Blink(LED_BlinkCount_t times, LED_Time_t duration_ms)
+{
+    for (uint8_t i = 0; i < times; i++)
+    {
+        LED_Fade(100, LED_TIME_FASTEST, true);
+        vTaskDelay(duration_ms / portTICK_PERIOD_MS);
+        LED_Fade(0, LED_TIME_FASTEST, true);
+        vTaskDelay(duration_ms / portTICK_PERIOD_MS);
+    }
+
+    return ESP_OK;
+}
 
 void LED_Init(void)
 {
@@ -119,8 +136,7 @@ void LED_Init(void)
 
     init_pwm();
 
-    LED_Fade(100, LED_FADE_FAST, false);
-    LED_Fade(0, LED_FADE_FASTEST, false);
+    LED_Blink(LED_BLINK_OK, LED_TIME_FAST);
 }
 
 // Show status of the device via LED
@@ -128,23 +144,7 @@ void LED_Status(void *pvParameters)
 {
     while (1)
     {
-
-        // TODO: This uses to big delays, so the LED doesn't immediatelly reflect state changes
-        // switch (gAudioState)
-        // {
-        // case AUDIO_TRANSMITTING:
-        //     gpio_set_level(gSettings.gpio.status_led, 1);
-        //     vTaskDelay(100 / portTICK_PERIOD_MS);
-        //     break;
-        // default:
-        //     gpio_set_level(gSettings.gpio.status_led, 0);
-        //     vTaskDelay(LED_OFF_MS / portTICK_PERIOD_MS);
-
-        //     gpio_set_level(gSettings.gpio.status_led, 1);
-        //     vTaskDelay(LED_ON_MS / portTICK_PERIOD_MS);
-
-        //     break;
-        // }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        LED_Blink(LED_BLINK_OK, LED_TIME_FAST);
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }

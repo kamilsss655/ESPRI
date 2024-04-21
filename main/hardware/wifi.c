@@ -28,6 +28,7 @@
 
 #include "settings.h"
 #include "wifi.h"
+#include "hardware/led.h"
 
 static const char *TAG = "HW/WIFI";
 
@@ -216,6 +217,9 @@ static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        // Indicate there is a problem
+        LED_Blink(LED_BLINK_WIFI_ERROR, LED_TIME_SLOW);
+
         if (s_retry_num < WIFI_CONNECT_MAX_RETRY) {
             // vTaskDelay(5000 / portTICK_PERIOD_MS);
             esp_wifi_connect();
@@ -230,5 +234,7 @@ static void WIFI_sta_event_handler(void* arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+        // Indicate connection ok
+        LED_Blink(LED_BLINK_OK, LED_TIME_FAST);
     }
 }

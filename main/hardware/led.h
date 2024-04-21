@@ -27,21 +27,28 @@
 #define LED_PWM_FREQ_HZ    10000
 #define LED_VALUE_MAX      (1 << LED_PWM_RESOLUTION) // max LED brightness
 #define LED_VALUE_MIN      0 // min LED brightness
-#define LED_FADE_TIME_MAX LED_FADE_SLOWEST // max time to wait (block) in ms for fade function to finish
 
-// Fade transition times in ms
-enum {
-    LED_FADE_FASTEST = 50,
-    LED_FADE_FAST    = 300,
-    LED_FADE_SLOW    = 600,
-    LED_FADE_SLOWEST = 1200 
-};
+// Helper time (in ms) duration enum
+typedef enum {
+    LED_TIME_FASTEST = 50,
+    LED_TIME_FAST    = 300,
+    LED_TIME_SLOW    = 600,
+    LED_TIME_MAX     = 1200 // max time to wait (block) in ms for fade function to finish
+} LED_Time_t;
+
+// Blink count indicates whether there is issue or not
+typedef enum {
+    LED_BLINK_OK = 1,
+    LED_BLINK_ERROR = 2,
+    LED_BLINK_WIFI_ERROR = 3
+} LED_BlinkCount_t;
 
 // Global LED semaphore for shared resource allocation
 extern SemaphoreHandle_t gLedSemaphore;
 
 void LED_Status(void *pvParameters);
 void LED_Init(void);
-esp_err_t LED_Fade(uint8_t target_brightness, int time_ms, bool wait_to_finish);
+esp_err_t LED_Fade(uint8_t target_brightness, LED_Time_t duration_ms, bool wait_to_finish);
+esp_err_t LED_Blink(LED_BlinkCount_t times, LED_Time_t duration_ms);
 
 #endif
