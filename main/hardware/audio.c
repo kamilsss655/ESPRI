@@ -266,6 +266,13 @@ esp_err_t AUDIO_TransmitStart(void)
         },
     };
 
+    // Configure upsampling so the sound is good even at lower sample rates
+    // Upsampling = up_sample_fp / up_sample_fs
+    pdm_tx_cfg.clk_cfg.up_sample_fp = 960;
+    pdm_tx_cfg.clk_cfg.up_sample_fs = (AUDIO_PDM_TX_FREQ_HZ) / 100;
+    // TODO: Test with 30
+    // pdm_tx_cfg.clk_cfg.up_sample_fs = 30;
+
     ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
 
     ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);

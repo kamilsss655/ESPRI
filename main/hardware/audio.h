@@ -26,7 +26,7 @@
 #define AUDIO_INPUT_CHUNK_SIZE 256
 
 // Define audio input sampling frequency in Hz
-#define AUDIO_INPUT_SAMPLE_FREQ 32000
+#define AUDIO_INPUT_SAMPLE_FREQ 16000
 
 // Define ADC conv mode
 #define AUDIO_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
@@ -53,6 +53,14 @@
 #define AUDIO_AFSK_MIN_BAUD 50
 #define AUDIO_AFSK_MAX_BAUD 2400
 
+// I2S PDM TX clock io number (not used, but needs to be assigned)
+#define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_21
+#define AUDIO_BUFFER_SIZE 2048
+// 16kHz seems fine with filtering
+#define AUDIO_PDM_TX_FREQ_HZ 16000
+// volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
+#define AUDIO_VOLUME_MULTIPLIER (320.0)
+#define CONST_PI (3.1416f)
 
 // At the same time we can either listen to audio, or transmit audio.
 // We cannot do both at the same time. Event bits are used to syncronize shared I2S0 resource.
@@ -73,15 +81,6 @@ typedef enum
 } AudioState_t;
 
 extern AudioState_t gAudioState;
-
-// I2S PDM TX clock io number (not used, but needs to be assigned)
-#define AUDIO_PDM_TX_CLK_GPIO GPIO_NUM_21
-#define AUDIO_BUFFER_SIZE 2048
-// 16kHz seems fine with filtering
-#define AUDIO_PDM_TX_FREQ_HZ 32000
-// volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
-#define AUDIO_VOLUME_MULTIPLIER (320.0)
-#define CONST_PI (3.1416f)
 
 esp_err_t AUDIO_TransmitStart(void);
 esp_err_t AUDIO_TransmitStop(void);
