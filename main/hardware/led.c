@@ -144,6 +144,6 @@ void LED_Status(void *pvParameters)
     while (1)
     {
         LED_Blink(LED_BLINK_OK, LED_TIME_FAST, LED_BRIGHTNESS_LOW);
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        vTaskDelay(900 / portTICK_PERIOD_MS);
     }
 }
