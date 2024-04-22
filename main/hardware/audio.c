@@ -287,6 +287,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     // Multiply duration by 2 because we point to u_int8_t and write int16_t
     duration_total *= 2;
 
+    // Turn on PWM audio output
     pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1U);
     pwm_audio_start();
 
@@ -299,6 +300,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
         }
     }
 
+    // Stop audio
     pwm_audio_stop();
 
     // Deallocate temp buffer
@@ -308,108 +310,113 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 // Play AFSK coded data
 void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq)
 {
-    // uint16_t zero_freq_p;
-    // uint16_t one_freq_p;
-    // uint16_t baud_p;
+    uint16_t zero_freq_p;
+    uint16_t one_freq_p;
+    uint16_t baud_p;
 
-    // // Sanitize inputs
-    // zero_freq_p = MAX(zero_freq, AUDIO_AFSK_TONE_MIN_FREQ);
-    // one_freq_p = MAX(one_freq, AUDIO_AFSK_TONE_MIN_FREQ);
-    // baud_p = MAX(baud, AUDIO_AFSK_MIN_BAUD);
+    // Sanitize inputs
+    zero_freq_p = MAX(zero_freq, AUDIO_AFSK_TONE_MIN_FREQ);
+    one_freq_p = MAX(one_freq, AUDIO_AFSK_TONE_MIN_FREQ);
+    baud_p = MAX(baud, AUDIO_AFSK_MIN_BAUD);
 
-    // zero_freq_p = MIN(zero_freq, AUDIO_AFSK_TONE_MAX_FREQ);
-    // one_freq_p = MIN(one_freq, AUDIO_AFSK_TONE_MAX_FREQ);
-    // baud_p = MIN(baud, AUDIO_AFSK_MAX_BAUD);
+    zero_freq_p = MIN(zero_freq, AUDIO_AFSK_TONE_MAX_FREQ);
+    one_freq_p = MIN(one_freq, AUDIO_AFSK_TONE_MAX_FREQ);
+    baud_p = MIN(baud, AUDIO_AFSK_MAX_BAUD);
 
-    // int duration_us = (1000001 / baud_p);
+    int duration_us = (1000001 / baud_p);
 
-    // ESP_LOGI(TAG, "AFSK baud: %d, duration_us: %d", baud_p, duration_us);
-    // ESP_LOGI(TAG, "AFSK zero_f: %d, one_f: %d", zero_freq_p, one_freq_p);
+    ESP_LOGI(TAG, "AFSK baud: %d, duration_us: %d", baud_p, duration_us);
+    ESP_LOGI(TAG, "AFSK zero_f: %d, one_f: %d", zero_freq_p, one_freq_p);
 
-    // size_t w_bytes = 0;
+    size_t w_bytes = 0;
 
-    // // Allocate temp buffer one
-    // int16_t *w_buf_one = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
-    // assert(w_buf_one);
+    // Allocate temp buffer one
+    int16_t *w_buf_one = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    assert(w_buf_one);
 
-    // // Allocate temp buffer zero
-    // int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
-    // assert(w_buf_zero);
+    // Allocate temp buffer zero
+    int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    assert(w_buf_zero);
 
-    // uint32_t duration_sine_zero = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)zero_freq_p) + 0.5;
-    // uint32_t duration_sine_one = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)one_freq_p) + 0.5;
+    uint32_t duration_sine_zero = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)zero_freq_p) + 0.5;
+    uint32_t duration_sine_one = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)one_freq_p) + 0.5;
 
-    // /* Generate the tone buffer */
-    // // Single sinewave zero
+    /* Generate the tone buffer */
+    // Single sinewave zero
 
-    // for (int i = 0; i < duration_sine_zero; i++)
-    // {
-    //     w_buf_zero[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_zero)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
-    // }
+    for (int i = 0; i < duration_sine_zero; i++)
+    {
+        w_buf_zero[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_zero)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
+    }
 
-    // /* Generate the tone buffer */
-    // // Single sinewave one
+    /* Generate the tone buffer */
+    // Single sinewave one
 
-    // for (int i = 0; i < duration_sine_one; i++)
-    // {
-    //     w_buf_one[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_one)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
-    // }
+    for (int i = 0; i < duration_sine_one; i++)
+    {
+        w_buf_one[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine_one)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
+    }
 
-    // // Multiply single sinewave to desired duration
+    // Multiply single sinewave to desired duration
 
-    // uint32_t duration_total = duration_us * AUDIO_OUTPUT_SAMPLE_FREQ / 1000000;
+    uint32_t duration_total = duration_us * AUDIO_OUTPUT_SAMPLE_FREQ / 1000000;
 
-    // ESP_LOGI(TAG, "AFSK duration_total: %" PRIu32 "", duration_total);
+    // Multiply duration by 2 because we point to u_int8_t and write int16_t
+    duration_total *= 2;
 
-    // // for (int i = 0; i < sizeof(data)/sizeof(uint8_t); i++)
-    // //     for (int bit = 7; bit >= 0; bit--)
-    // //     {
-    // //         if ((data[i] >> bit) & 1)
-    // //         {
-    // //             ESP_LOGI(TAG, "1");
-    // //         }
-    // //         else
-    // //         {
-    // //             ESP_LOGI(TAG, "0");
-    // //         }
-    // //     }
+    ESP_LOGI(TAG, "AFSK duration_total: %" PRIu32 "", duration_total);
 
-    // // Turn on PDM output
-    // ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
-
-    // for (int i = 0; i < len; i++)
+    // for (int i = 0; i < sizeof(data)/sizeof(uint8_t); i++)
     //     for (int bit = 7; bit >= 0; bit--)
     //     {
     //         if ((data[i] >> bit) & 1)
     //         {
-    //             for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
-    //             {
-    //                 /* Play the tone one */
-    //                 if (i2s_channel_write(tx_channel, w_buf_one, duration_sine_one * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
-    //                 {
-    //                     printf("Write Task: i2s write failed\n");
-    //                 }
-    //             }
+    //             ESP_LOGI(TAG, "1");
     //         }
     //         else
     //         {
-    //             for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
-    //             {
-    //                 /* Play the tone zero */
-    //                 if (i2s_channel_write(tx_channel, w_buf_zero, duration_sine_zero * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
-    //                 {
-    //                     printf("Write Task: i2s write failed\n");
-    //                 }
-    //             }
+    //             ESP_LOGI(TAG, "0");
     //         }
     //     }
 
-    // // Turn off PDM output
-    // ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
+    // Turn on PWM audio output
+    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1U);
+    pwm_audio_start();
 
-    // // Deallocate temp buffer
-    // free(w_buf_zero);
-    // free(w_buf_one);
+    for (int i = 0; i < len; i++)
+        for (int bit = 7; bit >= 0; bit--)
+        {
+            if ((data[i] >> bit) & 1)
+            {
+
+                for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
+                {
+                    // Play the tone one
+                    if (pwm_audio_write((u_int8_t *)w_buf_one, duration_sine_one * sizeof(int16_t), &w_bytes, 1000 / portTICK_PERIOD_MS) != ESP_OK)
+                    {
+                        printf("Write Task: i2s write failed\n");
+                    }
+                }
+            }
+            else
+            {
+                for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
+                {
+                    // Play the tone zero
+                    if (pwm_audio_write((u_int8_t *)w_buf_zero, duration_sine_zero * sizeof(int16_t), &w_bytes, 1000 / portTICK_PERIOD_MS) != ESP_OK)
+                    {
+                        printf("Write Task: i2s write failed\n");
+                    }
+                }
+            }
+        }
+
+    // Stop audio
+    pwm_audio_stop();
+
+    // Deallocate temp buffer
+    free(w_buf_zero);
+    free(w_buf_one);
 }
 
 esp_err_t AUDIO_PlayWav(const char *filepath)
