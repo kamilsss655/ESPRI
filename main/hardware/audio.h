@@ -26,7 +26,7 @@
 #define AUDIO_INPUT_CHUNK_SIZE 256
 
 // Define audio input sampling frequency in Hz
-#define AUDIO_INPUT_SAMPLE_FREQ 16000
+#define AUDIO_INPUT_SAMPLE_FREQ 32000
 
 // Define ADC conv mode
 #define AUDIO_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
