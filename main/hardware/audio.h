@@ -54,10 +54,12 @@
 #define AUDIO_AFSK_MAX_BAUD 2400
 
 #define AUDIO_BUFFER_SIZE 2048
-// 16kHz seems fine with filtering
-#define AUDIO_PDM_TX_FREQ_HZ 32000
+
+// Define audio output sampling frequency in Hz
+#define AUDIO_OUTPUT_SAMPLE_FREQ 32000
 // volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
 #define AUDIO_VOLUME_MULTIPLIER (320.0)
+
 #define CONST_PI (3.1416f)
 
 // At the same time we can either listen to audio, or transmit audio.
@@ -77,6 +79,24 @@ typedef enum
     AUDIO_TRANSMITTING,
     AUDIO_LAST
 } AudioState_t;
+
+typedef struct
+{
+    uint8_t ChunkID[4];
+    int32_t ChunkSize;
+    uint8_t Format[4];
+    // The "fmt" sub-chunk
+    uint8_t Subchunk1ID[4];
+    int32_t Subchunk1Size;
+    int16_t AudioFormat;
+    int16_t NumChannels;
+    int32_t SampleRate;
+    int32_t ByteRate;
+    int16_t BlockAlign;
+    int16_t BitsPerSample;
+    uint8_t Subchunk2ID[4];
+    int32_t Subchunk2Size;
+} wav_header_t;
 
 extern AudioState_t gAudioState;
 
