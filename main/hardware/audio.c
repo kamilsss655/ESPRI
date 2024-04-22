@@ -46,34 +46,8 @@ AudioState_t gAudioState;
 SemaphoreHandle_t gAudioStateSemaphore;
 SemaphoreHandle_t transmitSemaphore;
 
-// I2S handle to transmit audio
-// i2s_chan_handle_t tx_channel;
-
 // I2S handle to receive/listen audio
-static adc_continuous_handle_t rx_channel;
-
-typedef struct
-{
-    // The "RIFF" chunk descriptor
-    uint8_t ChunkID[4];
-    int32_t ChunkSize;
-    uint8_t Format[4];
-    // The "fmt" sub-chunk
-    uint8_t Subchunk1ID[4];
-    int32_t Subchunk1Size;
-    int16_t AudioFormat;
-    int16_t NumChannels;
-    int32_t SampleRate;
-    int32_t ByteRate;
-    int16_t BlockAlign;
-    int16_t BitsPerSample;
-    // The "data" sub-chunk
-    uint8_t Subchunk2ID[4];
-    int32_t Subchunk2Size;
-} wav_header_t;
-
-#define GPIO_AUDIO_OUTPUT_L 12
-#define GPIO_AUDIO_OUTPUT_R 26
+static adc_continuous_handle_t adc_handle;
 
 const char *gAudioStateNames[4] = {
     "OFF",
@@ -115,7 +89,7 @@ static void AUDIO_AdcInit()
         .conv_frame_size = AUDIO_INPUT_CHUNK_SIZE,
     };
 
-    ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &rx_channel));
+    ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &adc_handle));
 
     adc_continuous_config_t dig_cfg = {
         .sample_freq_hz = AUDIO_INPUT_SAMPLE_FREQ,
@@ -140,13 +114,13 @@ static void AUDIO_AdcInit()
 
     dig_cfg.adc_pattern = adc_pattern;
 
-    ESP_ERROR_CHECK(adc_continuous_config(rx_channel, &dig_cfg));
+    ESP_ERROR_CHECK(adc_continuous_config(adc_handle, &dig_cfg));
 
     adc_continuous_evt_cbs_t cbs = {
         .on_conv_done = adc_conv_done_callback,
     };
-    ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(rx_channel, &cbs, NULL));
-    ESP_ERROR_CHECK(adc_continuous_start(rx_channel));
+    ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(adc_handle, &cbs, NULL));
+    ESP_ERROR_CHECK(adc_continuous_start(adc_handle));
 
     ESP_LOGI(TAG, "ADC initialized.");
     ESP_LOGI(TAG, "ADC attenuation: %" PRIx8, dig_cfg.adc_pattern[0].atten);
@@ -156,8 +130,8 @@ static void AUDIO_AdcInit()
 // Stop ADC
 void AUDIO_AdcStop()
 {
-    adc_continuous_stop(rx_channel);
-    adc_continuous_deinit(rx_channel);
+    adc_continuous_stop(adc_handle);
+    adc_continuous_deinit(adc_handle);
 }
 
 // Task listening to incoming audio on ADC port
@@ -204,7 +178,7 @@ void AUDIO_Listen(void *pvParameters)
             // Block until we receive notification from the interupt that data is available
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-            ret = adc_continuous_read(rx_channel, result, AUDIO_INPUT_CHUNK_SIZE, &ret_num, 0);
+            ret = adc_continuous_read(adc_handle, result, AUDIO_INPUT_CHUNK_SIZE, &ret_num, 0);
 
             if (ret == ESP_OK)
             {
@@ -241,8 +215,7 @@ void AUDIO_Listen(void *pvParameters)
 }
 
 // Start audio transmit
-// This will stop audio listen so we can use I2S0 peripheral for transmit
-// Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
+// This will stop audio listening so we can transmit
 esp_err_t AUDIO_TransmitStart(void)
 {
     EventBits_t audioEventGroupBits;
@@ -276,19 +249,10 @@ esp_err_t AUDIO_TransmitStart(void)
 }
 
 // Stop audio transmit
+// Releases event bits so audio listening can resume
 esp_err_t AUDIO_TransmitStop(void)
 {
     ESP_LOGI(TAG, "Transmit stop");
-
-    // Release I2S0 peripheral
-    // TODO: This causes runtime error if channel was already disabled
-    // we should probably check if it was disabled before disabling it
-    // i2s_channel_disable(tx_channel);
-    // i2s_del_channel(tx_channel);
-
-    // Stop PWM Audio
-    // pwm_audio_stop();
-    // play operations will stop it themselves
 
     // Indicate that audio transmit is finished
     xEventGroupClearBits(audioEventGroup, BIT_STOPPED_LISTENING);
@@ -300,7 +264,9 @@ esp_err_t AUDIO_TransmitStop(void)
     return ESP_OK;
 }
 
-// Play tone
+/// @brief Play single tone
+/// @param freq frequency of the tone in hz
+/// @param duration_ms duration in ms
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 {
     size_t w_bytes = 0;
@@ -309,21 +275,18 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     int16_t *w_buf = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
     assert(w_buf);
 
-    uint32_t duration_sine = (AUDIO_PDM_TX_FREQ_HZ / (float)freq) + 0.5;
+    uint32_t duration_sine = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)freq) + 0.5;
 
-    /* Generate the tone buffer */
-    // Single sinewave
-
+    // Generate tone buffer for single sinewave
     for (int i = 0; i < duration_sine; i++)
     {
         w_buf[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
     }
 
     // Multiply single sinewave to desired duration
+    uint32_t duration_i2s = duration_ms * AUDIO_OUTPUT_SAMPLE_FREQ / 1000;
 
-    uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
-
-    pwm_audio_set_param(AUDIO_PDM_TX_FREQ_HZ, 16, 1U);
+    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, 16, 1U);
     pwm_audio_start();
 
     // Divide w_bytes / 2 because we point to u_int8_t and write int16_t
@@ -344,8 +307,6 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 }
 
 // Play AFSK coded data
-// TODO: Works but needs refactor to be cleaner
-// AUDIO_PlayAFSK((uint8_t *)msg, strlen(msg), 1200, 2200, 1200);
 void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq)
 {
     // uint16_t zero_freq_p;
@@ -376,8 +337,8 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     // int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
     // assert(w_buf_zero);
 
-    // uint32_t duration_sine_zero = (AUDIO_PDM_TX_FREQ_HZ / (float)zero_freq_p) + 0.5;
-    // uint32_t duration_sine_one = (AUDIO_PDM_TX_FREQ_HZ / (float)one_freq_p) + 0.5;
+    // uint32_t duration_sine_zero = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)zero_freq_p) + 0.5;
+    // uint32_t duration_sine_one = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)one_freq_p) + 0.5;
 
     // /* Generate the tone buffer */
     // // Single sinewave zero
@@ -397,7 +358,7 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
 
     // // Multiply single sinewave to desired duration
 
-    // uint32_t duration_i2s = duration_us * AUDIO_PDM_TX_FREQ_HZ / 1000000;
+    // uint32_t duration_i2s = duration_us * AUDIO_OUTPUT_SAMPLE_FREQ / 1000000;
 
     // ESP_LOGI(TAG, "AFSK duration_i2s: %" PRIu32 "", duration_i2s);
 
