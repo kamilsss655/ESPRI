@@ -243,8 +243,6 @@ esp_err_t AUDIO_TransmitStart(void)
 
     ESP_LOGI(TAG, "Transmit starting");
 
-    ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
-
     return ESP_OK;
 }
 
@@ -284,16 +282,17 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     }
 
     // Multiply single sinewave to desired duration
-    uint32_t duration_i2s = duration_ms * AUDIO_OUTPUT_SAMPLE_FREQ / 1000;
+    uint32_t duration_total = duration_ms * AUDIO_OUTPUT_SAMPLE_FREQ / 1000;
 
-    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, 16, 1U);
+    // Multiply duration by 2 because we point to u_int8_t and write int16_t
+    duration_total *= 2;
+
+    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1U);
     pwm_audio_start();
 
-    // Divide w_bytes / 2 because we point to u_int8_t and write int16_t
-    for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes / 2)
+    for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
     {
-        /* Play the tone */
-        // if (i2s_channel_write(tx_channel, w_buf, duration_sine * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
+        // Play the tone
         if (pwm_audio_write((u_int8_t *)w_buf, duration_sine * sizeof(int16_t), &w_bytes, 1000 / portTICK_PERIOD_MS) != ESP_OK)
         {
             printf("Write Task: i2s write failed\n");
@@ -358,9 +357,9 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
 
     // // Multiply single sinewave to desired duration
 
-    // uint32_t duration_i2s = duration_us * AUDIO_OUTPUT_SAMPLE_FREQ / 1000000;
+    // uint32_t duration_total = duration_us * AUDIO_OUTPUT_SAMPLE_FREQ / 1000000;
 
-    // ESP_LOGI(TAG, "AFSK duration_i2s: %" PRIu32 "", duration_i2s);
+    // ESP_LOGI(TAG, "AFSK duration_total: %" PRIu32 "", duration_total);
 
     // // for (int i = 0; i < sizeof(data)/sizeof(uint8_t); i++)
     // //     for (int bit = 7; bit >= 0; bit--)
@@ -383,7 +382,7 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     //     {
     //         if ((data[i] >> bit) & 1)
     //         {
-    //             for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+    //             for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
     //             {
     //                 /* Play the tone one */
     //                 if (i2s_channel_write(tx_channel, w_buf_one, duration_sine_one * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
@@ -394,7 +393,7 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     //         }
     //         else
     //         {
-    //             for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+    //             for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
     //             {
     //                 /* Play the tone zero */
     //                 if (i2s_channel_write(tx_channel, w_buf_zero, duration_sine_zero * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
@@ -504,6 +503,8 @@ static void initialize_pwm_audio(void)
         .ringbuf_len = 1024 * 8,
     };
     pwm_audio_init(&pac);
+
+    ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
 }
 
 void AUDIO_Init(void)

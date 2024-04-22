@@ -57,6 +57,8 @@
 
 // Define audio output sampling frequency in Hz
 #define AUDIO_OUTPUT_SAMPLE_FREQ 32000
+// Bits per sample
+#define AUDIO_OUTPUT_BITS_PER_SAMPLE 16
 // volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
 #define AUDIO_VOLUME_MULTIPLIER (320.0)
 
