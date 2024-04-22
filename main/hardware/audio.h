@@ -55,7 +55,7 @@
 
 #define AUDIO_BUFFER_SIZE 2048
 // 16kHz seems fine with filtering
-#define AUDIO_PDM_TX_FREQ_HZ 16000
+#define AUDIO_PDM_TX_FREQ_HZ 32000
 // volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
 #define AUDIO_VOLUME_MULTIPLIER (320.0)
 #define CONST_PI (3.1416f)
@@ -86,6 +86,7 @@ void AUDIO_Listen(void *pvParameters);
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
 void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq);
 void AUDIO_Init(void);
-void AUDIO_AdcStop();
+void AUDIO_AdcStop(void);
+esp_err_t AUDIO_PlayWav(const char *filepath);
 
 #endif

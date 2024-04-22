@@ -84,12 +84,7 @@ void TRANSMIT_Afsk(void *pvParameters)
 
     ESP_LOGI(TAG, "Transmitting <Afsk>: %s", param->input);
 
-    AUDIO_PlayAFSK(
-        (const uint8_t *)param->input,
-        param->len,
-        param->baud,
-        param->zero_freq,
-        param->one_freq);
+    AUDIO_PlayWav("/storage/sample2.wav");
 
     PTT_Release();
 
