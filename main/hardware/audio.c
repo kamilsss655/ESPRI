@@ -323,13 +323,11 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 
     uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
 
-    // Turn on PDM output
-    // ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
-    pwm_audio_set_param(AUDIO_PDM_TX_FREQ_HZ, 8, 1U);
+    pwm_audio_set_param(AUDIO_PDM_TX_FREQ_HZ, 16, 1U);
     pwm_audio_start();
-    pwm_audio_set_volume(16);
 
-    for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+    // Divide w_bytes / 2 because we point to u_int8_t and write int16_t
+    for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes / 2)
     {
         /* Play the tone */
         // if (i2s_channel_write(tx_channel, w_buf, duration_sine * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
@@ -340,9 +338,6 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     }
 
     pwm_audio_stop();
-
-    // Turn off PDM output
-    // ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
 
     // Deallocate temp buffer
     free(w_buf);
