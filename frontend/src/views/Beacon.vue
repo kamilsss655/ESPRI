@@ -211,6 +211,12 @@ const beaconModeOptions = ref([
     value: BeaconMode.AFSK,
     description: "Use AFSK modulation.",
     icon: "ion-wifi"
+  },
+  {
+    label: "WAV",
+    value: BeaconMode.WAV,
+    description: "Play .wav audio file",
+    icon: "ion-musical-notes"
   }
 ]);
 </script>

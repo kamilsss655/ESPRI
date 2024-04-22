@@ -7,7 +7,8 @@ export enum WifiMode {
 export enum BeaconMode {
   OFF,
   MORSE_CODE,
-  AFSK
+  AFSK,
+  WAV
 }
 
 export interface Settings {
