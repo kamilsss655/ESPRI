@@ -158,7 +158,7 @@ esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filename)
     }
     else if (IS_FILE_EXT(filename, ".wav"))
     {
-        return httpd_resp_set_type(req, "audio/wav");
+        return httpd_resp_set_type(req, "audio/x-wav");
     }
     /* This is a limited set only */
     /* For any other type always set as plain text */
