@@ -23,6 +23,11 @@
 /* Max length a file path can have on storage */
 #define FILE_PATH_MAX (ESP_VFS_PATH_MAX + CONFIG_SPIFFS_OBJ_NAME_LEN)
 
+// Max size of an individual file
+// Make sure this is reflected in upload front-end
+#define MAX_FILE_SIZE   (1200*1024) // 1200 KB -> 1.2MB
+#define MAX_FILE_SIZE_STR "1.2MB"
+
 esp_err_t STATIC_FILES_Download(httpd_req_t *req);
 esp_err_t STATIC_FILES_Upload(httpd_req_t *req);
 const char *get_path_from_uri(char *dest, const char *base_path, const char *uri, size_t destsize);
