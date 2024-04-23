@@ -100,3 +100,28 @@ Done:
     // Delete self
     vTaskDelete(NULL);
 }
+
+// Task to transmit .wav audio file
+void TRANSMIT_Wav(void *pvParameters)
+{
+    TRANSMIT_WavParam_t *param = (TRANSMIT_WavParam_t *)pvParameters;
+
+    esp_err_t ret = AUDIO_TransmitStart();
+
+    // If we cannot start TX (audio resource likely busy) we abort
+    if (ret == ESP_FAIL)
+        goto Done;
+
+    PTT_Press();
+
+    AUDIO_PlayWav(param->path);
+
+    PTT_Release();
+
+    AUDIO_TransmitStop();
+
+Done:
+
+    // Delete self
+    vTaskDelete(NULL);
+}

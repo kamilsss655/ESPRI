@@ -58,6 +58,14 @@ void BEACON_Scheduler(void *pvParameters)
 
             xTaskCreate(TRANSMIT_MorseCode, "TRANSMIT_MorseCode", 4096, &morse_code_param, RTOS_PRIORITY_MEDIUM, NULL);
             break;
+
+        case SETTINGS_BEACON_MODE_WAV:
+            // Schedule transmit task
+            TRANSMIT_WavParam_t wav_param = {
+                .path="/storage/sample.wav"};
+
+            xTaskCreate(TRANSMIT_Wav, "TRANSMIT_Wav", 4096, &wav_param, RTOS_PRIORITY_MEDIUM, NULL);
+            break;
         }
 
         // Delay before re-scheduling attempt

@@ -34,7 +34,13 @@ typedef struct
     uint16_t one_freq;
 } TRANSMIT_AfskParam_t;
 
+typedef struct
+{
+    const char *path;
+} TRANSMIT_WavParam_t;
+
 void TRANSMIT_MorseCode(void *pvParameters);
 void TRANSMIT_Afsk(void *pvParameters);
+void TRANSMIT_Wav(void *pvParameters);
 
 #endif

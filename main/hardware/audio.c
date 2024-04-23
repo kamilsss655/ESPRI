@@ -17,10 +17,11 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#include <sys/stat.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
-#include <driver/i2s_pdm.h>
+#include <pwm_audio.h>
 #include <esp_adc/adc_continuous.h>
 #include <driver/gpio.h>
 #include <esp_check.h>
@@ -45,10 +46,8 @@ AudioState_t gAudioState;
 SemaphoreHandle_t gAudioStateSemaphore;
 SemaphoreHandle_t transmitSemaphore;
 
-// I2S handle to transmit audio
-i2s_chan_handle_t tx_channel;
 // I2S handle to receive/listen audio
-static adc_continuous_handle_t rx_channel;
+static adc_continuous_handle_t adc_handle;
 
 const char *gAudioStateNames[4] = {
     "OFF",
@@ -90,7 +89,7 @@ static void AUDIO_AdcInit()
         .conv_frame_size = AUDIO_INPUT_CHUNK_SIZE,
     };
 
-    ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &rx_channel));
+    ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &adc_handle));
 
     adc_continuous_config_t dig_cfg = {
         .sample_freq_hz = AUDIO_INPUT_SAMPLE_FREQ,
@@ -115,13 +114,13 @@ static void AUDIO_AdcInit()
 
     dig_cfg.adc_pattern = adc_pattern;
 
-    ESP_ERROR_CHECK(adc_continuous_config(rx_channel, &dig_cfg));
+    ESP_ERROR_CHECK(adc_continuous_config(adc_handle, &dig_cfg));
 
     adc_continuous_evt_cbs_t cbs = {
         .on_conv_done = adc_conv_done_callback,
     };
-    ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(rx_channel, &cbs, NULL));
-    ESP_ERROR_CHECK(adc_continuous_start(rx_channel));
+    ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(adc_handle, &cbs, NULL));
+    ESP_ERROR_CHECK(adc_continuous_start(adc_handle));
 
     ESP_LOGI(TAG, "ADC initialized.");
     ESP_LOGI(TAG, "ADC attenuation: %" PRIx8, dig_cfg.adc_pattern[0].atten);
@@ -131,8 +130,8 @@ static void AUDIO_AdcInit()
 // Stop ADC
 void AUDIO_AdcStop()
 {
-    adc_continuous_stop(rx_channel);
-    adc_continuous_deinit(rx_channel);
+    adc_continuous_stop(adc_handle);
+    adc_continuous_deinit(adc_handle);
 }
 
 // Task listening to incoming audio on ADC port
@@ -179,7 +178,7 @@ void AUDIO_Listen(void *pvParameters)
             // Block until we receive notification from the interupt that data is available
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-            ret = adc_continuous_read(rx_channel, result, AUDIO_INPUT_CHUNK_SIZE, &ret_num, 0);
+            ret = adc_continuous_read(adc_handle, result, AUDIO_INPUT_CHUNK_SIZE, &ret_num, 0);
 
             if (ret == ESP_OK)
             {
@@ -216,8 +215,7 @@ void AUDIO_Listen(void *pvParameters)
 }
 
 // Start audio transmit
-// This will stop audio listen so we can use I2S0 peripheral for transmit
-// Note: Keep wires/traces from PDM output pin as short as possible to minimalize interference
+// This will stop audio listening so we can transmit
 esp_err_t AUDIO_TransmitStart(void)
 {
     EventBits_t audioEventGroupBits;
@@ -245,52 +243,14 @@ esp_err_t AUDIO_TransmitStart(void)
 
     ESP_LOGI(TAG, "Transmit starting");
 
-    // Configure I2S0 peripheral for audio transmit
-
-    i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
-
-    tx_chan_cfg.auto_clear = true;
-
-    ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &tx_channel, NULL));
-
-    i2s_pdm_tx_config_t pdm_tx_cfg = {
-        .clk_cfg = I2S_PDM_TX_CLK_DEFAULT_CONFIG(AUDIO_PDM_TX_FREQ_HZ),
-        /* The data bit-width of PDM mode is fixed to 16 */
-        .slot_cfg = I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
-        .gpio_cfg = {
-            .clk = I2S_GPIO_UNUSED,
-            .dout = gSettings.gpio.audio_out,
-            .invert_flags = {
-                .clk_inv = false,
-            },
-        },
-    };
-
-    // Configure upsampling so the sound is good even at lower sample rates
-    // Upsampling = up_sample_fp / up_sample_fs
-    pdm_tx_cfg.clk_cfg.up_sample_fp = 960;
-    // up_sample_fs = (AUDIO_PDM_TX_FREQ_HZ) / 100 -> typical application
-    // up_sample_fs = 30 -> causes error as sample rate gets too high
-    // up_sample_fs = 60 -> seems to work (gives 16x upsample = 960/60)
-    pdm_tx_cfg.clk_cfg.up_sample_fs = 60;
-
-    ESP_ERROR_CHECK(i2s_channel_init_pdm_tx_mode(tx_channel, &pdm_tx_cfg));
-
-    ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
-
     return ESP_OK;
 }
 
 // Stop audio transmit
+// Releases event bits so audio listening can resume
 esp_err_t AUDIO_TransmitStop(void)
 {
     ESP_LOGI(TAG, "Transmit stop");
-
-    // Release I2S0 peripheral
-    // TODO: This causes runtime error if channel was already disabled
-    // we should probably check if it was disabled before disabling it
-    i2s_channel_disable(tx_channel);
-    i2s_del_channel(tx_channel);
 
     // Indicate that audio transmit is finished
     xEventGroupClearBits(audioEventGroup, BIT_STOPPED_LISTENING);
@@ -302,7 +262,9 @@ esp_err_t AUDIO_TransmitStop(void)
     return ESP_OK;
 }
 
-// Play tone
+/// @brief Play single tone
+/// @param freq frequency of the tone in hz
+/// @param duration_ms duration in ms
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
 {
     size_t w_bytes = 0;
@@ -311,42 +273,41 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     int16_t *w_buf = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
     assert(w_buf);
 
-    uint32_t duration_sine = (AUDIO_PDM_TX_FREQ_HZ / (float)freq) + 0.5;
+    uint32_t duration_sine = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)freq) + 0.5;
 
-    /* Generate the tone buffer */
-    // Single sinewave
-
+    // Generate tone buffer for single sinewave
     for (int i = 0; i < duration_sine; i++)
     {
         w_buf[i] = (int16_t)((sin(2 * (float)i * CONST_PI / duration_sine)) * (gSettings.audio.out.volume * AUDIO_VOLUME_MULTIPLIER));
     }
 
     // Multiply single sinewave to desired duration
+    uint32_t duration_total = duration_ms * AUDIO_OUTPUT_SAMPLE_FREQ / 1000;
 
-    uint32_t duration_i2s = duration_ms * AUDIO_PDM_TX_FREQ_HZ / 1000;
+    // Multiply duration by 2 because we point to u_int8_t and write int16_t
+    duration_total *= 2;
 
-    // Turn on PDM output
-    ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
+    // Turn on PWM audio output
+    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1U);
+    pwm_audio_start();
 
-    for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+    for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
     {
-        /* Play the tone */
-        if (i2s_channel_write(tx_channel, w_buf, duration_sine * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
+        // Play the tone
+        if (pwm_audio_write((u_int8_t *)w_buf, duration_sine * sizeof(int16_t), &w_bytes, 1000 / portTICK_PERIOD_MS) != ESP_OK)
         {
             printf("Write Task: i2s write failed\n");
         }
     }
 
-    // Turn off PDM output
-    ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
+    // Stop audio
+    pwm_audio_stop();
 
     // Deallocate temp buffer
     free(w_buf);
 }
 
 // Play AFSK coded data
-// TODO: Works but needs refactor to be cleaner
-// AUDIO_PlayAFSK((uint8_t *)msg, strlen(msg), 1200, 2200, 1200);
 void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq)
 {
     uint16_t zero_freq_p;
@@ -377,8 +338,8 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
     assert(w_buf_zero);
 
-    uint32_t duration_sine_zero = (AUDIO_PDM_TX_FREQ_HZ / (float)zero_freq_p) + 0.5;
-    uint32_t duration_sine_one = (AUDIO_PDM_TX_FREQ_HZ / (float)one_freq_p) + 0.5;
+    uint32_t duration_sine_zero = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)zero_freq_p) + 0.5;
+    uint32_t duration_sine_one = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)one_freq_p) + 0.5;
 
     /* Generate the tone buffer */
     // Single sinewave zero
@@ -398,9 +359,12 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
 
     // Multiply single sinewave to desired duration
 
-    uint32_t duration_i2s = duration_us * AUDIO_PDM_TX_FREQ_HZ / 1000000;
+    uint32_t duration_total = duration_us * AUDIO_OUTPUT_SAMPLE_FREQ / 1000000;
 
-    ESP_LOGI(TAG, "AFSK duration_i2s: %" PRIu32 "", duration_i2s);
+    // Multiply duration by 2 because we point to u_int8_t and write int16_t
+    duration_total *= 2;
+
+    ESP_LOGI(TAG, "AFSK duration_total: %" PRIu32 "", duration_total);
 
     // for (int i = 0; i < sizeof(data)/sizeof(uint8_t); i++)
     //     for (int bit = 7; bit >= 0; bit--)
@@ -415,18 +379,20 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     //         }
     //     }
 
-    // Turn on PDM output
-    ESP_ERROR_CHECK(i2s_channel_enable(tx_channel));
+    // Turn on PWM audio output
+    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1U);
+    pwm_audio_start();
 
     for (int i = 0; i < len; i++)
         for (int bit = 7; bit >= 0; bit--)
         {
             if ((data[i] >> bit) & 1)
             {
-                for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+
+                for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
                 {
-                    /* Play the tone one */
-                    if (i2s_channel_write(tx_channel, w_buf_one, duration_sine_one * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
+                    // Play the tone one
+                    if (pwm_audio_write((u_int8_t *)w_buf_one, duration_sine_one * sizeof(int16_t), &w_bytes, 1000 / portTICK_PERIOD_MS) != ESP_OK)
                     {
                         printf("Write Task: i2s write failed\n");
                     }
@@ -434,10 +400,10 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
             }
             else
             {
-                for (int tot_bytes = 0; tot_bytes < duration_i2s; tot_bytes += w_bytes)
+                for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
                 {
-                    /* Play the tone zero */
-                    if (i2s_channel_write(tx_channel, w_buf_zero, duration_sine_zero * sizeof(int16_t), &w_bytes, 1000) != ESP_OK)
+                    // Play the tone zero
+                    if (pwm_audio_write((u_int8_t *)w_buf_zero, duration_sine_zero * sizeof(int16_t), &w_bytes, 1000 / portTICK_PERIOD_MS) != ESP_OK)
                     {
                         printf("Write Task: i2s write failed\n");
                     }
@@ -445,12 +411,112 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
             }
         }
 
-    // Turn off PDM output
-    ESP_ERROR_CHECK(i2s_channel_disable(tx_channel));
+    // Stop audio
+    pwm_audio_stop();
 
     // Deallocate temp buffer
     free(w_buf_zero);
     free(w_buf_one);
+}
+
+esp_err_t AUDIO_PlayWav(const char *filepath)
+{
+    FILE *fd = NULL;
+    struct stat file_stat;
+
+    if (stat(filepath, &file_stat) == -1)
+    {
+        ESP_LOGE(TAG, "Failed to stat file : %s", filepath);
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "file stat info: %s (%ld bytes)...", filepath, file_stat.st_size);
+    fd = fopen(filepath, "r");
+
+    if (NULL == fd)
+    {
+        ESP_LOGE(TAG, "Failed to read existing file : %s", filepath);
+        return ESP_FAIL;
+    }
+    const size_t chunk_size = 4096;
+    uint8_t *buffer = malloc(chunk_size);
+
+    if (NULL == buffer)
+    {
+        ESP_LOGE(TAG, "audio data buffer malloc failed");
+        fclose(fd);
+        return ESP_FAIL;
+    }
+
+    /**
+     * read head of WAV file
+     */
+    wav_header_t wav_head;
+    int len = fread(&wav_head, 1, sizeof(wav_header_t), fd);
+    if (len <= 0)
+    {
+        ESP_LOGE(TAG, "Read wav header failed");
+        fclose(fd);
+        return ESP_FAIL;
+    }
+    if (NULL == strstr((char *)wav_head.Subchunk1ID, "fmt") &&
+        NULL == strstr((char *)wav_head.Subchunk2ID, "data"))
+    {
+        ESP_LOGE(TAG, "Header of wav format error");
+        fclose(fd);
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "frame_rate= %" PRIi32 ", ch=%d, width=%d", wav_head.SampleRate, wav_head.NumChannels, wav_head.BitsPerSample);
+
+    pwm_audio_set_param(wav_head.SampleRate, wav_head.BitsPerSample, wav_head.NumChannels);
+    pwm_audio_start();
+
+    /**
+     * read wave data of WAV file
+     */
+    size_t write_num = 0;
+    size_t cnt;
+
+    do
+    {
+        /* Read file in chunks into the scratch buffer */
+        len = fread(buffer, 1, chunk_size, fd);
+        if (len <= 0)
+        {
+            break;
+        }
+        pwm_audio_write(buffer, len, &cnt, 1000 / portTICK_PERIOD_MS);
+
+        write_num += len;
+    } while (1);
+
+    // Stop audio
+    pwm_audio_stop();
+    // Close file
+    fclose(fd);
+    // Deallocate temp buffer
+    free(buffer);
+
+    ESP_LOGI(TAG, "File reading complete, total: %d bytes", write_num);
+    return ESP_OK;
+}
+
+// Init PWM audio
+static void initialize_pwm_audio(void)
+{
+    pwm_audio_config_t pac = {
+        .duty_resolution = LEDC_TIMER_10_BIT,
+        .gpio_num_left = gSettings.gpio.audio_out,
+        .ledc_channel_left = LEDC_CHANNEL_1,
+        .gpio_num_right = gSettings.gpio.audio_out,
+        .ledc_channel_right = LEDC_CHANNEL_1,
+        .ledc_timer_sel = LEDC_TIMER_1,
+        .ringbuf_len = 1024 * 8,
+    };
+    pwm_audio_init(&pac);
+
+    ESP_LOGI(TAG, "Audio output initialized on pin: %d", gSettings.gpio.audio_out);
 }
 
 void AUDIO_Init(void)
@@ -463,4 +529,6 @@ void AUDIO_Init(void)
 
     transmitSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(transmitSemaphore);
+
+    initialize_pwm_audio();
 }

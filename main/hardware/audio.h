@@ -54,10 +54,14 @@
 #define AUDIO_AFSK_MAX_BAUD 2400
 
 #define AUDIO_BUFFER_SIZE 2048
-// 16kHz seems fine with filtering
-#define AUDIO_PDM_TX_FREQ_HZ 16000
+
+// Define audio output sampling frequency in Hz
+#define AUDIO_OUTPUT_SAMPLE_FREQ 32000
+// Bits per sample
+#define AUDIO_OUTPUT_BITS_PER_SAMPLE 16
 // volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
 #define AUDIO_VOLUME_MULTIPLIER (320.0)
+
 #define CONST_PI (3.1416f)
 
 // At the same time we can either listen to audio, or transmit audio.
@@ -78,6 +82,24 @@ typedef enum
     AUDIO_LAST
 } AudioState_t;
 
+typedef struct
+{
+    uint8_t ChunkID[4];
+    int32_t ChunkSize;
+    uint8_t Format[4];
+    // The "fmt" sub-chunk
+    uint8_t Subchunk1ID[4];
+    int32_t Subchunk1Size;
+    int16_t AudioFormat;
+    int16_t NumChannels;
+    int32_t SampleRate;
+    int32_t ByteRate;
+    int16_t BlockAlign;
+    int16_t BitsPerSample;
+    uint8_t Subchunk2ID[4];
+    int32_t Subchunk2Size;
+} wav_header_t;
+
 extern AudioState_t gAudioState;
 
 esp_err_t AUDIO_TransmitStart(void);
@@ -86,6 +108,7 @@ void AUDIO_Listen(void *pvParameters);
 void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms);
 void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zero_freq, uint16_t one_freq);
 void AUDIO_Init(void);
-void AUDIO_AdcStop();
+void AUDIO_AdcStop(void);
+esp_err_t AUDIO_PlayWav(const char *filepath);
 
 #endif

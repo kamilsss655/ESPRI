@@ -85,7 +85,8 @@ typedef struct
 typedef enum {
     SETTINGS_BEACON_MODE_OFF,
     SETTINGS_BEACON_MODE_MORSE_CODE,
-    SETTINGS_BEACON_MODE_AFSK
+    SETTINGS_BEACON_MODE_AFSK,
+    SETTINGS_BEACON_MODE_WAV
 } SETTINGS_BeaconMode_t;
 
 // Morse code beacon settings
