@@ -20,6 +20,9 @@
         <q-btn round dense flat to="/beacon" icon="ion-flag">
           <q-tooltip>Beacon</q-tooltip>
         </q-btn>
+        <q-btn round dense flat to="/files" icon="ion-folder">
+          <q-tooltip>Files</q-tooltip>
+        </q-btn>
         <q-btn round dense flat to="/settings" icon="ion-settings">
           <q-tooltip>Settings</q-tooltip>
         </q-btn>

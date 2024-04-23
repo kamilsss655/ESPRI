@@ -40,8 +40,6 @@
           filled
         />
 
-        <FileUploader v-if="beaconMode == BeaconMode.WAV" />
-
         <q-field
           filled
           label="Delay in seconds"
@@ -179,7 +177,6 @@
 import { computed, onMounted, ref } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { BeaconMode } from "../types/Settings";
-import FileUploader from "../components/system/FileUploader.vue";
 
 const settingsStore = useSettingsStore();
 

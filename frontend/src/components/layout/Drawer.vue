@@ -19,6 +19,15 @@
             <q-item-label caption>Setup beacon</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item clickable to="/files" rel="noopener">
+          <q-item-section avatar>
+            <q-icon name="ion-folder" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Files</q-item-label>
+            <q-item-label caption>Manage files</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item clickable to="/settings" rel="noopener">
           <q-item-section avatar>
             <q-icon name="ion-settings" />
@@ -34,7 +43,7 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>About</q-item-label>
-            <q-item-label caption>More info about the project</q-item-label>
+            <q-item-label caption>Get more details</q-item-label>
           </q-item-section>
         </q-item>
     </q-list>
