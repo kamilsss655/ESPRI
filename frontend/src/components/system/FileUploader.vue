@@ -3,6 +3,7 @@
     :factory=factoryFn
     label="Max file size (1.2MB)"
     multiple
+    send-raw
     accept=".wav"
     max-file-size="1228800"
     max-total-size="1228800"
