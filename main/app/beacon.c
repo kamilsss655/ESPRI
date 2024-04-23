@@ -62,7 +62,7 @@ void BEACON_Scheduler(void *pvParameters)
         case SETTINGS_BEACON_MODE_WAV:
             // Schedule transmit task
             TRANSMIT_WavParam_t wav_param = {
-                .path="/storage/sample2.wav"};
+                .path="/storage/sample.wav"};
 
             xTaskCreate(TRANSMIT_Wav, "TRANSMIT_Wav", 4096, &wav_param, RTOS_PRIORITY_MEDIUM, NULL);
             break;
