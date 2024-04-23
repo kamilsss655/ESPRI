@@ -71,7 +71,9 @@ void before_shutdown(void)
     // We forcefully take semaphore in case other tasks are using the LED (i.e PTT)
     xSemaphoreGive(gLedSemaphore);
     // Fade off the LED
-    LED_Fade(LED_BRIGHTNESS_OFF, LED_TIME_SLOW, true);
+    LED_Fade(LED_BRIGHTNESS_OFF, LED_TIME_FASTEST, true);
+    // Indicate shutdown to user
+    LED_Blink(LED_BLINK_ON_OFF, LED_TIME_FASTEST, LED_BRIGHTNESS_MAX);
     // Take LED semaphore to prevent other tasks interacting with the LED
     xSemaphoreTake(gLedSemaphore, LED_TIME_MAX / portTICK_PERIOD_MS);
 

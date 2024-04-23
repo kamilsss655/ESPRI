@@ -46,9 +46,9 @@ typedef enum {
 
 // Blink count indicates whether there is issue or not
 typedef enum {
-    LED_BLINK_OK = 1,
-    LED_BLINK_BOOT_FINISHED = 2,
-    LED_BLINK_WIFI_ERROR = 3
+    LED_BLINK_OK = 1,        // indicate initial power on
+    LED_BLINK_ON_OFF = 2,    // indicate boot complete, or power off
+    LED_BLINK_WIFI_ERROR = 3 // indicate error with wifi
 } LED_BlinkCount_t;
 
 // Global LED semaphore for shared resource allocation

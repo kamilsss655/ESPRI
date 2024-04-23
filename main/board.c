@@ -60,5 +60,5 @@ void BOARD_Init(void)
     SYSTEM_InfoInit();
 
     // Indicate boot finished to user
-    LED_Blink(LED_BLINK_BOOT_FINISHED, LED_TIME_FASTEST, LED_BRIGHTNESS_MAX);
+    LED_Blink(LED_BLINK_ON_OFF, LED_TIME_FASTEST, LED_BRIGHTNESS_MAX);
 }
