@@ -36,9 +36,17 @@
           v-model="settingsStore['beacon.text']"
           label="Text"
           hint="Define what message will be transmitted"
-          v-if="beaconMode != BeaconMode.OFF"
+          v-if="beaconMode != BeaconMode.OFF && beaconMode != BeaconMode.WAV"
           filled
         />
+
+        <q-banner
+          class="bg-warning text-black"
+          v-if="beaconMode == BeaconMode.WAV"
+        >
+          This is an experimental feature. For now only a single static file is
+          played.
+        </q-banner>
 
         <q-field
           filled
