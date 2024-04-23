@@ -114,8 +114,6 @@ void TRANSMIT_Wav(void *pvParameters)
 
     PTT_Press();
 
-    ESP_LOGI(TAG, "Transmitting <Wav>: %s", param->path);
-
     AUDIO_PlayWav(param->path);
 
     PTT_Release();
