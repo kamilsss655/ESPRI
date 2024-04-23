@@ -119,10 +119,10 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     httpd_register_uri_handler(server, &api_uvk5_message_create_uri);
 
     // Match all and try to serve static files
-    httpd_uri_t static_file_uri = {
+    httpd_uri_t static_file_get_uri = {
         .uri = "/*", // Match all other URIs
         .method = HTTP_GET,
-        .handler = STATIC_FILES_Handle,
+        .handler = STATIC_FILES_Get,
         .user_ctx = server_data};
-    httpd_register_uri_handler(server, &static_file_uri);
+    httpd_register_uri_handler(server, &static_file_get_uri);
 }

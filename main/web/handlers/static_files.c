@@ -23,7 +23,7 @@
 static const char *TAG = "WEB/STATIC_FILES";
 
 /* Handler to download a file kept on the server */
-esp_err_t STATIC_FILES_Handle(httpd_req_t *req)
+esp_err_t STATIC_FILES_Get(httpd_req_t *req)
 {
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;
