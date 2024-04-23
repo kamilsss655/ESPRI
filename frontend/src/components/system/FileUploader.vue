@@ -31,9 +31,9 @@ function onRejected(rejectedEntries: any) {
   });
 }
 
-function onFailed(files: readonly any[], xhr: any) {
-  console.log(files);
-  console.log(xhr);
+function onFailed(info: {files: readonly any[], xhr: any}) {
+  console.log(info.files);
+  console.log(info.xhr);
   Notify.create({
     type: "negative",
     message: `Upload failed`
