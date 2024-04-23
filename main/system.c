@@ -34,10 +34,21 @@ void SYSTEM_InfoRefresh(void *pvParameters)
 {
     while (1)
     {
-
+        // Memory usage
         gSystemInfo.heap.free = esp_get_free_heap_size();
         gSystemInfo.heap.min_free = esp_get_minimum_free_heap_size();
+
+        // Uptick uptime counter
         gSystemInfo.uptime += 1;
+
+        // SPIFFS /storage size
+        size_t storage_total_bytes;
+        size_t storage_used_bytes;
+
+        esp_spiffs_info(NULL, &storage_total_bytes, &storage_used_bytes);
+
+        gSystemInfo.storage.total = (SYSTEM_INTEGER_TYPE)storage_total_bytes;
+        gSystemInfo.storage.used = (SYSTEM_INTEGER_TYPE)storage_used_bytes;
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
@@ -52,15 +63,6 @@ void SYSTEM_InfoInit(void)
 
     // Total heap memory size
     gSystemInfo.heap.total = SYSTEM_TOTAL_HEAP_SIZE;
-
-    // SPIFFS /storage size
-    size_t storage_total_bytes;
-    size_t storage_used_bytes;
-
-    esp_spiffs_info(NULL, &storage_total_bytes, &storage_used_bytes);
-
-    gSystemInfo.storage.total = (SYSTEM_INTEGER_TYPE)storage_total_bytes;
-    gSystemInfo.storage.used = (SYSTEM_INTEGER_TYPE)storage_used_bytes;
 }
 
 // Gracefully take care of all the running tasks, gpio, spiffs before shutdown
