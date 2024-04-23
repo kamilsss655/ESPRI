@@ -47,7 +47,7 @@ typedef enum {
 // Blink count indicates whether there is issue or not
 typedef enum {
     LED_BLINK_OK = 1,
-    LED_BLINK_ERROR = 2,
+    LED_BLINK_BOOT_FINISHED = 2,
     LED_BLINK_WIFI_ERROR = 3
 } LED_BlinkCount_t;
 
