@@ -19,6 +19,7 @@
 
 #include "static_files.h"
 #include "helper/http.h"
+#include "helper/api.h"
 #include "board.h"
 
 static const char *TAG = "WEB/STATIC_FILES";
@@ -174,65 +175,72 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     /* Skip leading "/upload" from URI to get filename */
     /* Note sizeof() counts NULL termination hence the -1 */
     const char *filename = get_path_from_uri(filepath, STORAGE_BASE_PATH,
-                                            req->uri + sizeof("/upload") - 1, sizeof(filepath));
-    if (!filename) {
+                                             req->uri + sizeof("/upload") - 1, sizeof(filepath));
+    if (!filename)
+    {
         /* Respond with 500 Internal Server Error */
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
+        httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
         return ESP_FAIL;
     }
 
     /* Filename cannot have a trailing '/' */
-    if (filename[strlen(filename) - 1] == '/') {
+    if (filename[strlen(filename) - 1] == '/')
+    {
         ESP_LOGE(TAG, "Invalid filename : %s", filename);
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid filename");
+        httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid filename");
         return ESP_FAIL;
     }
 
-    #ifdef UPLOAD_PREVENT_FILE_OVERWRITE
-        if (stat(filepath, &file_stat) == 0) {
-            ESP_LOGE(TAG, "File already exists : %s", filepath);
-            /* Respond with 400 Bad Request */
-            httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "File already exists");
-            return ESP_FAIL;
-        }
-    #endif
+#ifdef UPLOAD_PREVENT_FILE_OVERWRITE
+    if (stat(filepath, &file_stat) == 0)
+    {
+        ESP_LOGE(TAG, "File already exists : %s", filepath);
+        /* Respond with 400 Bad Request */
+        httpd_json_resp_send(req, HTTPD_400_BAD_REQUEST, "File already exists");
+        return ESP_FAIL;
+    }
+#endif
 
     /* File cannot be larger than a limit */
-    if (req->content_len > MAX_FILE_SIZE) {
+    if (req->content_len > MAX_FILE_SIZE)
+    {
         ESP_LOGE(TAG, "File too large : %d bytes", req->content_len);
         /* Respond with 400 Bad Request */
-        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
-                            "File size must be less than "
-                            MAX_FILE_SIZE_STR "!");
+        httpd_json_resp_send(req, HTTPD_400_BAD_REQUEST,
+                             "File size must be less than " MAX_FILE_SIZE_STR "!");
         /* Return failure to close underlying connection else the
          * incoming file content will keep the socket busy */
         return ESP_FAIL;
     }
 
     fd = fopen(filepath, "w");
-    if (!fd) {
+    if (!fd)
+    {
         ESP_LOGE(TAG, "Failed to create file : %s", filepath);
         /* Respond with 500 Internal Server Error */
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to create file");
+        httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to create file");
         return ESP_FAIL;
     }
 
     ESP_LOGI(TAG, "Receiving file : %s...", filename);
 
     /* Retrieve the pointer to scratch buffer for temporary storage */
-    char *buf =((file_server_data *)req->user_ctx)->scratch;
+    char *buf = ((file_server_data *)req->user_ctx)->scratch;
     int received;
 
     /* Content length of the request gives
      * the size of the file being uploaded */
     int remaining = req->content_len;
 
-    while (remaining > 0) {
+    while (remaining > 0)
+    {
 
         ESP_LOGI(TAG, "Remaining size : %d", remaining);
         /* Receive the file part by part into a buffer */
-        if ((received = httpd_req_recv(req, buf, MIN(remaining, SCRATCH_BUFSIZE))) <= 0) {
-            if (received == HTTPD_SOCK_ERR_TIMEOUT) {
+        if ((received = httpd_req_recv(req, buf, MIN(remaining, SCRATCH_BUFSIZE))) <= 0)
+        {
+            if (received == HTTPD_SOCK_ERR_TIMEOUT)
+            {
                 /* Retry if timeout occurred */
                 continue;
             }
@@ -244,12 +252,13 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
 
             ESP_LOGE(TAG, "File reception failed!");
             /* Respond with 500 Internal Server Error */
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive file");
+            httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive file");
             return ESP_FAIL;
         }
 
         /* Write buffer content to file on storage */
-        if (received && (received != fwrite(buf, 1, received, fd))) {
+        if (received && (received != fwrite(buf, 1, received, fd)))
+        {
             /* Couldn't write everything to file!
              * Storage may be full? */
             fclose(fd);
@@ -257,7 +266,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
 
             ESP_LOGE(TAG, "File write failed!");
             /* Respond with 500 Internal Server Error */
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to write file to storage");
+            httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to write file to storage");
             return ESP_FAIL;
         }
 
@@ -270,12 +279,6 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     fclose(fd);
     ESP_LOGI(TAG, "File reception complete");
 
-    /* Redirect onto root to see the updated file list */
-    httpd_resp_set_status(req, "303 See Other");
-    httpd_resp_set_hdr(req, "Location", "/");
-#ifdef CONFIG_EXAMPLE_HTTPD_CONN_CLOSE_HEADER
-    httpd_resp_set_hdr(req, "Connection", "close");
-#endif
-    httpd_resp_sendstr(req, "File uploaded successfully");
+    httpd_json_resp_send(req, HTTPD_200, "File upload complete");
     return ESP_OK;
 }

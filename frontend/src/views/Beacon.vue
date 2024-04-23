@@ -40,13 +40,7 @@
           filled
         />
 
-        <q-banner
-          class="bg-warning text-black"
-          v-if="beaconMode == BeaconMode.WAV"
-        >
-          This is an experimental feature. For now only a single static file is
-          played.
-        </q-banner>
+        <FileUploader v-if="beaconMode == BeaconMode.WAV" />
 
         <q-field
           filled
@@ -146,7 +140,6 @@
             />
           </template>
         </q-field>
-
         <q-field
           filled
           label="Tone frequency"
@@ -186,6 +179,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { BeaconMode } from "../types/Settings";
+import FileUploader from "../components/system/FileUploader.vue";
 
 const settingsStore = useSettingsStore();
 

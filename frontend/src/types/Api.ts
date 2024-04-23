@@ -4,7 +4,8 @@ export enum ApiPaths {
   Event = "/api/event",
   Reboot = "/api/system/reboot",
   DeepSleep = "/api/system/deep_sleep",
-  FactoryReset = "/api/system/factory_reset"
+  FactoryReset = "/api/system/factory_reset",
+  FileUpload ="/upload"
 }
 
 export interface ApiResponse {
