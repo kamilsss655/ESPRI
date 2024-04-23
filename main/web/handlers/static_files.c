@@ -23,7 +23,7 @@
 static const char *TAG = "WEB/STATIC_FILES";
 
 /* Handler to download a file kept on the server */
-esp_err_t STATIC_FILES_Get(httpd_req_t *req)
+esp_err_t STATIC_FILES_Download(httpd_req_t *req)
 {
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;
@@ -158,4 +158,9 @@ esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filename)
     /* This is a limited set only */
     /* For any other type always set as plain text */
     return httpd_resp_set_type(req, "text/plain");
+}
+
+esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
+{
+    return ESP_OK;
 }
