@@ -37,7 +37,7 @@ esp_err_t STATIC_FILES_Download(httpd_req_t *req)
     {
         ESP_LOGE(TAG, "Filename is too long");
         /* Respond with 500 Internal Server Error */
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
+        httpd_json_resp_send(req, HTTPD_500, "Filename too long");
         return ESP_FAIL;
     }
 
@@ -45,7 +45,7 @@ esp_err_t STATIC_FILES_Download(httpd_req_t *req)
     {
         ESP_LOGE(TAG, "Failed to stat file : %s", filepath);
         /* Respond with 404 Not Found */
-        httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "File does not exist");
+        httpd_json_resp_send(req, HTTPD_404, "File does not exist");
         return ESP_FAIL;
     }
 
@@ -54,7 +54,7 @@ esp_err_t STATIC_FILES_Download(httpd_req_t *req)
     {
         ESP_LOGE(TAG, "Failed to read existing file : %s", filepath);
         /* Respond with 500 Internal Server Error */
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read existing file");
+        httpd_json_resp_send(req, HTTPD_500, "Failed to read existing file");
         return ESP_FAIL;
     }
 
@@ -79,7 +79,7 @@ esp_err_t STATIC_FILES_Download(httpd_req_t *req)
                 /* Abort sending file */
                 httpd_resp_sendstr_chunk(req, NULL);
                 /* Respond with 500 Internal Server Error */
-                httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to send file");
+                httpd_json_resp_send(req, HTTPD_500, "Failed to send file");
                 return ESP_FAIL;
             }
         }
@@ -170,7 +170,6 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
 {
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;
-    struct stat file_stat;
 
     /* Skip leading "/upload" from URI to get filename */
     /* Note sizeof() counts NULL termination hence the -1 */
@@ -179,7 +178,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     if (!filename)
     {
         /* Respond with 500 Internal Server Error */
-        httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
+        httpd_json_resp_send(req, HTTPD_500, "Filename too long");
         return ESP_FAIL;
     }
 
@@ -187,7 +186,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     if (filename[strlen(filename) - 1] == '/')
     {
         ESP_LOGE(TAG, "Invalid filename : %s", filename);
-        httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid filename");
+        httpd_json_resp_send(req, HTTPD_500, "Invalid filename");
         return ESP_FAIL;
     }
 
@@ -196,7 +195,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     {
         ESP_LOGE(TAG, "File already exists : %s", filepath);
         /* Respond with 400 Bad Request */
-        httpd_json_resp_send(req, HTTPD_400_BAD_REQUEST, "File already exists");
+        httpd_json_resp_send(req, HTTPD_400, "File already exists");
         return ESP_FAIL;
     }
 #endif
@@ -206,8 +205,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     {
         ESP_LOGE(TAG, "File too large : %d bytes", req->content_len);
         /* Respond with 400 Bad Request */
-        httpd_json_resp_send(req, HTTPD_400_BAD_REQUEST,
-                             "File size must be less than " MAX_FILE_SIZE_STR "!");
+        httpd_json_resp_send(req, HTTPD_400, "File size must be less than");
         /* Return failure to close underlying connection else the
          * incoming file content will keep the socket busy */
         return ESP_FAIL;
@@ -218,7 +216,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     {
         ESP_LOGE(TAG, "Failed to create file : %s", filepath);
         /* Respond with 500 Internal Server Error */
-        httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to create file");
+        httpd_json_resp_send(req, HTTPD_500, "Failed to create file");
         return ESP_FAIL;
     }
 
@@ -252,7 +250,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
 
             ESP_LOGE(TAG, "File reception failed!");
             /* Respond with 500 Internal Server Error */
-            httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive file");
+            httpd_json_resp_send(req, HTTPD_500, "Failed to receive file");
             return ESP_FAIL;
         }
 
@@ -266,7 +264,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
 
             ESP_LOGE(TAG, "File write failed!");
             /* Respond with 500 Internal Server Error */
-            httpd_json_resp_send(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to write file to storage");
+            httpd_json_resp_send(req, HTTPD_500, "Failed to write file to storage");
             return ESP_FAIL;
         }
 
