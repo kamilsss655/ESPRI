@@ -491,8 +491,13 @@ esp_err_t AUDIO_PlayWav(const char *filepath)
         write_num += len;
     } while (1);
 
-    // pwm_audio_stop();
+    // Stop audio
+    pwm_audio_stop();
+    // Close file
     fclose(fd);
+    // Deallocate temp buffer
+    free(buffer);
+
     ESP_LOGI(TAG, "File reading complete, total: %d bytes", write_num);
     return ESP_OK;
 }
