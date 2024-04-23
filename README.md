@@ -1,18 +1,21 @@
 # ESPRI
 ESPRI (ESP Radio Interface) project providing extended functionalities to ham radios.
 
+![espri](https://github.com/kamilsss655/ESPRI/assets/8842065/e8632e6c-fe20-4633-ab5d-4eacdee4b952)
+
 ![high-level-diagram-4](https://github.com/kamilsss655/ESPRI/assets/8842065/813055e7-6729-47e8-8912-1e9155d7ca6d)
 
 The main goal of this project is to extend functionalities of ham radios with addition of a small PCB board that contains ESP32 microcontroller.
 
 As such following features would be enabled:
-- time domain scrambling (based on the [HEKTOR 128](http://jtxp.org/tech/hektor_en.htm) project)
 - custom digital modes (modulated and demodulated by the ESP chip)
   - more advanced messaging
     - could be served as webpage by the esp chip itself
     - or have a mobile client as Meshtastic 
 - wireless UART connection to the radio
+- broadcast .wav files
 - turning any radio into IoT device via JSON API served from the ESP
+- time domain scrambling (based on the [HEKTOR 128](http://jtxp.org/tech/hektor_en.htm) project)
 
 The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
 
@@ -65,11 +68,7 @@ Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cab
 
 Custom PCB:
 
-![board-corrected](https://github.com/kamilsss655/ESPRI/assets/8842065/32c43c5b-be82-4ada-a294-97c2a03125fd)
-
-
-> [!WARNING]
-> Please take extra care in regards to the polarity of tantalum capacitors. Markings in red are the correct polarity. More info [here](https://github.com/kamilsss655/ESPRI/issues/23)
+![espri-pcb](https://github.com/kamilsss655/ESPRI/assets/8842065/56b6cc3e-1b23-4875-9b87-86ff9d0ace6c)
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
