@@ -62,5 +62,19 @@ esp_err_t SPIFFS_Init(const char *base_path)
     }
 
     ESP_LOGI(TAG, "Partition: %s size: total: %d, used: %d", base_path, total, used);
+
+    ESP_LOGI(TAG, "Performing garbage collection..");
+
+    // Garbage collect to reclaim 1MB
+    ret = esp_spiffs_gc(NULL, 1024 * 1024);
+
+    if (ret == ESP_OK)
+    {
+        ESP_LOGI(TAG, "Garbage collection complete");
+    }
+    else
+    {
+        ESP_LOGE(TAG, "Garbage collection failed");
+    }
     return ESP_OK;
 }

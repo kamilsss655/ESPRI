@@ -40,14 +40,6 @@
           filled
         />
 
-        <q-banner
-          class="bg-warning text-black"
-          v-if="beaconMode == BeaconMode.WAV"
-        >
-          This is an experimental feature. For now only a single static file is
-          played.
-        </q-banner>
-
         <q-field
           filled
           label="Delay in seconds"
@@ -146,7 +138,6 @@
             />
           </template>
         </q-field>
-
         <q-field
           filled
           label="Tone frequency"

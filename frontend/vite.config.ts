@@ -36,6 +36,11 @@ export default defineConfig({
         target: "http://" + espIpAddress, // IP address for the ESP web server
         changeOrigin: true,
         secure: false,
+      },
+      "/upload": {
+        target: "http://" + espIpAddress, // IP address for the ESP web server
+        changeOrigin: true,
+        secure: false,
       }
     }
   },
