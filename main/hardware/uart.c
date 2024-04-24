@@ -21,6 +21,7 @@
 #include <esp_log.h>
 
 #include "uart.h"
+#include "web/handlers/websocket.h"
 
 static const char *TAG = "HW/UART";
 
@@ -64,6 +65,7 @@ void UART_Monitor(void *pvParameters)
         {
             data[len] = '\0';
             ESP_LOGI(TAG, "Received: %s", (char *)data);
+            WEBSOCKET_Send(TAG, "Received: %s", (char *)data);
 
             // TODO: Have this call a separate UART_handle_receive function in app/uart.c
             // to perform application specific logic
