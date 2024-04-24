@@ -19,14 +19,13 @@
 
 #include <stddef.h>
 
-#define ECHO_TEST_TXD 16
-#define ECHO_TEST_RXD 17
+#define ECHO_TEST_TXD CONFIG_UART_TX_GPIO
+#define ECHO_TEST_RXD CONFIG_UART_RX_GPIO
 #define ECHO_TEST_RTS 2
 #define ECHO_TEST_CTS 4
 
 #define ECHO_UART_PORT_NUM   1
-// For some reason 240000 works better than target 250000 baud
-#define ECHO_UART_BAUD_RATE  240000
+#define ECHO_UART_BAUD_RATE  CONFIG_UART_BAUD_RATE
 #define ECHO_TASK_STACK_SIZE 2048
 
 #define BUF_SIZE (1024)

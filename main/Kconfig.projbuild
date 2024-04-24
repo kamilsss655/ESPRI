@@ -80,9 +80,30 @@ menu "Project configuration"
         help
             Touch button 1 number.
 
+    config UART_RX_GPIO
+        int "UART RX GPIO Pin"
+        range 1 30
+        default 17
+        help
+            UART RX GPIO Pin.
+
+    config UART_TX_GPIO
+        int "UART TX GPIO Pin"
+        range 1 30
+        default 16
+        help
+            UART TX GPIO Pin.
+
+    config UART_BAUD_RATE
+        int "UART baud rate"
+        range 1200 230400
+        default 115200
+        help
+            UART baud rate.
+
     config BEACON_MODE
         int "Beacon mode"
-        default 1
+        default 0
         help
             Beacon mode.
 
