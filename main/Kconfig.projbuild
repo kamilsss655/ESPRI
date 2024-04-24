@@ -60,6 +60,20 @@ menu "Project configuration"
         help
             PTT GPIO Pin to use.
 
+    config PTT_ON_DELAY
+        int "PTT on delay in ms"
+        range 0 2000
+        default 500
+        help
+            PTT on delay in ms.
+
+    config PTT_OFF_DELAY
+        int "PTT off delay in ms"
+        range 0 2000
+        default 500
+        help
+            PTT off delay in ms.
+
     config STATUS_LED_GPIO
         int "Status LED GPIO Pin"
         range 1 30

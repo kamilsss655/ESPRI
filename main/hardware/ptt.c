@@ -31,6 +31,8 @@ esp_err_t PTT_Init(void)
     ESP_ERROR_CHECK(gpio_set_direction(gSettings.gpio.ptt, GPIO_MODE_OUTPUT));
 
     ESP_LOGI(TAG, "PTT output initialized on pin: %d", gSettings.gpio.ptt);
+    ESP_LOGI(TAG, "PTT on delay: %dms", CONFIG_PTT_ON_DELAY);
+    ESP_LOGI(TAG, "PTT off delay: %dms", CONFIG_PTT_OFF_DELAY);
 
     return ESP_OK;
 }
@@ -39,16 +41,23 @@ esp_err_t PTT_Init(void)
 void PTT_Press()
 {
     LED_Fade(LED_BRIGHTNESS_MAX, LED_TIME_FAST, false);
+
     // Take LED semaphore to prevent other tasks interacting with the LED
     xSemaphoreTake(gLedSemaphore, LED_TIME_MAX / portTICK_PERIOD_MS);
 
     gpio_set_level(gSettings.gpio.ptt, 1);
     ESP_LOGI(TAG, "PTT pressed!");
+
+    // Wait a bit with PTT pressed before we output audio
+    vTaskDelay(CONFIG_PTT_ON_DELAY / portTICK_PERIOD_MS);
 }
 
 // Release PTT
 void PTT_Release()
 {
+    // Wait a bit in silence before we release PTT
+    vTaskDelay(CONFIG_PTT_OFF_DELAY / portTICK_PERIOD_MS);
+
     // Give LED semaphore to allow other tasks interacting with the LED
     xSemaphoreGive(gLedSemaphore);
     LED_Fade(LED_BRIGHTNESS_OFF, LED_TIME_FAST, false);
