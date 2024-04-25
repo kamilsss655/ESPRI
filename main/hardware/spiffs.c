@@ -16,8 +16,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "esp_log.h"
-#include "esp_spiffs.h"
+#include <esp_log.h>
+#include <esp_spiffs.h>
 
 static const char *TAG = "HW/SPIFFS";
 
@@ -62,19 +62,28 @@ esp_err_t SPIFFS_Init(const char *base_path)
     }
 
     ESP_LOGI(TAG, "Partition: %s size: total: %d, used: %d", base_path, total, used);
+    return ESP_OK;
+}
 
-    ESP_LOGI(TAG, "Performing garbage collection..");
+// Check integrity of SPIFFS (takes a lot of time)
+esp_err_t SPIFFS_IntegrityCheck(void)
+{      
+    esp_err_t ret = esp_spiffs_check(NULL);
 
-    // Garbage collect to reclaim 1MB
-    ret = esp_spiffs_gc(NULL, 1024 * 1024);
-
-    if (ret == ESP_OK)
+    if (ret != ESP_OK)
     {
-        ESP_LOGI(TAG, "Garbage collection complete");
+        if (ret == ESP_ERR_INVALID_STATE)
+        {
+            ESP_LOGE(TAG, "Partition was not mounted");
+        }
+        else if (ret == ESP_FAIL)
+        {
+            ESP_LOGE(TAG, "Partition corrupted");
+        }
+        return ret;
     }
-    else
-    {
-        ESP_LOGE(TAG, "Garbage collection failed");
-    }
+
+    ESP_LOGE(TAG, "Partition integrity check positive");
+
     return ESP_OK;
 }

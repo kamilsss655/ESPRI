@@ -20,5 +20,6 @@
 #include <esp_err.h>
 
 esp_err_t SPIFFS_Init(const char *base_path);
+esp_err_t SPIFFS_IntegrityCheck(void);
 
 #endif

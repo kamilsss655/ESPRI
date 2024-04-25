@@ -181,6 +181,7 @@ Thank you for your interest in contributing to this project! Here are some of th
 - https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/sdm.html
 - https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/i2s.html
 - https://docs.espressif.com/projects/esp-idf/en/stable/esp32h2/api-reference/peripherals/ana_cmpr.html
+- https://www.oldradioworld.com/shows/Vintage_Commercials.php (old radio show recordings, show copyrights are believed to be expired)
 
 ## License
 
