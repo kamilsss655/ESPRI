@@ -15,12 +15,14 @@
 
 <script setup lang="ts">
 import { Notify, QUploaderFactoryFn } from "quasar";
-import { ApiPaths } from "../../types/Api";
+import { ApiPaths, ApiResponse, GetApiResponseFromJson } from "../../types/Api";
 
-function onUploaded() {
+function onUploaded(info: {files: readonly any[], xhr: XMLHttpRequest}) {
+  const response: ApiResponse = GetApiResponseFromJson(info.xhr.response);
+
   Notify.create({
     type: "positive",
-    message: `Upload complete.`
+    message: response.data.response
   });
 }
 
@@ -28,16 +30,19 @@ function onRejected(rejectedEntries: any) {
   console.log(rejectedEntries);
   Notify.create({
     type: "negative",
-    message: `${rejectedEntries.length} file(s) did not pass validation constraints`
+    message: `${rejectedEntries.length} file(s) did not pass validation constraints. File too big?`
   });
 }
 
-function onFailed(info: {files: readonly any[], xhr: any}) {
+function onFailed(info: {files: readonly any[], xhr: XMLHttpRequest}) {
   console.log(info.files);
   console.log(info.xhr);
+
+  const response: ApiResponse = GetApiResponseFromJson(info.xhr.response);
+
   Notify.create({
     type: "negative",
-    message: `Upload failed`
+    message: "Error! " + response.data.response
   });
 }
 
