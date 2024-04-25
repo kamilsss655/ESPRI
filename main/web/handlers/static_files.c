@@ -16,6 +16,7 @@
 
 #include <sys/param.h>
 #include <esp_log.h>
+#include <esp_spiffs.h>
 
 #include "static_files.h"
 #include "helper/http.h"
@@ -210,6 +211,20 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
          * incoming file content will keep the socket busy */
         return ESP_FAIL;
     }
+
+#ifdef UPLOAD_PREVENT_FILE_OVERWRITE
+    // Delete the file
+    unlink(filepath);
+
+    // Garbage collect to get enough free space for the file
+    esp_err_t ret = esp_spiffs_gc(NULL, req->content_len);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to get enough free space for the file");
+        httpd_json_resp_send(req, HTTPD_500, "Failed to get enough free space for the file");
+        return ESP_FAIL;
+    }
+#endif
 
     fd = fopen(filepath, "w");
     if (!fd)
