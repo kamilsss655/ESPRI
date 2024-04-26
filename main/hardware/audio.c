@@ -50,6 +50,9 @@ adc_unit_t audioAdcUnit;
 // ADC dropped frames count due to slow processing
 volatile u_int16_t adcDroppedFrames = 0;
 
+// Counts samples over squelch
+uint16_t samplesOverSquelch;
+
 AudioState_t gAudioState;
 
 SemaphoreHandle_t gAudioStateSemaphore;
@@ -94,7 +97,7 @@ esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
     gSettings.calibration.adc.is_valid = SETTINGS_TRUE;
 
     ESP_ERROR_CHECK_WITHOUT_ABORT(SETTINGS_Save());
-  
+
     ESP_LOGI(TAG, "ADC calibrated to: %d. Used %d samples for calibration.", gSettings.calibration.adc.value, samples_count);
 
     return ESP_OK;
@@ -209,7 +212,7 @@ void AUDIO_AudioInputProcess(void *pvParameters)
     size_t received_data_size;
 
     while (1)
-    {   
+    {
         // Recalibrate if current ADC calibration is invalid
         if (gSettings.calibration.adc.is_valid == SETTINGS_FALSE)
         {
@@ -222,6 +225,11 @@ void AUDIO_AudioInputProcess(void *pvParameters)
         {
             // Process data here
 
+            if ((*data > ((gSettings.calibration.adc.value * 105) / 100)) || (*data < ((gSettings.calibration.adc.value * 95) / 100)))
+            {
+                samplesOverSquelch++;
+            }
+
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, (void *)data);
         }
@@ -230,31 +238,36 @@ void AUDIO_AudioInputProcess(void *pvParameters)
             // Likely the buffer is empty
             ESP_LOGI(TAG, "ADC ring buffer empty");
         }
+    }
+}
 
-        // uint16_t lastAudioCount = audioOnCount;
+// Monitors samples over squelch and controls the squelch
+void AUDIO_SquelchMonitor(void *pvParameters)
+{
+    uint16_t samples_temp = samplesOverSquelch;
+    while (1)
+    {
+        if (samples_temp != samplesOverSquelch)
+        {
 
-        // if ((data > ((calibration_val * 102) / 100)) || (data < ((calibration_val * 98) / 100)))
-        // {
-        //     audioOnCount++;
-        //     // ESP_LOGI(TAG, "audio detected");
-        // }
+            if (gAudioState != AUDIO_RECEIVING)
+            {
+                ESP_LOGI(TAG, "RECEIVING");
+                AUDIO_SetAudioState(AUDIO_RECEIVING);
+            }
+        }
+        else
+        {
 
-        // ESP_LOGE(TAG, "sound count: %d", audioOnCount);
-        // ESP_LOGI(TAG, "ADC dropped frames: %d", adcDroppedFrames);
-        // vTaskDelay(500 / portTICK_PERIOD_MS);
-        // if (lastAudioCount != audioOnCount)
-        // {
-        //     ESP_LOGI(TAG, "RECEIVING");
-        //     if (gAudioState != AUDIO_RECEIVING)
-        //         AUDIO_SetAudioState(AUDIO_RECEIVING);
-        // }
-        // else
-        // {
-        //     ESP_LOGI(TAG, "LISTENING");
-        //     if (gAudioState != AUDIO_LISTENING)
-        //         AUDIO_SetAudioState(AUDIO_LISTENING);
-        // }
-        // lastAudioCount = audioOnCount;
+            if (gAudioState != AUDIO_LISTENING)
+            {
+                ESP_LOGI(TAG, "LISTENING");
+                AUDIO_SetAudioState(AUDIO_LISTENING);
+            }
+        }
+        samples_temp = samplesOverSquelch;
+
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
