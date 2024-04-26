@@ -110,5 +110,6 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
 void AUDIO_Init(void);
 void AUDIO_AdcStop(void);
 esp_err_t AUDIO_PlayWav(const char *filepath);
+void AUDIO_MonitorInput(void *pvParameters);
 
 #endif

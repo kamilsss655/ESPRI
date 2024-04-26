@@ -51,5 +51,7 @@ void app_main()
     
     // Create system info refresh task
     xTaskCreate(SYSTEM_InfoRefresh, "SYSTEM_InfoRefresh", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
+
+    xTaskCreate(AUDIO_MonitorInput, "AUDIO_MonitorInput", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
     
 }

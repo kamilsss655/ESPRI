@@ -41,10 +41,44 @@ EventGroupHandle_t audioEventGroup;
 
 adc_unit_t audioAdcUnit;
 
+// ADC dropped frames count due to slow processing
+volatile u_int16_t adcDroppedFrames = 0;
+
 AudioState_t gAudioState;
 
 SemaphoreHandle_t gAudioStateSemaphore;
 SemaphoreHandle_t transmitSemaphore;
+
+#define CALIBRATION_SAMPLES_TARGET 100
+
+int calibrated = 0;
+int16_t calibration_val = 0;
+int calibration_finished = 0;
+
+// There is an issue since this value will change with voltage, temperature etc
+// for now let's test it
+void AUDIO_AdcCalibrate(u_int16_t value)
+{
+    if (calibration_finished == 1)
+        return;
+
+    ESP_LOGI(TAG, "ADC value: %d", value);
+    if (calibrated <= CALIBRATION_SAMPLES_TARGET)
+    {
+        calibrated += 1;
+        calibration_val += value;
+
+        if (calibrated > 2)
+        {
+            calibration_val /= 2;
+        }
+    }
+    else
+    {
+        calibration_finished = 1;
+        ESP_LOGI(TAG, "Mean ADC value: %d", calibration_val);
+    }
+}
 
 // I2S handle to receive/listen audio
 static adc_continuous_handle_t adc_handle;
@@ -65,6 +99,15 @@ static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, con
     return (mustYield == pdTRUE);
 }
 
+// Interupt callback called when there is ADC sample overflow likely due to slow data processing
+static bool IRAM_ATTR adc_pool_ovf(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
+{
+    adcDroppedFrames++;
+    return false;
+}
+
+// Consider this to be state machine?
+// so we can have busy channel lock etc?
 // Set gAudioState, protect with semaphores to prevent race conditions
 static void AUDIO_SetAudioState(AudioState_t state)
 {
@@ -118,7 +161,7 @@ static void AUDIO_AdcInit()
 
     adc_continuous_evt_cbs_t cbs = {
         .on_conv_done = adc_conv_done_callback,
-    };
+        .on_pool_ovf = adc_pool_ovf};
     ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(adc_handle, &cbs, NULL));
     ESP_ERROR_CHECK(adc_continuous_start(adc_handle));
 
@@ -132,6 +175,32 @@ void AUDIO_AdcStop()
 {
     adc_continuous_stop(adc_handle);
     adc_continuous_deinit(adc_handle);
+}
+
+u_int16_t audioOnCount = 0;
+
+void AUDIO_MonitorInput(void *pvParameters)
+{
+    uint16_t lastAudioCount = audioOnCount;
+    while (1)
+    {
+        ESP_LOGE(TAG, "sound count: %d", audioOnCount);
+        ESP_LOGI(TAG, "ADC dropped frames: %d", adcDroppedFrames);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+        if (lastAudioCount != audioOnCount)
+        {
+            ESP_LOGI(TAG, "RECEIVING");
+            if (gAudioState != AUDIO_RECEIVING)
+                AUDIO_SetAudioState(AUDIO_RECEIVING);
+        }
+        else
+        {
+            ESP_LOGI(TAG, "LISTENING");
+            if (gAudioState != AUDIO_LISTENING)
+                AUDIO_SetAudioState(AUDIO_LISTENING);
+        }
+        lastAudioCount = audioOnCount;
+    }
 }
 
 // Task listening to incoming audio on ADC port
@@ -172,6 +241,8 @@ void AUDIO_Listen(void *pvParameters)
             AUDIO_AdcInit();
             xEventGroupClearBits(audioEventGroup, BIT_DONE_TX);
             AUDIO_SetAudioState(AUDIO_LISTENING);
+            // report dropped frames for diagnostics
+            ESP_LOGI(TAG, "ADC dropped frames: %d", adcDroppedFrames);
         }
         else // if no bits are set do listen (default state)
         {
@@ -183,27 +254,34 @@ void AUDIO_Listen(void *pvParameters)
             if (ret == ESP_OK)
             {
                 // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
-                // for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
-                // {
-                //     adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
-                //     uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
-                //     uint16_t data = AUDIO_ADC_GET_DATA(p);
-                //     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
-                //     if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
-                //     {
-                //         ESP_LOGI(TAG, "Channel: %" PRIu32 ", Value: %u", chan_num, data);
-                //     }
-                //     else
-                //     {
-                //         ESP_LOGW(TAG, "Invalid data");
-                //     }
-                // }
+                for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
+                {
+                    adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
+                    uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
+                    uint16_t data = AUDIO_ADC_GET_DATA(p);
+
+                    /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
+                    if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
+                    {
+                        AUDIO_AdcCalibrate(data);
+
+                        if ((data > ((calibration_val * 102) / 100)) || (data < ((calibration_val * 98) / 100)))
+                        {
+                            audioOnCount++;
+                            // ESP_LOGI(TAG, "audio detected");
+                        }
+                    }
+                    else
+                    {
+                        ESP_LOGW(TAG, "Invalid data");
+                    }
+                }
                 /**
                  * Because printing is slow, so every time you call `ulTaskNotifyTake`, it will immediately return.
                  * To avoid a task watchdog timeout, add a delay here. When you replace the way you process the data,
                  * usually you don't need this delay (as this task will block for a while).
                  */
-                vTaskDelay(1);
+                // vTaskDelay(1);
             }
             else if (ret == ESP_ERR_TIMEOUT)
             {
