@@ -44,8 +44,6 @@ EventGroupHandle_t audioEventGroup;
 // ADC ring buffer handle
 RingbufHandle_t adcRingBufferHandle;
 
-bool calibrated = false;
-
 adc_unit_t audioAdcUnit;
 
 // ADC dropped frames count due to slow processing
