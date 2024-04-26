@@ -170,17 +170,6 @@ static void AUDIO_AdcInit()
     ESP_LOGI(TAG, "ADC initialized");
     ESP_LOGI(TAG, "ADC attenuation: %" PRIx8, dig_cfg.adc_pattern[0].atten);
     ESP_LOGI(TAG, "ADC channel: %" PRIx8, dig_cfg.adc_pattern[0].channel);
-
-    // Create ADC ring buffer to store ADC samples (FIFO)
-    adcRingBufferHandle = xRingbufferCreate(AUDIO_ADC_RING_BUFFER_SIZE, AUDIO_ADC_RING_BUFFER_TYPE);
-    if (adcRingBufferHandle == NULL)
-    {
-        ESP_LOGE(TAG, "Failed to create ADC ring buffer");
-    }
-    else
-    {
-        ESP_LOGI(TAG, "ADC ring buffer initialized");
-    }
 }
 
 // Stop ADC
@@ -650,6 +639,17 @@ void AUDIO_Init(void)
 
     transmitSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(transmitSemaphore);
+
+    // Create ADC ring buffer to store ADC samples (FIFO)
+    adcRingBufferHandle = xRingbufferCreate(AUDIO_ADC_RING_BUFFER_SIZE, AUDIO_ADC_RING_BUFFER_TYPE);
+    if (adcRingBufferHandle == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create ADC ring buffer");
+    }
+    else
+    {
+        ESP_LOGI(TAG, "ADC ring buffer initialized");
+    }
 
     initialize_pwm_audio();
 }
