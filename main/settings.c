@@ -14,6 +14,8 @@
  *     limitations under the License.
  */
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include <string.h>
 #include <esp_log.h>
 #include <esp_spiffs.h>
@@ -25,9 +27,27 @@ static const char *TAG = "SETTINGS";
 
 SETTINGS_Config_t gSettings;
 
+SemaphoreHandle_t settingsSemaphore;
+
+// Initialize settings
+esp_err_t SETTINGS_Init(void)
+{
+    settingsSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(settingsSemaphore);
+
+    ESP_ERROR_CHECK(SETTINGS_Load());
+
+    return ESP_OK;
+}
+
 // Load settings from local filesystem
 esp_err_t SETTINGS_Load(void)
 {
+    if (xSemaphoreTake(settingsSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+    {
+        ESP_LOGE(TAG, "Could not load settings due to lock");
+        return ESP_FAIL;
+    }
 
     FILE *fd = NULL;
 
@@ -35,10 +55,15 @@ esp_err_t SETTINGS_Load(void)
     if (!fd)
     {
         ESP_LOGE(TAG, "No config file found. First boot?");
+        xSemaphoreGive(settingsSemaphore);
         SYSTEM_FirstBoot();
     }
-    fread(&gSettings, 1, sizeof(gSettings), fd);
-    fclose(fd);
+    else
+    {
+        fread(&gSettings, 1, sizeof(gSettings), fd);
+        fclose(fd);
+        xSemaphoreGive(settingsSemaphore);
+    }
 
     return ESP_OK;
 }
@@ -46,11 +71,19 @@ esp_err_t SETTINGS_Load(void)
 // Save settings into local filesystem
 esp_err_t SETTINGS_Save(void)
 {
+    if (xSemaphoreTake(settingsSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+    {
+        ESP_LOGE(TAG, "Could not save settings due to lock");
+        return ESP_FAIL;
+    }
+
     FILE *fd = NULL;
 
     fd = fopen(CONFIG_LOCATION, "wb");
     fwrite(&gSettings, 1, sizeof(gSettings), fd);
     fclose(fd);
+
+    xSemaphoreGive(settingsSemaphore);
 
     return ESP_OK;
 }
@@ -95,6 +128,9 @@ esp_err_t SETTINGS_FactoryReset(bool reboot)
     gSettings.beacon.afsk.baud = CONFIG_AFSK_BEACON_BAUD;
     gSettings.beacon.afsk.zero_freq = CONFIG_AFSK_ZERO_FREQ;
     gSettings.beacon.afsk.one_freq = CONFIG_AFSK_ONE_FREQ;
+    // Calibration
+    gSettings.calibration.adc.value = 0;
+    gSettings.calibration.adc.is_valid = SETTINGS_FALSE;
 
     SETTINGS_Save();
 

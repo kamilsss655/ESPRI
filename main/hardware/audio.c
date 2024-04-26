@@ -55,11 +55,6 @@ AudioState_t gAudioState;
 SemaphoreHandle_t gAudioStateSemaphore;
 SemaphoreHandle_t transmitSemaphore;
 
-#define CALIBRATION_SAMPLES_TARGET 100
-
-int16_t calibration_val = 0;
-int calibration_finished = 0;
-
 /// @brief Calibrate ADC by calculating mean value of the samples
 /// @param samples_count target samples count used for calibration
 /// @return
@@ -95,9 +90,12 @@ esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
         }
     }
 
-    ESP_LOGI(TAG, "ADC calibrated to: %d. Used %d samples for calibration.", (u_int16_t)calibration_value, samples_count);
+    gSettings.calibration.adc.value = (u_int16_t)calibration_value;
+    gSettings.calibration.adc.is_valid = SETTINGS_TRUE;
 
-    calibrated = true;
+    ESP_ERROR_CHECK_WITHOUT_ABORT(SETTINGS_Save());
+  
+    ESP_LOGI(TAG, "ADC calibrated to: %d. Used %d samples for calibration.", gSettings.calibration.adc.value, samples_count);
 
     return ESP_OK;
 }
@@ -211,8 +209,9 @@ void AUDIO_AudioInputProcess(void *pvParameters)
     size_t received_data_size;
 
     while (1)
-    {
-        if (calibrated == false)
+    {   
+        // Recalibrate if current ADC calibration is invalid
+        if (gSettings.calibration.adc.is_valid == SETTINGS_FALSE)
         {
             AUDIO_AdcCalibrate(AUDIO_ADC_CALIBRATION_SAMPLES);
         }

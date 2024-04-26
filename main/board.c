@@ -33,7 +33,7 @@ void BOARD_Init(void)
     ESP_ERROR_CHECK(SPIFFS_Init(STORAGE_BASE_PATH));
 
     // Load SETTINGS
-    ESP_ERROR_CHECK(SETTINGS_Load());
+    ESP_ERROR_CHECK(SETTINGS_Init());
 
     // Init LED
     LED_Init();
