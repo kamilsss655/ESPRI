@@ -43,6 +43,8 @@ EventGroupHandle_t audioEventGroup;
 // ADC ring buffer handle
 RingbufHandle_t adcRingBufferHandle;
 
+bool calibrated = false;
+
 adc_unit_t audioAdcUnit;
 
 // ADC dropped frames count due to slow processing
@@ -55,31 +57,49 @@ SemaphoreHandle_t transmitSemaphore;
 
 #define CALIBRATION_SAMPLES_TARGET 100
 
-int calibrated = 0;
 int16_t calibration_val = 0;
 int calibration_finished = 0;
 
-void AUDIO_AdcCalibrate(AUDIO_ADC_DATA_TYPE value)
+/// @brief Calibrate ADC by calculating mean value of the samples
+/// @param samples_count target samples count used for calibration
+/// @return
+esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
 {
-    if (calibration_finished == 1)
-        return;
+    // ADC sample
+    AUDIO_ADC_DATA_TYPE *data;
+    size_t received_data_size;
+    uint32_t calibration_value = 0;
 
-    ESP_LOGI(TAG, "ADC value: %d", value);
-    if (calibrated <= CALIBRATION_SAMPLES_TARGET)
+    for (u_int i = 0; i < samples_count; i++)
     {
-        calibrated += 1;
-        calibration_val += value;
-
-        if (calibrated > 2)
+        // Get ADC data from the ADC ring buffer
+        data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
+        // Check received data
+        if (data != NULL)
         {
-            calibration_val /= 2;
+            // Calculate mean value
+            calibration_value += *data;
+            if (i > 2)
+            {
+                calibration_value /= 2;
+            }
+
+            // Return item so it gets removed from the ring buffer
+            vRingbufferReturnItem(adcRingBufferHandle, (void *)data);
+        }
+        else
+        {
+            // Likely the buffer is empty
+            ESP_LOGI(TAG, "ADC ring buffer empty");
+            return ESP_FAIL;
         }
     }
-    else
-    {
-        calibration_finished = 1;
-        ESP_LOGI(TAG, "Mean ADC value: %d", calibration_val);
-    }
+
+    ESP_LOGI(TAG, "ADC calibrated to: %d. Used %d samples for calibration.", (u_int16_t)calibration_value, samples_count);
+
+    calibrated = true;
+
+    return ESP_OK;
 }
 
 // I2S handle to receive/listen audio
@@ -192,13 +212,17 @@ void AUDIO_AudioInputProcess(void *pvParameters)
 
     while (1)
     {
+        if (calibrated == false)
+        {
+            AUDIO_AdcCalibrate(AUDIO_ADC_CALIBRATION_SAMPLES);
+        }
         // Get ADC data from the ADC ring buffer
         data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
         // Check received data
         if (data != NULL)
         {
-            // Process data
-            AUDIO_AdcCalibrate(*data);
+            // Process data here
+
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, (void *)data);
         }

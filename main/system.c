@@ -122,7 +122,5 @@ void SYSTEM_FirstBoot(void)
 {
     ESP_LOGI(TAG, "First boot");
 
-    SETTINGS_FactoryReset(false);
-    // TODO: perform calibration here
-    SYSTEM_Reboot();
+    SETTINGS_FactoryReset(true);
 }

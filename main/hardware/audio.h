@@ -31,6 +31,9 @@
 // Define audio input sampling frequency in Hz
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
 
+// Define amount of samples used for ADC calibration
+#define AUDIO_ADC_CALIBRATION_SAMPLES 16000
+
 // Define ADC conv mode
 #define AUDIO_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
 
@@ -118,5 +121,6 @@ void AUDIO_Init(void);
 void AUDIO_AdcStop(void);
 esp_err_t AUDIO_PlayWav(const char *filepath);
 void AUDIO_AudioInputProcess(void *pvParameters);
+esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count);
 
 #endif
