@@ -19,6 +19,9 @@
 
 #include <driver/i2s_pdm.h>
 
+// Define audio ADC data type representing single audio sample
+#define AUDIO_ADC_DATA_TYPE uint16_t
+
 // Define audio input max buffer size
 #define AUDIO_INPUT_MAX_BUFF_SIZE 1024
 
@@ -54,6 +57,10 @@
 #define AUDIO_AFSK_MAX_BAUD 2400
 
 #define AUDIO_BUFFER_SIZE 2048
+
+// Define ADC Ring buffer
+#define AUDIO_ADC_RING_BUFFER_SIZE 1024
+#define AUDIO_ADC_RING_BUFFER_TYPE RINGBUF_TYPE_BYTEBUF
 
 // Define audio output sampling frequency in Hz
 #define AUDIO_OUTPUT_SAMPLE_FREQ 32000
@@ -110,6 +117,6 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
 void AUDIO_Init(void);
 void AUDIO_AdcStop(void);
 esp_err_t AUDIO_PlayWav(const char *filepath);
-void AUDIO_MonitorInput(void *pvParameters);
+void AUDIO_AudioInputProcess(void *pvParameters);
 
 #endif

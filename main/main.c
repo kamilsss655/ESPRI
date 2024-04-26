@@ -43,6 +43,9 @@ void app_main()
     // Audio listen task
     xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
 
+    // Audio input process task
+    xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
+
     // Create Morse code transmit task
     xTaskCreate(BEACON_Scheduler, "BEACON_Scheduler", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);
 
@@ -51,7 +54,5 @@ void app_main()
     
     // Create system info refresh task
     xTaskCreate(SYSTEM_InfoRefresh, "SYSTEM_InfoRefresh", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
-
-    xTaskCreate(AUDIO_MonitorInput, "AUDIO_MonitorInput", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
     
 }
