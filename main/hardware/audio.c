@@ -32,6 +32,7 @@
 #include "settings.h"
 #include "helper/misc.h"
 #include "helper/rtos.h"
+#include "hardware/led.h"
 #include "web/handlers/websocket.h"
 
 static const char *TAG = "HW/AUDIO";
@@ -136,7 +137,31 @@ static void AUDIO_SetAudioState(AudioState_t state)
 {
     if (xSemaphoreTake(gAudioStateSemaphore, 1000 / portTICK_PERIOD_MS) == pdTRUE)
     {
+        // State machine constraints
+        // switch (state)
+        // {
+        // case AUDIO_TRANSMITTING:
+        // if(gAudioState == )
+        // }
+
         gAudioState = state;
+
+        // Side effects
+        switch (gAudioState)
+        {
+        case AUDIO_TRANSMITTING:
+        case AUDIO_RECEIVING:
+            LED_Fade(LED_BRIGHTNESS_MAX, LED_TIME_FAST, false);
+            // Take LED semaphore to prevent other tasks interacting with the LED
+            xSemaphoreTake(gLedSemaphore, LED_TIME_MAX / portTICK_PERIOD_MS);
+            break;
+
+        default:
+            // Give LED semaphore to allow other tasks interacting with the LED
+            xSemaphoreGive(gLedSemaphore);
+            LED_Fade(LED_BRIGHTNESS_OFF, LED_TIME_FAST, false);
+            break;
+        }
 
         WEBSOCKET_Send("gAudioState", "%s", gAudioStateNames[state]);
 
@@ -249,7 +274,6 @@ void AUDIO_SquelchMonitor(void *pvParameters)
     {
         if (samples_temp != samplesOverSquelch)
         {
-
             if (gAudioState != AUDIO_RECEIVING)
             {
                 ESP_LOGI(TAG, "RECEIVING");
@@ -258,8 +282,7 @@ void AUDIO_SquelchMonitor(void *pvParameters)
         }
         else
         {
-
-            if (gAudioState != AUDIO_LISTENING)
+            if (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING)
             {
                 ESP_LOGI(TAG, "LISTENING");
                 AUDIO_SetAudioState(AUDIO_LISTENING);
