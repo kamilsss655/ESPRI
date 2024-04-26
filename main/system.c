@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <esp_system.h>
 #include <esp_sleep.h>
+#include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <esp_app_desc.h>
 #include <esp_spiffs.h>
@@ -26,6 +27,8 @@
 #include "system.h"
 #include "settings.h"
 #include "hardware/led.h"
+
+static const char *TAG = "SYSTEM";
 
 SYSTEM_Info_t gSystemInfo;
 
@@ -94,6 +97,8 @@ void before_shutdown(void)
 
 void SYSTEM_DeepSleep(void)
 {
+    ESP_LOGI(TAG, "Deep sleep");
+
     before_shutdown();
 
     // Enable wake-up with touch button
@@ -105,7 +110,19 @@ void SYSTEM_DeepSleep(void)
 
 void SYSTEM_Reboot(void)
 {
+    ESP_LOGI(TAG, "Reboot");
+
     before_shutdown();
 
     esp_restart();
+}
+
+// Called upon first system boot (after flashing new firmware)
+void SYSTEM_FirstBoot(void)
+{
+    ESP_LOGI(TAG, "First boot");
+
+    SETTINGS_FactoryReset(false);
+    // TODO: perform calibration here
+    SYSTEM_Reboot();
 }

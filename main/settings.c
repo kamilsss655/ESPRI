@@ -34,10 +34,10 @@ esp_err_t SETTINGS_Load(void)
     fd = fopen(CONFIG_LOCATION, "rb");
     if (!fd)
     {
-        ESP_LOGE(TAG, "No config file found.");
-        SETTINGS_FactoryReset();
+        ESP_LOGE(TAG, "No config file found. First boot?");
+        SYSTEM_FirstBoot();
     }
-    fread(&gSettings, 1, sizeof(gSettings),fd);
+    fread(&gSettings, 1, sizeof(gSettings), fd);
     fclose(fd);
 
     return ESP_OK;
@@ -49,28 +49,30 @@ esp_err_t SETTINGS_Save(void)
     FILE *fd = NULL;
 
     fd = fopen(CONFIG_LOCATION, "wb");
-    fwrite(&gSettings, 1, sizeof(gSettings),fd);
+    fwrite(&gSettings, 1, sizeof(gSettings), fd);
     fclose(fd);
 
     return ESP_OK;
 }
 
-// Performs factory reset
+/// @brief Performs factory reset
 // Allows to overwrite settings with private developer settings
 // To use run: idp.py menuconfig -> Project configuration
 // Settings set with menuconfig are not tracked with version control
 // Useful for connecting to private WIFI network
-esp_err_t SETTINGS_FactoryReset(void)
+/// @param reboot determines whether device should reboot after the reset
+/// @return
+esp_err_t SETTINGS_FactoryReset(bool reboot)
 {
     ESP_LOGW(TAG, "Performing factory reset.");
-    // WiFi
-    #ifdef CONFIG_WIFI_AP_MODE_ENABLED
-        gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
-        gSettings.wifi.channel = CONFIG_WIFI_CHANNEL;
-        gSettings.wifi.max_connections = CONFIG_MAX_STA_CONN;
-    #else
-        gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
-    #endif
+// WiFi
+#ifdef CONFIG_WIFI_AP_MODE_ENABLED
+    gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
+    gSettings.wifi.channel = CONFIG_WIFI_CHANNEL;
+    gSettings.wifi.max_connections = CONFIG_MAX_STA_CONN;
+#else
+    gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
+#endif
     strcpy(gSettings.wifi.ssid, CONFIG_WIFI_SSID);
     strcpy(gSettings.wifi.password, CONFIG_WIFI_PASSWORD);
     // GPIO
@@ -95,8 +97,11 @@ esp_err_t SETTINGS_FactoryReset(void)
     gSettings.beacon.afsk.one_freq = CONFIG_AFSK_ONE_FREQ;
 
     SETTINGS_Save();
-    
-    SYSTEM_Reboot();
-    
+
+    if (reboot)
+    {
+        SYSTEM_Reboot();
+    }
+
     return ESP_OK;
 }

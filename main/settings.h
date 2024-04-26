@@ -148,6 +148,6 @@ extern SETTINGS_Config_t gSettings;
 // Initialize the board
 esp_err_t SETTINGS_Load(void);
 esp_err_t SETTINGS_Save(void);
-esp_err_t SETTINGS_FactoryReset(void);
+esp_err_t SETTINGS_FactoryReset(bool reboot);
 
 #endif
