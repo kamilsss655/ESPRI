@@ -107,12 +107,6 @@ esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
 // I2S handle to receive/listen audio
 static adc_continuous_handle_t adc_handle;
 
-const char *gAudioStateNames[4] = {
-    "OFF",
-    "LISTENING",
-    "RECEIVING",
-    "TRANSMITTING"};
-
 // Interupt callback called when ADC finishes one portion of ADC conversions
 static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
 {
@@ -163,7 +157,7 @@ static void AUDIO_SetAudioState(AudioState_t state)
             break;
         }
 
-        WEBSOCKET_Send("gAudioState", "%s", gAudioStateNames[state]);
+        WEBSOCKET_Send("gAudioState", "%d", state);
 
         xSemaphoreGive(gAudioStateSemaphore);
     }
