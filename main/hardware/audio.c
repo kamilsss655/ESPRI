@@ -210,9 +210,7 @@ void AUDIO_AdcStop()
 
 u_int16_t audioOnCount = 0;
 
-// Audio input process task
-// This is a main audio processing task that reads ADC samples from the ADC ring buffer
-// and processes them
+// Main audio processing task that reads ADC samples from the ADC ring buffer and processes them
 void AUDIO_AudioInputProcess(void *pvParameters)
 {
     // ADC sample
