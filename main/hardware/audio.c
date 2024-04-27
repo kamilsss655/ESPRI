@@ -255,6 +255,7 @@ void AUDIO_SquelchMonitor(void *pvParameters)
     uint16_t samples_temp = samplesOverSquelch;
     while (1)
     {
+        // If the samplesOverSquelch has changed since last time we checked it means we are receiving audio
         if (samples_temp != samplesOverSquelch)
         {
             if (gAudioState != AUDIO_RECEIVING)
@@ -263,6 +264,7 @@ void AUDIO_SquelchMonitor(void *pvParameters)
                 AUDIO_SetAudioState(AUDIO_RECEIVING);
             }
         }
+        // If the samplesOverSquelch remains unchanged since last time we checked it means we are not receiving audio
         else
         {
             if (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING)
