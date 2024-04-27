@@ -122,20 +122,11 @@ static bool IRAM_ATTR adc_pool_ovf(adc_continuous_handle_t handle, const adc_con
     return false;
 }
 
-// Consider this to be state machine?
-// so we can have busy channel lock etc?
-// Set gAudioState, protect with semaphores to prevent race conditions
+// Set gAudioState
 static void AUDIO_SetAudioState(AudioState_t state)
 {
     if (xSemaphoreTake(gAudioStateSemaphore, 1000 / portTICK_PERIOD_MS) == pdTRUE)
     {
-        // State machine constraints
-        // switch (state)
-        // {
-        // case AUDIO_TRANSMITTING:
-        // if(gAudioState == )
-        // }
-
         gAudioState = state;
 
         // Side effects
