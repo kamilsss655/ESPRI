@@ -27,6 +27,13 @@
 // Determines location of where the config file is stored ie. /storage/config.bin
 #define CONFIG_LOCATION STORAGE_BASE_PATH CONFIG_FILE_PATH
 
+// BOOL type
+typedef enum
+{
+    SETTINGS_FALSE,
+    SETTINGS_TRUE
+} SETTINGS_Bool_t;
+
 // WIFI mode
 typedef enum
 {
@@ -107,13 +114,20 @@ typedef struct
 // Audio out settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE volume; // 0-100
+    SETTINGS_INTEGER_TYPE volume; // 0-100 - determines audio output volume
 } SETTINGS_AudioOutConfig_t;
+
+// Audio in settings
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE squelch; // 0-100 - determines squelch sensitivity
+} SETTINGS_AudioInConfig_t;
 
 // Audio settings
 typedef struct
 {
     SETTINGS_AudioOutConfig_t out;
+    SETTINGS_AudioInConfig_t  in;
 } SETTINGS_AudioConfig_t;
 
 // LED settings
@@ -132,6 +146,20 @@ typedef struct
     SETTINGS_AfskBeaconConfig_t      afsk;
 } SETTINGS_BeaconConfig_t;
 
+// Calibration subtype
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE value;    // value when there is no audio in signal
+    SETTINGS_Bool_t       is_valid; // set it to false to trigger calibration
+} SETTINGS_CalibrationSubtype_t;
+
+// Calibration settings
+typedef struct
+{
+    SETTINGS_CalibrationSubtype_t adc;
+    // SETTINGS_CalibrationSubtype_t touch;
+} SETTINGS_Calibration_t;
+
 // Global settings
 typedef struct
 {
@@ -141,13 +169,15 @@ typedef struct
     SETTINGS_AudioConfig_t           audio;
     SETTINGS_LedConfig_t             led;
     SETTINGS_BeaconConfig_t          beacon;
+    SETTINGS_Calibration_t           calibration;
 } SETTINGS_Config_t;
 
 extern SETTINGS_Config_t gSettings;
 
 // Initialize the board
+esp_err_t SETTINGS_Init(void);
 esp_err_t SETTINGS_Load(void);
 esp_err_t SETTINGS_Save(void);
-esp_err_t SETTINGS_FactoryReset(void);
+esp_err_t SETTINGS_FactoryReset(bool reboot);
 
 #endif

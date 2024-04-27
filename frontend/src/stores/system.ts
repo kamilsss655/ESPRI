@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ApiPaths } from "../types/Api";
 import { Notify } from "quasar";
-import { SystemInfo } from "../types/System";
+import { AudioState, System, SystemInfo } from "../types/System";
 import axios from "axios";
 
 const axiosInstance = axios.create();
@@ -9,9 +9,9 @@ axiosInstance.defaults.timeout = 600;
 
 export const useSystemStore = defineStore({
   id: "system",
-  state: () => ({
-    rebootRequired: false as Boolean,
-    audio: "LISTENING",
+  state: (): System => ({
+    rebootRequired: false,
+    audioState: AudioState.LISTENING,
     info: {
       "heap.total": 160000,
       "heap.free": 80241,
@@ -26,7 +26,7 @@ export const useSystemStore = defineStore({
   actions: {
     handle(event: any) {
       if (event.tag == "gAudioState") {
-        this.$state.audio = event.message;
+        this.$state.audioState = event.message;
       }
     },
     resetRebootRequiredFlag() {
@@ -49,8 +49,6 @@ export const useSystemStore = defineStore({
     }
   },
   getters: {
-    audioListening: (state) => state.audio == "LISTENING",
-    audioTransmitting: (state) => state.audio == "TRANSMITTING",
     heapUsagePercent: (state): number =>
       ((state.info["heap.total"] - state.info["heap.free"]) /
         state.info["heap.total"]) *

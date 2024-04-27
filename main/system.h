@@ -54,5 +54,6 @@ void SYSTEM_InfoRefresh(void *pvParameters);
 void SYSTEM_InfoInit(void);
 void SYSTEM_DeepSleep(void);
 void SYSTEM_Reboot(void);
+void SYSTEM_FirstBoot(void);
 
 #endif

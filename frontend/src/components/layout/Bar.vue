@@ -19,12 +19,17 @@
       v-if="isBeaconEnabled"
       to="/beacon"
     />
-    <q-btn dense flat icon="ion-arrow-dropup-circle" v-if="systemStore.audioTransmitting" color="red">
+    <q-btn dense flat icon="ion-arrow-dropup-circle" v-if="systemStore.audioState == AudioState.TRANSMITTING" color="red">
       <q-tooltip>
         TRANSMITTING
       </q-tooltip>
     </q-btn>
-    <q-btn dense flat icon="ion-headset" v-if="systemStore.audioListening" color="white">
+    <q-btn dense flat icon="ion-arrow-dropdown-circle" v-if="systemStore.audioState == AudioState.RECEIVING" color="warning">
+      <q-tooltip>
+        RECEIVING
+      </q-tooltip>
+    </q-btn>
+    <q-btn dense flat icon="ion-headset" v-if="systemStore.audioState == AudioState.LISTENING" color="white">
       <q-tooltip>
         LISTENING
       </q-tooltip>
@@ -46,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { AudioState } from "../../types/System";
 import { onMounted, computed } from "vue";
 import { useSettingsStore } from "../../stores/settings";
 import { useWebsocketStore } from "../../stores/websocket";

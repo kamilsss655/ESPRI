@@ -21,6 +21,7 @@ export const useSettingsStore = defineStore({
     "gpio.audio_out": 18,
     "gpio.ptt": 13,
     "audio.out.volume": 100,
+    "audio.in.squelch": 3,
     "led.max_brightness": 5,
     "beacon.mode": BeaconMode.MORSE_CODE,
     "beacon.text": "-..--.",

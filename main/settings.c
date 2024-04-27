@@ -14,6 +14,8 @@
  *     limitations under the License.
  */
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include <string.h>
 #include <esp_log.h>
 #include <esp_spiffs.h>
@@ -25,20 +27,43 @@ static const char *TAG = "SETTINGS";
 
 SETTINGS_Config_t gSettings;
 
+SemaphoreHandle_t settingsSemaphore;
+
+// Initialize settings
+esp_err_t SETTINGS_Init(void)
+{
+    settingsSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(settingsSemaphore);
+
+    ESP_ERROR_CHECK(SETTINGS_Load());
+
+    return ESP_OK;
+}
+
 // Load settings from local filesystem
 esp_err_t SETTINGS_Load(void)
 {
+    if (xSemaphoreTake(settingsSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+    {
+        ESP_LOGE(TAG, "Could not load settings due to lock");
+        return ESP_FAIL;
+    }
 
     FILE *fd = NULL;
 
     fd = fopen(CONFIG_LOCATION, "rb");
     if (!fd)
     {
-        ESP_LOGE(TAG, "No config file found.");
-        SETTINGS_FactoryReset();
+        ESP_LOGE(TAG, "No config file found. First boot?");
+        xSemaphoreGive(settingsSemaphore);
+        SYSTEM_FirstBoot();
     }
-    fread(&gSettings, 1, sizeof(gSettings),fd);
-    fclose(fd);
+    else
+    {
+        fread(&gSettings, 1, sizeof(gSettings), fd);
+        fclose(fd);
+        xSemaphoreGive(settingsSemaphore);
+    }
 
     return ESP_OK;
 }
@@ -46,31 +71,41 @@ esp_err_t SETTINGS_Load(void)
 // Save settings into local filesystem
 esp_err_t SETTINGS_Save(void)
 {
+    if (xSemaphoreTake(settingsSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+    {
+        ESP_LOGE(TAG, "Could not save settings due to lock");
+        return ESP_FAIL;
+    }
+
     FILE *fd = NULL;
 
     fd = fopen(CONFIG_LOCATION, "wb");
-    fwrite(&gSettings, 1, sizeof(gSettings),fd);
+    fwrite(&gSettings, 1, sizeof(gSettings), fd);
     fclose(fd);
+
+    xSemaphoreGive(settingsSemaphore);
 
     return ESP_OK;
 }
 
-// Performs factory reset
+/// @brief Performs factory reset
 // Allows to overwrite settings with private developer settings
 // To use run: idp.py menuconfig -> Project configuration
 // Settings set with menuconfig are not tracked with version control
 // Useful for connecting to private WIFI network
-esp_err_t SETTINGS_FactoryReset(void)
+/// @param reboot determines whether device should reboot after the reset
+/// @return
+esp_err_t SETTINGS_FactoryReset(bool reboot)
 {
     ESP_LOGW(TAG, "Performing factory reset.");
-    // WiFi
-    #ifdef CONFIG_WIFI_AP_MODE_ENABLED
-        gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
-        gSettings.wifi.channel = CONFIG_WIFI_CHANNEL;
-        gSettings.wifi.max_connections = CONFIG_MAX_STA_CONN;
-    #else
-        gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
-    #endif
+// WiFi
+#ifdef CONFIG_WIFI_AP_MODE_ENABLED
+    gSettings.wifi.mode = SETTINGS_WIFI_MODE_AP;
+    gSettings.wifi.channel = CONFIG_WIFI_CHANNEL;
+    gSettings.wifi.max_connections = CONFIG_MAX_STA_CONN;
+#else
+    gSettings.wifi.mode = SETTINGS_WIFI_MODE_STA;
+#endif
     strcpy(gSettings.wifi.ssid, CONFIG_WIFI_SSID);
     strcpy(gSettings.wifi.password, CONFIG_WIFI_PASSWORD);
     // GPIO
@@ -80,6 +115,7 @@ esp_err_t SETTINGS_FactoryReset(void)
     gSettings.gpio.ptt        = CONFIG_PTT_GPIO;
     // Audio
     gSettings.audio.out.volume = CONFIG_AUDIO_OUT_VOLUME;
+    gSettings.audio.in.squelch = CONFIG_AUDIO_IN_SQUELCH;
     // LED
     gSettings.led.max_brightness = CONFIG_STATUS_LED_GPIO_MAX_BRIGHTNESS;
     // Beacon
@@ -93,10 +129,16 @@ esp_err_t SETTINGS_FactoryReset(void)
     gSettings.beacon.afsk.baud = CONFIG_AFSK_BEACON_BAUD;
     gSettings.beacon.afsk.zero_freq = CONFIG_AFSK_ZERO_FREQ;
     gSettings.beacon.afsk.one_freq = CONFIG_AFSK_ONE_FREQ;
+    // Calibration
+    gSettings.calibration.adc.value = 0;
+    gSettings.calibration.adc.is_valid = SETTINGS_FALSE;
 
     SETTINGS_Save();
-    
-    SYSTEM_Reboot();
-    
+
+    if (reboot)
+    {
+        SYSTEM_Reboot();
+    }
+
     return ESP_OK;
 }

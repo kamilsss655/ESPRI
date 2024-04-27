@@ -109,7 +109,7 @@ esp_err_t API_SYSTEM_FactoryReset(httpd_req_t *req)
     // Delay to respond to client gracefully
     vTaskDelay(10);
 
-    SETTINGS_FactoryReset();
+    SETTINGS_FactoryReset(true);
 
     return ESP_OK;
 }

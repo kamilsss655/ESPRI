@@ -23,6 +23,7 @@
 #include <freertos/semphr.h>
 #include <pwm_audio.h>
 #include <esp_adc/adc_continuous.h>
+#include <freertos/ringbuf.h>
 #include <driver/gpio.h>
 #include <esp_check.h>
 #include <esp_log.h>
@@ -31,6 +32,7 @@
 #include "settings.h"
 #include "helper/misc.h"
 #include "helper/rtos.h"
+#include "hardware/led.h"
 #include "web/handlers/websocket.h"
 
 static const char *TAG = "HW/AUDIO";
@@ -39,21 +41,69 @@ static TaskHandle_t audioListenTaskHandle;
 
 EventGroupHandle_t audioEventGroup;
 
+// ADC ring buffer handle
+RingbufHandle_t adcRingBufferHandle;
+
 adc_unit_t audioAdcUnit;
+
+// ADC dropped frames count due to slow processing
+volatile u_int16_t adcDroppedFrames = 0;
+
+// Counts samples over squelch
+uint16_t samplesOverSquelch;
 
 AudioState_t gAudioState;
 
 SemaphoreHandle_t gAudioStateSemaphore;
 SemaphoreHandle_t transmitSemaphore;
 
+/// @brief Calibrate ADC by calculating mean value of the samples
+/// @param samples_count target samples count used for calibration
+/// @return
+esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
+{
+    // ADC sample
+    AUDIO_ADC_DATA_TYPE *data;
+    size_t received_data_size;
+    uint32_t calibration_value = 0;
+
+    for (u_int i = 0; i < samples_count; i++)
+    {
+        // Get ADC data from the ADC ring buffer
+        data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
+        // Check received data
+        if (data != NULL)
+        {
+            // Calculate mean value
+            calibration_value += *data;
+            if (i > 2)
+            {
+                calibration_value /= 2;
+            }
+
+            // Return item so it gets removed from the ring buffer
+            vRingbufferReturnItem(adcRingBufferHandle, (void *)data);
+        }
+        else
+        {
+            // Likely the buffer is empty
+            ESP_LOGI(TAG, "ADC ring buffer empty");
+            return ESP_FAIL;
+        }
+    }
+
+    gSettings.calibration.adc.value = (u_int16_t)calibration_value;
+    gSettings.calibration.adc.is_valid = SETTINGS_TRUE;
+
+    ESP_ERROR_CHECK_WITHOUT_ABORT(SETTINGS_Save());
+
+    ESP_LOGI(TAG, "ADC calibrated to: %d. Used %d samples for calibration.", gSettings.calibration.adc.value, samples_count);
+
+    return ESP_OK;
+}
+
 // I2S handle to receive/listen audio
 static adc_continuous_handle_t adc_handle;
-
-const char *gAudioStateNames[4] = {
-    "OFF",
-    "LISTENING",
-    "RECEIVING",
-    "TRANSMITTING"};
 
 // Interupt callback called when ADC finishes one portion of ADC conversions
 static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
@@ -65,14 +115,38 @@ static bool IRAM_ATTR adc_conv_done_callback(adc_continuous_handle_t handle, con
     return (mustYield == pdTRUE);
 }
 
-// Set gAudioState, protect with semaphores to prevent race conditions
+// Interupt callback called when there is ADC sample overflow likely due to slow data processing
+static bool IRAM_ATTR adc_pool_ovf(adc_continuous_handle_t handle, const adc_continuous_evt_data_t *edata, void *user_data)
+{
+    adcDroppedFrames++;
+    return false;
+}
+
+// Set gAudioState
 static void AUDIO_SetAudioState(AudioState_t state)
 {
     if (xSemaphoreTake(gAudioStateSemaphore, 1000 / portTICK_PERIOD_MS) == pdTRUE)
     {
         gAudioState = state;
 
-        WEBSOCKET_Send("gAudioState", "%s", gAudioStateNames[state]);
+        // Side effects
+        switch (gAudioState)
+        {
+        case AUDIO_TRANSMITTING:
+        case AUDIO_RECEIVING:
+            LED_Fade(LED_BRIGHTNESS_MAX, LED_TIME_FAST, false);
+            // Take LED semaphore to prevent other tasks interacting with the LED
+            xSemaphoreTake(gLedSemaphore, LED_TIME_MAX / portTICK_PERIOD_MS);
+            break;
+
+        default:
+            // Give LED semaphore to allow other tasks interacting with the LED
+            xSemaphoreGive(gLedSemaphore);
+            LED_Fade(LED_BRIGHTNESS_OFF, LED_TIME_FAST, false);
+            break;
+        }
+
+        WEBSOCKET_Send("gAudioState", "%d", state);
 
         xSemaphoreGive(gAudioStateSemaphore);
     }
@@ -118,11 +192,11 @@ static void AUDIO_AdcInit()
 
     adc_continuous_evt_cbs_t cbs = {
         .on_conv_done = adc_conv_done_callback,
-    };
+        .on_pool_ovf = adc_pool_ovf};
     ESP_ERROR_CHECK(adc_continuous_register_event_callbacks(adc_handle, &cbs, NULL));
     ESP_ERROR_CHECK(adc_continuous_start(adc_handle));
 
-    ESP_LOGI(TAG, "ADC initialized.");
+    ESP_LOGI(TAG, "ADC initialized");
     ESP_LOGI(TAG, "ADC attenuation: %" PRIx8, dig_cfg.adc_pattern[0].atten);
     ESP_LOGI(TAG, "ADC channel: %" PRIx8, dig_cfg.adc_pattern[0].channel);
 }
@@ -134,13 +208,90 @@ void AUDIO_AdcStop()
     adc_continuous_deinit(adc_handle);
 }
 
+u_int16_t audioOnCount = 0;
+
+// Main audio processing task that reads ADC samples from the ADC ring buffer and processes them
+void AUDIO_AudioInputProcess(void *pvParameters)
+{
+    // ADC sample
+    AUDIO_ADC_DATA_TYPE *data;
+    size_t received_data_size;
+
+    while (1)
+    {
+        // Recalibrate if current ADC calibration is invalid
+        if (gSettings.calibration.adc.is_valid == SETTINGS_FALSE)
+        {
+            AUDIO_AdcCalibrate(AUDIO_ADC_CALIBRATION_SAMPLES);
+        }
+        // Get ADC data from the ADC ring buffer
+        // To get the value you need to dereference the pointer, so use *data
+        data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
+        // Check received data
+        if (data != NULL)
+        {
+            // Process data here
+
+            // Count samples over the squelch threshold
+            if ((*data > ((gSettings.calibration.adc.value * (100 + gSettings.audio.in.squelch)) / 100)) || (*data < ((gSettings.calibration.adc.value * (100 - gSettings.audio.in.squelch)) / 100)))
+            {
+                samplesOverSquelch++;
+            }
+
+            // Return item so it gets removed from the ring buffer
+            vRingbufferReturnItem(adcRingBufferHandle, (void *)data);
+        }
+        else
+        {
+            // Likely the buffer is empty
+            ESP_LOGI(TAG, "ADC ring buffer empty");
+        }
+    }
+}
+
+// Monitors samples over squelch and controls the squelch
+void AUDIO_SquelchControl(void *pvParameters)
+{
+    uint16_t samples_temp = samplesOverSquelch;
+    while (1)
+    {
+        // If the samplesOverSquelch has changed since last time we checked it means we are receiving audio
+        if (samples_temp != samplesOverSquelch)
+        {
+            if (gAudioState != AUDIO_RECEIVING)
+            {
+                ESP_LOGI(TAG, "RECEIVING");
+                AUDIO_SetAudioState(AUDIO_RECEIVING);
+            }
+        }
+        // If the samplesOverSquelch remains unchanged since last time we checked it means we are not receiving audio
+        else
+        {
+            if (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING)
+            {
+                ESP_LOGI(TAG, "LISTENING");
+                AUDIO_SetAudioState(AUDIO_LISTENING);
+            }
+        }
+        samples_temp = samplesOverSquelch;
+
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+}
+
 // Task listening to incoming audio on ADC port
+// It writes ADC samples to ADC ring buffer for further processing
 void AUDIO_Listen(void *pvParameters)
 {
+    // ADC sample value
+    AUDIO_ADC_DATA_TYPE data;
+    adc_digi_output_data_t *p;
+    uint32_t chan_num;
+    uint32_t received_bytes = 0;
     esp_err_t ret;
-    uint32_t ret_num = 0;
     uint8_t result[AUDIO_INPUT_CHUNK_SIZE] = {0};
     memset(result, 0xcc, AUDIO_INPUT_CHUNK_SIZE);
+
     audioListenTaskHandle = xTaskGetCurrentTaskHandle();
     EventBits_t audioEventGroupBits;
 
@@ -172,38 +323,41 @@ void AUDIO_Listen(void *pvParameters)
             AUDIO_AdcInit();
             xEventGroupClearBits(audioEventGroup, BIT_DONE_TX);
             AUDIO_SetAudioState(AUDIO_LISTENING);
+            // report dropped frames for diagnostics
+            ESP_LOGI(TAG, "ADC dropped frames: %d", adcDroppedFrames);
         }
         else // if no bits are set do listen (default state)
         {
-            // Block until we receive notification from the interupt that data is available
+            // Block until we receive notification from the interupt that data frame is available
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-            ret = adc_continuous_read(adc_handle, result, AUDIO_INPUT_CHUNK_SIZE, &ret_num, 0);
+            ret = adc_continuous_read(adc_handle, result, AUDIO_INPUT_CHUNK_SIZE, &received_bytes, 0);
 
             if (ret == ESP_OK)
             {
-                // ESP_LOGI("TASK", "ret is %x, ret_num is %"PRIu32" bytes", ret, ret_num);
-                // for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES)
-                // {
-                //     adc_digi_output_data_t *p = (adc_digi_output_data_t *)&result[i];
-                //     uint32_t chan_num = AUDIO_ADC_GET_CHANNEL(p);
-                //     uint16_t data = AUDIO_ADC_GET_DATA(p);
-                //     /* Check the channel number validation, the data is invalid if the channel num exceed the maximum channel */
-                //     if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
-                //     {
-                //         ESP_LOGI(TAG, "Channel: %" PRIu32 ", Value: %u", chan_num, data);
-                //     }
-                //     else
-                //     {
-                //         ESP_LOGW(TAG, "Invalid data");
-                //     }
-                // }
-                /**
-                 * Because printing is slow, so every time you call `ulTaskNotifyTake`, it will immediately return.
-                 * To avoid a task watchdog timeout, add a delay here. When you replace the way you process the data,
-                 * usually you don't need this delay (as this task will block for a while).
-                 */
-                vTaskDelay(1);
+                for (int i = 0; i < received_bytes; i += SOC_ADC_DIGI_RESULT_BYTES)
+                {
+                    p = (adc_digi_output_data_t *)&result[i];
+                    chan_num = AUDIO_ADC_GET_CHANNEL(p);
+                    // Get actual ADC sample value
+                    data = AUDIO_ADC_GET_DATA(p);
+
+                    // Check the channel number validation, the data is invalid if the channel num exceed the maximum channel
+                    if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
+                    {
+                        // Send ADC sample to ring buffer
+                        UBaseType_t res = xRingbufferSend(adcRingBufferHandle, &data, sizeof(AUDIO_ADC_DATA_TYPE), pdMS_TO_TICKS(1000));
+
+                        if (res != pdTRUE)
+                        {
+                            ESP_LOGW(TAG, "Failed to send ADC data to the ring buffer. The buffer is full?");
+                        }
+                    }
+                    else
+                    {
+                        ESP_LOGW(TAG, "Invalid ADC data");
+                    }
+                }
             }
             else if (ret == ESP_ERR_TIMEOUT)
             {
@@ -529,6 +683,17 @@ void AUDIO_Init(void)
 
     transmitSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(transmitSemaphore);
+
+    // Create ADC ring buffer to store ADC samples (FIFO)
+    adcRingBufferHandle = xRingbufferCreate(AUDIO_ADC_RING_BUFFER_SIZE, AUDIO_ADC_RING_BUFFER_TYPE);
+    if (adcRingBufferHandle == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create ADC ring buffer");
+    }
+    else
+    {
+        ESP_LOGI(TAG, "ADC ring buffer initialized");
+    }
 
     initialize_pwm_audio();
 }

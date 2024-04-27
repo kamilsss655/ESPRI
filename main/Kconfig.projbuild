@@ -115,6 +115,13 @@ menu "Project configuration"
         help
             UART baud rate.
 
+    config AUDIO_IN_SQUELCH
+        int "Squelch value for audio input"
+        range 0 100
+        default 3
+        help
+            Squelch value for audio input
+
     config BEACON_MODE
         int "Beacon mode"
         default 0

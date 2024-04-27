@@ -1,3 +1,10 @@
+export enum AudioState {
+  OFF,
+  LISTENING,
+  RECEIVING,
+  TRANSMITTING
+}
+
 export interface SystemInfo {
   "heap.total": number;
   "heap.free": number;
@@ -7,4 +14,14 @@ export interface SystemInfo {
   "uptime": number;
   "version": string;
 }
+
+export interface System {
+  rebootRequired: Boolean,
+  audioState: AudioState,
+  info: SystemInfo,
+  systemInfoLiveUpdate: Boolean
+}
+
+
+
 
