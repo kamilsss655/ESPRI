@@ -250,7 +250,7 @@ void AUDIO_AudioInputProcess(void *pvParameters)
 }
 
 // Monitors samples over squelch and controls the squelch
-void AUDIO_SquelchMonitor(void *pvParameters)
+void AUDIO_SquelchControl(void *pvParameters)
 {
     uint16_t samples_temp = samplesOverSquelch;
     while (1)

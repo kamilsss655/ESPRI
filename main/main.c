@@ -46,8 +46,8 @@ void app_main()
     // Audio input process task
     xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
 
-    // Audio squelch monitor
-    xTaskCreate(AUDIO_SquelchMonitor, "AUDIO_SquelchMonitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
+    // Audio squelch control
+    xTaskCreate(AUDIO_SquelchControl, "AUDIO_SquelchControl", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
 
     // Create Morse code transmit task
     xTaskCreate(BEACON_Scheduler, "BEACON_Scheduler", 4096, NULL, RTOS_PRIORITY_IDLE, NULL);

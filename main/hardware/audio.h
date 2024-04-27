@@ -122,6 +122,6 @@ void AUDIO_AdcStop(void);
 esp_err_t AUDIO_PlayWav(const char *filepath);
 void AUDIO_AudioInputProcess(void *pvParameters);
 esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count);
-void AUDIO_SquelchMonitor(void *pvParameters);
+void AUDIO_SquelchControl(void *pvParameters);
 
 #endif
