@@ -115,6 +115,7 @@ esp_err_t SETTINGS_FactoryReset(bool reboot)
     gSettings.gpio.ptt        = CONFIG_PTT_GPIO;
     // Audio
     gSettings.audio.out.volume = CONFIG_AUDIO_OUT_VOLUME;
+    gSettings.audio.in.squelch = CONFIG_AUDIO_IN_SQUELCH;
     // LED
     gSettings.led.max_brightness = CONFIG_STATUS_LED_GPIO_MAX_BRIGHTNESS;
     // Beacon

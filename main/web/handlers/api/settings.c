@@ -38,6 +38,7 @@ ApiSetting_t settings[] = {
     {"gpio.audio_out",                   &gSettings.gpio.audio_out,                   1},
     {"gpio.ptt",                         &gSettings.gpio.ptt,                         1},
     {"audio.out.volume",                 &gSettings.audio.out.volume,                 1},
+    {"audio.in.squelch",                 &gSettings.audio.in.squelch,                 1},
     {"led.max_brightness",               &gSettings.led.max_brightness,               1},
     {"beacon.mode",                      &gSettings.beacon.mode,                      1},
     {"beacon.text",                      &gSettings.beacon.text,                      0},

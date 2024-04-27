@@ -236,13 +236,15 @@ void AUDIO_AudioInputProcess(void *pvParameters)
             AUDIO_AdcCalibrate(AUDIO_ADC_CALIBRATION_SAMPLES);
         }
         // Get ADC data from the ADC ring buffer
+        // To get the value you need to dereference the pointer, so use *data
         data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
         // Check received data
         if (data != NULL)
         {
             // Process data here
 
-            if ((*data > ((gSettings.calibration.adc.value * 105) / 100)) || (*data < ((gSettings.calibration.adc.value * 95) / 100)))
+            // Count samples over the squelch threshold
+            if ((*data > ((gSettings.calibration.adc.value * (100 + gSettings.audio.in.squelch)) / 100)) || (*data < ((gSettings.calibration.adc.value * (100 - gSettings.audio.in.squelch)) / 100)))
             {
                 samplesOverSquelch++;
             }

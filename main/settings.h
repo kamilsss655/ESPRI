@@ -114,13 +114,20 @@ typedef struct
 // Audio out settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE volume; // 0-100
+    SETTINGS_INTEGER_TYPE volume; // 0-100 - determines audio output volume
 } SETTINGS_AudioOutConfig_t;
+
+// Audio in settings
+typedef struct
+{
+    SETTINGS_INTEGER_TYPE squelch; // 0-100 - determines squelch sensitivity
+} SETTINGS_AudioInConfig_t;
 
 // Audio settings
 typedef struct
 {
     SETTINGS_AudioOutConfig_t out;
+    SETTINGS_AudioInConfig_t  in;
 } SETTINGS_AudioConfig_t;
 
 // LED settings
@@ -142,8 +149,8 @@ typedef struct
 // Calibration subtype
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE value;
-    SETTINGS_Bool_t       is_valid;
+    SETTINGS_INTEGER_TYPE value;    // value when there is no audio in signal
+    SETTINGS_Bool_t       is_valid; // set it to false to trigger calibration
 } SETTINGS_CalibrationSubtype_t;
 
 // Calibration settings

@@ -52,6 +52,23 @@
                       </q-item>
                       <q-item>
                         <q-item-section :side="true">
+                          <q-icon name="ion-volume-high" />
+                        </q-item-section>
+                        <q-item-section :side="true">In</q-item-section>
+                        <q-item-section>
+                          <q-slider
+                            v-model="settingsStore['audio.in.squelch']"
+                            :label-value="
+                              settingsStore['audio.in.squelch'] + '%'
+                            "
+                            :min="0"
+                            :max="100"
+                            label
+                          />
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section :side="true">
                           <q-icon name="ion-sunny" />
                         </q-item-section>
                         <q-item-section :side="true">LED</q-item-section>

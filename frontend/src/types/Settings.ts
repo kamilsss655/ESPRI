@@ -22,6 +22,7 @@ export interface Settings {
   "gpio.audio_out": number;
   "gpio.ptt": number;
   "audio.out.volume": number;
+  "audio.in.squelch": number;
   "led.max_brightness": number;
   "beacon.mode": BeaconMode;
   "beacon.text": string;
@@ -32,4 +33,3 @@ export interface Settings {
   "beacon.afsk.zero_freq": number;
   "beacon.afsk.one_freq": number;
 }
-
