@@ -252,49 +252,53 @@ void AUDIO_AudioInputProcess(void *pvParameters)
 // Monitors samples over squelch and controls the squelch
 void AUDIO_SquelchControl(void *pvParameters)
 {
-    uint16_t samples_temp = samplesOverSquelch;
-    u_int16_t overSquelchWindow = 0;
-    u_int16_t underSquelchWindow = 0;
+    // Last seen samples over squelch, updated every time window
+    uint16_t last_seen_samples_over_squelch = samplesOverSquelch;
+    // Counts time windows when there were samples over squelch
+    u_int16_t over_squelch_windows = 0;
+    // Counts time windows when there where samples under squelch
+    u_int16_t under_squelch_windows = 0;
     while (1)
     {
         // If the samplesOverSquelch has changed since last time we checked it means we are receiving audio
-        if (samples_temp != samplesOverSquelch)
+        if (last_seen_samples_over_squelch != samplesOverSquelch)
         {
             // Reset the opposite window
-            underSquelchWindow = 0;
+            under_squelch_windows = 0;
             // Prevent overflow
             samplesOverSquelch = 0;
             if (gAudioState == AUDIO_LISTENING)
-                overSquelchWindow++;
+                over_squelch_windows++;
         }
         // If the samplesOverSquelch remains unchanged since last time we checked it means we are not receiving audio
-        else if (samples_temp == samplesOverSquelch)
+        else if (last_seen_samples_over_squelch == samplesOverSquelch)
         {
             // Reset the opposite window
-            overSquelchWindow = 0;
+            over_squelch_windows = 0;
             if (gAudioState == AUDIO_RECEIVING)
-                underSquelchWindow++;
+                under_squelch_windows++;
         }
 
         // Squelch on delay based on the over the squelch time window count (1*10ms = 10ms)
-        if (overSquelchWindow >= 1 && gAudioState != AUDIO_RECEIVING)
+        if (over_squelch_windows >= 1 && gAudioState != AUDIO_RECEIVING)
         {
             ESP_LOGI(TAG, "RECEIVING");
             AUDIO_SetAudioState(AUDIO_RECEIVING);
-            overSquelchWindow = 0;
+            over_squelch_windows = 0;
         }
         // Squelch off delay based on the under the squelch time window count (10*10ms = 100ms)
-        if (underSquelchWindow >= 10 && (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING))
+        if (under_squelch_windows >= 10 && (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING))
         {
             ESP_LOGI(TAG, "LISTENING");
             AUDIO_SetAudioState(AUDIO_LISTENING);
-            underSquelchWindow = 0;
+            under_squelch_windows = 0;
         }
 
-        // ESP_LOGI(TAG, "O:%d U:%d S:%d", overSquelchWindow, underSquelchWindow, gAudioState);
-        // ESP_LOGI(TAG, "last:%d new:%d", samples_temp, samplesOverSquelch);
+        // ESP_LOGI(TAG, "O:%d U:%d S:%d", over_squelch_windows, under_squelch_windows, gAudioState);
+        // ESP_LOGI(TAG, "last:%d new:%d", last_seen_samples_over_squelch, samplesOverSquelch);
 
-        samples_temp = samplesOverSquelch;
+        // Set value for next time window
+        last_seen_samples_over_squelch = samplesOverSquelch;
 
         // Delay of this task is the time multplier of the time windows (10ms)
         vTaskDelay(10 / portTICK_PERIOD_MS);
