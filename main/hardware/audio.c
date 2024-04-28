@@ -253,29 +253,42 @@ void AUDIO_AudioInputProcess(void *pvParameters)
 void AUDIO_SquelchControl(void *pvParameters)
 {
     uint16_t samples_temp = samplesOverSquelch;
+    u_int16_t overSquelchWindow = 0;
+    u_int16_t underSquelchWindow = 0;
     while (1)
     {
+        // ESP_LOGI(TAG, "last:%d new:%d", samples_temp, samplesOverSquelch);
         // If the samplesOverSquelch has changed since last time we checked it means we are receiving audio
-        if (samples_temp != samplesOverSquelch)
+        if ((samples_temp != samplesOverSquelch) && (gAudioState == AUDIO_LISTENING))
         {
-            if (gAudioState != AUDIO_RECEIVING)
-            {
-                ESP_LOGI(TAG, "RECEIVING");
-                AUDIO_SetAudioState(AUDIO_RECEIVING);
-            }
+            overSquelchWindow++;
         }
         // If the samplesOverSquelch remains unchanged since last time we checked it means we are not receiving audio
-        else
+        else if ((samples_temp == samplesOverSquelch) && (gAudioState == AUDIO_RECEIVING))
         {
-            if (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING)
-            {
-                ESP_LOGI(TAG, "LISTENING");
-                AUDIO_SetAudioState(AUDIO_LISTENING);
-            }
+            underSquelchWindow++;
         }
+
+        if (overSquelchWindow >= 2 && gAudioState != AUDIO_RECEIVING)
+        {
+            ESP_LOGI(TAG, "RECEIVING");
+            AUDIO_SetAudioState(AUDIO_RECEIVING);
+            // overSquelchWindow = 0;
+            overSquelchWindow = 0;
+        }
+        if (underSquelchWindow >= 150 && (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING))
+        {
+            ESP_LOGI(TAG, "LISTENING");
+            AUDIO_SetAudioState(AUDIO_LISTENING);
+            underSquelchWindow=0;
+            // overSquelchWindow=0;
+        }
+
+        // ESP_LOGI(TAG, "O:%d U:%d S:%d", overSquelchWindow, underSquelchWindow, gAudioState);
+
         samples_temp = samplesOverSquelch;
 
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
 
@@ -296,6 +309,8 @@ void AUDIO_Listen(void *pvParameters)
     EventBits_t audioEventGroupBits;
 
     AUDIO_AdcInit();
+
+    AUDIO_SetAudioState(AUDIO_LISTENING);
 
     while (1)
     {
