@@ -1,5 +1,6 @@
 Comment,Designator,Footprint,LCSC
-100uF,"C1,C4,C6,C7",Capacitor_Tantalum_SMD:CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,C11375
+100uF,"C1,C4,C6",Capacitor_Tantalum_SMD:CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,C11375
+1uF,C7,Capacitor_Tantalum_SMD:CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,C145085
 100nF,C2,Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,C28233
 0.1uF,"C3,C5",Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,C28233
 5nF,"C8,C9",Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,C1744

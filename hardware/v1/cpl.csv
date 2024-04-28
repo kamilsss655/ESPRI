@@ -5,7 +5,7 @@ C3,0.1uF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,107.25,-81.5,180,bottom
 C4,100uF,CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,110.25,-75.75,-90,bottom
 C5,0.1uF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,97,-69.75,180,bottom
 C6,100uF,CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,104.25,-72,0,bottom
-C7,100uF,CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,110,-94.75,-90,bottom
+C7,1uF,CP_EIA-6032-20_AVX-F_Pad2.25x2.35mm_HandSolder,110,-94.75,-90,bottom
 C8,5nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,105.5,-88.25,180,bottom
 C9,5nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,110.25,-88.25,180,bottom
 D1,LED,D_0805_2012Metric_Pad1.15x1.40mm_HandSolder,94,-74.75,90,bottom
