@@ -62,7 +62,7 @@ ESP32 Lolin Lite (recommended, confirmed to work, lipo charger built-in):
 
 In order to interface radios through Kenwood connector following analog components have to be added to the ESP board:
 
-![schematic](https://github.com/kamilsss655/ESPRI/assets/8842065/fe40aa4f-8f9f-41ef-9298-324ccca43c26)
+![schematic](https://github.com/kamilsss655/ESPRI/assets/8842065/7f3c9675-1b76-4e7e-af38-748cd502900e)
 
 Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cable for Kenwood pinout.
 
