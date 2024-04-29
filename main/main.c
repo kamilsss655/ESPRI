@@ -44,7 +44,7 @@ void app_main()
     xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
 
     // Audio input process task
-    xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
+    xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 10000, NULL, RTOS_PRIORITY_HIGH, NULL);
 
     // Audio squelch control
     xTaskCreate(AUDIO_SquelchControl, "AUDIO_SquelchControl", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
