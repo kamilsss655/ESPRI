@@ -111,7 +111,7 @@ esp_err_t AUDIO_Record(size_t samples_count)
     AUDIO_ADC_DATA_TYPE *data;
     const size_t chunk_size = 1024;
     AUDIO_ADC_DATA_TYPE *buffer = calloc(chunk_size, sizeof(AUDIO_ADC_DATA_TYPE));
-    int16_t *buffersigned = calloc(chunk_size, sizeof(int16_t));
+    int16_t *buffersigned = calloc(chunk_size/2, sizeof(int16_t));
     FILE *fd = NULL;
 
     fd = fopen("/storage/sample.wav", "wb");
@@ -145,15 +145,16 @@ esp_err_t AUDIO_Record(size_t samples_count)
         // Check received data
         if (buffer != NULL)
         {
-            for (size_t i = 0; i < received_data_size; i++)
+            for (size_t i = 0; i < received_data_size/2; i+=2)
             {
+                buffersigned[i] = (buffer[i] + buffer[i+1])/2;
                 // Remove bias (center signal)
-                buffersigned[i] = buffer[i] - gSettings.calibration.adc.value;
+                buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify
-                buffersigned[i]*=10;
+                buffersigned[i]*=13;
             }
             // write to file
-            bytes_written = fwrite(buffersigned, sizeof(int16_t), received_data_size, fd);
+            bytes_written = fwrite(buffersigned, sizeof(int16_t), received_data_size/2, fd);
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, (void *)buffer);
         }
@@ -302,7 +303,7 @@ void AUDIO_AudioInputProcess(void *pvParameters)
         // if squelch on record
         else if (written == false && gAudioState == AUDIO_RECEIVING)
         {
-            AUDIO_Record(AUDIO_INPUT_SAMPLE_FREQ*7);
+            AUDIO_Record((AUDIO_INPUT_SAMPLE_FREQ/2)*7);
         }
         // otherwise just consume samples to prevent buffer overflow
         else
