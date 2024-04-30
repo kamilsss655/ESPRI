@@ -29,7 +29,8 @@
 #define AUDIO_INPUT_CHUNK_SIZE 2048
 
 // Define audio input sampling frequency in Hz
-#define AUDIO_INPUT_SAMPLE_FREQ 32000
+// With 1.5x upsampling this will result in 16000 bitrate
+#define AUDIO_INPUT_SAMPLE_FREQ 21333
 
 // Define amount of samples used for ADC calibration
 #define AUDIO_ADC_CALIBRATION_SAMPLES AUDIO_INPUT_SAMPLE_FREQ / 2
