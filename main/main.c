@@ -41,10 +41,13 @@ void app_main()
     xTaskCreate(UART_Monitor, "UART_Monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
 
     // Audio listen task
-    xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
+    xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
 
     // Audio input process task
-    xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 10000, NULL, RTOS_PRIORITY_HIGH, NULL);
+    xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
+
+    // Audio watchdog    
+    xTaskCreate(AUDIO_Watchdog, "AUDIO_Watchdog", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Audio squelch control
     xTaskCreate(AUDIO_SquelchControl, "AUDIO_SquelchControl", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);

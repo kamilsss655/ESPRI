@@ -45,7 +45,8 @@ EventGroupHandle_t audioEventGroup;
 RingbufHandle_t adcRingBufferHandle;
 
 adc_unit_t audioAdcUnit;
-bool written = false;
+bool written = true;
+FILE *fd = NULL;
 // ADC dropped frames count due to slow processing
 volatile u_int16_t adcDroppedFrames = 0;
 
@@ -106,21 +107,12 @@ esp_err_t AUDIO_Record(size_t samples_count)
 {
     ESP_LOGI(TAG, "Starting recording.");
     // ADC sample
-    size_t received_data_size=0;
+    size_t received_data_size = 0;
     size_t bytes_written = 0;
     AUDIO_ADC_DATA_TYPE *data;
-    const size_t chunk_size = 1024;
+    const size_t chunk_size = AUDIO_INPUT_CHUNK_SIZE;
     AUDIO_ADC_DATA_TYPE *buffer = calloc(chunk_size, sizeof(AUDIO_ADC_DATA_TYPE));
-    int16_t *buffersigned = calloc(chunk_size/2, sizeof(int16_t));
-    FILE *fd = NULL;
-
-    fd = fopen("/storage/sample.wav", "wb");
-
-    if (NULL == fd)
-    {
-        ESP_LOGE(TAG, "Failed to read sample.wav");
-        return ESP_FAIL;
-    }
+    int16_t *buffersigned = calloc(chunk_size / 2, sizeof(int16_t));
 
     // write wav header
     wav_header_t wav_header = {
@@ -138,26 +130,35 @@ esp_err_t AUDIO_Record(size_t samples_count)
         return ESP_FAIL;
     }
 
-    for (u_int i = 0; i < samples_count; i += bytes_written*2)
+    for (u_int i = 0; i < samples_count; i += bytes_written * 2)
     {
         // Get ADC data from the ADC ring buffer
-        buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000), chunk_size);
+        buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(250), chunk_size);
         // Check received data
         if (buffer != NULL)
         {
-            for (size_t i = 0, j = 0; i < received_data_size/2; i+=1, j+=2)
+            for (size_t i = 0, j = 0; i < received_data_size / 2; i += 1, j += 2)
             {
                 // this is 1.5 upsample kind off, so need to listen at 24kHz
-                buffersigned[i] = (buffer[i] + buffer[i+1])/2;
+                if (i == (received_data_size / 2) - 1)
+                {
+                    // last sample in buffer might be not present if we received odd number of samples, so we just use single sample to avoid glitching
+                    buffersigned[i] = buffer[i];
+                }
+                else
+                {
+                    buffersigned[i] = (buffer[i] + buffer[i + 1]) / 2;
+                }
+
                 // Remove bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify
-                buffersigned[i]*=13;
+                buffersigned[i] *= 20;
             }
-            // write to file
-            bytes_written = fwrite(buffersigned, sizeof(int16_t), received_data_size/2, fd);
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, (void *)buffer);
+            // write to file
+            bytes_written = fwrite(buffersigned, sizeof(int16_t), received_data_size / 2, fd);
         }
         else
         {
@@ -304,7 +305,7 @@ void AUDIO_AudioInputProcess(void *pvParameters)
         // if squelch on record
         else if (written == false && gAudioState == AUDIO_RECEIVING)
         {
-            AUDIO_Record((AUDIO_INPUT_SAMPLE_FREQ)*7);
+            AUDIO_Record((AUDIO_INPUT_SAMPLE_FREQ) * 7);
         }
         // otherwise just consume samples to prevent buffer overflow
         else
@@ -329,6 +330,20 @@ void AUDIO_AudioInputProcess(void *pvParameters)
     }
 }
 
+// Monitors audio state for issues
+void AUDIO_Watchdog(void *pvParameters)
+{
+    while (1)
+    {
+        if (adcDroppedFrames > 0)
+        {
+            ESP_LOGW(TAG, "Dropped frames: %d", adcDroppedFrames);
+            adcDroppedFrames = 0;
+        }
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
 // Monitors samples over squelch and controls the squelch
 void AUDIO_SquelchControl(void *pvParameters)
 {
@@ -431,8 +446,6 @@ void AUDIO_Listen(void *pvParameters)
             AUDIO_AdcInit();
             xEventGroupClearBits(audioEventGroup, BIT_DONE_TX);
             AUDIO_SetAudioState(AUDIO_LISTENING);
-            // report dropped frames for diagnostics
-            ESP_LOGI(TAG, "ADC dropped frames: %d", adcDroppedFrames);
         }
         else // if no bits are set do listen (default state)
         {
@@ -460,7 +473,7 @@ void AUDIO_Listen(void *pvParameters)
                         }
 
                         // Send ADC sample to ring buffer
-                        UBaseType_t res = xRingbufferSend(adcRingBufferHandle, &data, sizeof(AUDIO_ADC_DATA_TYPE), pdMS_TO_TICKS(1000));
+                        UBaseType_t res = xRingbufferSend(adcRingBufferHandle, &data, sizeof(AUDIO_ADC_DATA_TYPE), pdMS_TO_TICKS(100));
 
                         if (res != pdTRUE)
                         {
@@ -789,6 +802,17 @@ static void initialize_pwm_audio(void)
 
 void AUDIO_Init(void)
 {
+    ESP_LOGI(TAG, "Opening file..");
+    fd = fopen("/storage/sample.wav", "wb");
+
+    if (NULL == fd)
+    {
+        ESP_LOGE(TAG, "Failed to read sample.wav");
+    }
+    ESP_LOGI(TAG, "File opened");
+
+    written = false;
+
     // Initialize event group
     audioEventGroup = xEventGroupCreate();
 

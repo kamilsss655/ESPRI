@@ -23,16 +23,16 @@
 #define AUDIO_ADC_DATA_TYPE uint16_t
 
 // Define audio input max buffer size
-#define AUDIO_INPUT_MAX_BUFF_SIZE 2048
+#define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
 
 // Define chunk size for audio input we process at a time
-#define AUDIO_INPUT_CHUNK_SIZE 512
+#define AUDIO_INPUT_CHUNK_SIZE 2048
 
 // Define audio input sampling frequency in Hz
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
 
 // Define amount of samples used for ADC calibration
-#define AUDIO_ADC_CALIBRATION_SAMPLES 16000
+#define AUDIO_ADC_CALIBRATION_SAMPLES AUDIO_INPUT_SAMPLE_FREQ / 2
 
 // Define ADC conv mode
 #define AUDIO_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
@@ -62,7 +62,7 @@
 #define AUDIO_BUFFER_SIZE 2048
 
 // Define ADC Ring buffer
-#define AUDIO_ADC_RING_BUFFER_SIZE 30000
+#define AUDIO_ADC_RING_BUFFER_SIZE AUDIO_INPUT_CHUNK_SIZE * 3
 #define AUDIO_ADC_RING_BUFFER_TYPE RINGBUF_TYPE_BYTEBUF
 
 // Define audio output sampling frequency in Hz
@@ -123,5 +123,6 @@ esp_err_t AUDIO_PlayWav(const char *filepath);
 void AUDIO_AudioInputProcess(void *pvParameters);
 esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count);
 void AUDIO_SquelchControl(void *pvParameters);
+void AUDIO_Watchdog(void *pvParameters);
 
 #endif
