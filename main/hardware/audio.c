@@ -138,15 +138,16 @@ esp_err_t AUDIO_Record(size_t samples_count)
         return ESP_FAIL;
     }
 
-    for (u_int i = 0; i < samples_count; i += bytes_written)
+    for (u_int i = 0; i < samples_count; i += bytes_written*2)
     {
         // Get ADC data from the ADC ring buffer
         buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000), chunk_size);
         // Check received data
         if (buffer != NULL)
         {
-            for (size_t i = 0; i < received_data_size/2; i+=2)
+            for (size_t i = 0, j = 0; i < received_data_size/2; i+=1, j+=2)
             {
+                // this is 1.5 upsample kind off, so need to listen at 24kHz
                 buffersigned[i] = (buffer[i] + buffer[i+1])/2;
                 // Remove bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
@@ -303,7 +304,7 @@ void AUDIO_AudioInputProcess(void *pvParameters)
         // if squelch on record
         else if (written == false && gAudioState == AUDIO_RECEIVING)
         {
-            AUDIO_Record((AUDIO_INPUT_SAMPLE_FREQ/2)*7);
+            AUDIO_Record((AUDIO_INPUT_SAMPLE_FREQ)*7);
         }
         // otherwise just consume samples to prevent buffer overflow
         else
