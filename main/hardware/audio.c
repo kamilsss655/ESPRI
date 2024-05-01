@@ -108,12 +108,12 @@ esp_err_t AUDIO_Record(size_t samples_count)
 {
     ESP_LOGI(TAG, "Starting recording.");
     // ADC sample
-    size_t received_data_size = 0;
+    size_t bytes_received = 0;
     size_t bytes_written = 0;
     AUDIO_ADC_DATA_TYPE *data;
     const size_t chunk_size = AUDIO_INPUT_CHUNK_SIZE;
     AUDIO_ADC_DATA_TYPE *buffer = calloc(chunk_size, sizeof(AUDIO_ADC_DATA_TYPE));
-    int16_t *buffersigned = calloc(chunk_size / 2, sizeof(int16_t));
+    int16_t *buffersigned = calloc(chunk_size, sizeof(int16_t));
 
     // write wav header
     wav_header_t wav_header = {
@@ -134,24 +134,27 @@ esp_err_t AUDIO_Record(size_t samples_count)
     for (u_int i = 0; i < samples_count; i += bytes_written * 2)
     {
         // Get ADC data from the ADC ring buffer
-        buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(250), chunk_size);
+        // bytes received is indeed bytes, so now we receive 400 bytes (chunk 200 * sizeof 2 = 400), so thats 200 samples
+        buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), chunk_size * sizeof(AUDIO_ADC_DATA_TYPE));
         // Check received data
         if (buffer != NULL)
         {
-            for (size_t i = 0, j = 0; i < received_data_size / 2; i += 1, j += 2)
+            // ESP_LOGI(TAG, "bytes_received: %zu", bytes_received);
+            // iterate over samples
+            for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
             {
                 // this is 1.5 upsample kind off, so need to listen at 24kHz
-                if (i == (received_data_size / 2) - 1)
-                {
+                // if (i == (bytes_received / 2) - 1)
+                // {
                     // last sample in buffer might be not present if we received odd number of samples, so we just use single sample to avoid glitching
-                    buffersigned[i] = buffer[i];
-                }
-                else
-                {
-                    buffersigned[i] = (buffer[i] + buffer[i + 1]) / 2;
-                }
+                buffersigned[i] = buffer[i];
+                // }
+                // else
+                // {
+                //     buffersigned[i] = (buffer[i] + buffer[i + 1]) / 2;
+                // }
 
-                // Remove bias (center signal)
+                // Remove DC bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify
                 buffersigned[i] *= 20;
@@ -159,7 +162,7 @@ esp_err_t AUDIO_Record(size_t samples_count)
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, (void *)buffer);
             // write to file
-            bytes_written = fwrite(buffersigned, sizeof(int16_t), received_data_size / 2, fd);
+            bytes_written = fwrite(buffersigned, sizeof(int16_t), bytes_received / 2, fd);
         }
         else
         {
