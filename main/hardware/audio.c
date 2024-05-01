@@ -45,8 +45,6 @@ EventGroupHandle_t audioEventGroup;
 RingbufHandle_t adcRingBufferHandle;
 
 adc_unit_t audioAdcUnit;
-bool written = true;
-FILE *fd = NULL;
 // ADC dropped frames count due to slow processing
 volatile u_int16_t adcDroppedFrames = 0;
 
@@ -153,13 +151,27 @@ void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
 // Audio record task
 void AUDIO_Record(void *pvParameters)
 {
+    ESP_LOGI(TAG, "Starting recording.");
+
+    FILE *fd = NULL;
+
+    ESP_LOGI(TAG, "Opening file..");
+    fd = fopen("/storage/sample.wav", "wb");
+
+    if (NULL == fd)
+    {
+        ESP_LOGE(TAG, "Failed to read sample.wav");
+        goto Done;
+    }
+
+    ESP_LOGI(TAG, "File opened");
+
     // If ADC ring buffer is being used by some other task wait indefinitely
     while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
     {
         ESP_LOGW(TAG, "Record waiting for ADC ring buffer to be released..");
     }
 
-    ESP_LOGI(TAG, "Starting recording.");
     // ADC sample
     size_t samples_count = 7 * AUDIO_INPUT_SAMPLE_FREQ;
     size_t bytes_received = 0;
@@ -222,7 +234,6 @@ Done:
     // free(buffer);
     // free(buffersigned);
 
-    written = true;
     // Give semaphore so other tasks can access ADC ring buffer
     xSemaphoreGive(receiveSemaphore);
     // Delete self
@@ -338,14 +349,19 @@ void AUDIO_AdcStop()
 // Monitors audio state for issues
 void AUDIO_Watchdog(void *pvParameters)
 {
+    TaskHandle_t adcCalibrateTaskHandle = NULL;
     while (1)
     {
         // Schedule ADC calibration if its value is not valid
         if (gSettings.calibration.adc.is_valid == SETTINGS_FALSE)
         {
             ESP_LOGW(TAG, "ADC calibration is invalid. Please remove audio input. Scheduling calibration..");
-            xTaskCreate(AUDIO_AdcCalibrate, "AUDIO_AdcCalibrate", 2048, NULL, RTOS_PRIORITY_HIGH, NULL);
-            xTaskCreate(AUDIO_Record, "AUDIO_Record", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
+            // If ADC calibrate task is not already running we can start
+            if (adcCalibrateTaskHandle == NULL)
+            {
+                ESP_LOGI(TAG, "ADC calibration starting..");
+                xTaskCreate(AUDIO_AdcCalibrate, "AUDIO_AdcCalibrate", 2048, NULL, RTOS_PRIORITY_HIGH, &adcCalibrateTaskHandle);
+            }
         }
         // Check if there are dropped frames
         if (adcDroppedFrames > 0)
@@ -394,7 +410,7 @@ void AUDIO_SquelchControl(void *pvParameters)
             AUDIO_SetAudioState(AUDIO_RECEIVING);
             over_squelch_windows = 0;
         }
-        // Squelch off delay based on the under the squelch time window count (10*10ms = 100ms)
+        // Squelch off delay based on the under the squelch time window count (200*10ms = 2000ms)
         if (under_squelch_windows >= 200 && (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING))
         {
             ESP_LOGI(TAG, "LISTENING");
@@ -825,17 +841,6 @@ static void initialize_pwm_audio(void)
 
 void AUDIO_Init(void)
 {
-    ESP_LOGI(TAG, "Opening file..");
-    fd = fopen("/storage/sample.wav", "wb");
-
-    if (NULL == fd)
-    {
-        ESP_LOGE(TAG, "Failed to read sample.wav");
-    }
-    ESP_LOGI(TAG, "File opened");
-
-    written = false;
-
     // Initialize event group
     audioEventGroup = xEventGroupCreate();
 
