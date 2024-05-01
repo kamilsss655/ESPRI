@@ -34,6 +34,7 @@
 #include "helper/rtos.h"
 #include "hardware/led.h"
 #include "web/handlers/websocket.h"
+#include "helper/filesystem.h"
 
 static const char *TAG = "HW/AUDIO";
 
@@ -151,9 +152,23 @@ void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
 // Audio record task
 void AUDIO_Record(void *pvParameters)
 {
-    ESP_LOGI(TAG, "Starting recording.");
+    const char *filepath = STORAGE_BASE_PATH "/sample.wav";
 
     FILE *fd = NULL;
+
+    // If the file exists delete it
+    esp_err_t ret = delete_file(filepath);
+
+    if (ret != ESP_OK && ret != ESP_ERR_NOT_FOUND)
+    {
+        ESP_LOGI(TAG, "Recorder failed to allocate space");
+        ESP_LOGI(TAG, "err: %d", (u_int16_t)ret);
+        goto Done;
+    }
+
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    ESP_LOGI(TAG, "Starting recording.");
 
     ESP_LOGI(TAG, "Opening file..");
     fd = fopen("/storage/sample.wav", "wb");

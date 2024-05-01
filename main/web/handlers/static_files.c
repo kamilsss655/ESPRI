@@ -21,6 +21,7 @@
 #include "static_files.h"
 #include "helper/http.h"
 #include "helper/api.h"
+#include "helper/filesystem.h"
 #include "board.h"
 
 static const char *TAG = "WEB/STATIC_FILES";
@@ -214,16 +215,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
 
 #ifdef UPLOAD_PREVENT_FILE_OVERWRITE
     // Delete the file
-    unlink(filepath);
-
-    // Garbage collect to get enough free space for the file
-    esp_err_t ret = esp_spiffs_gc(NULL, req->content_len);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to get enough free space for the file");
-        httpd_json_resp_send(req, HTTPD_500, "Failed to get enough free space for the file");
-        return ESP_OK;
-    }
+    delete_file(filepath);
 #endif
 
     fd = fopen(filepath, "w");
@@ -261,7 +253,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
             /* In case of unrecoverable error,
              * close and delete the unfinished file*/
             fclose(fd);
-            unlink(filepath);
+            delete_file(filepath);
 
             ESP_LOGE(TAG, "File reception failed!");
             /* Respond with 500 Internal Server Error */
@@ -275,7 +267,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
             /* Couldn't write everything to file!
              * Storage may be full? */
             fclose(fd);
-            unlink(filepath);
+            delete_file(filepath);
 
             ESP_LOGE(TAG, "File write failed!");
             /* Respond with 500 Internal Server Error */

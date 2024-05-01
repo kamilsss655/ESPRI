@@ -18,6 +18,7 @@ set(srcs
     "hardware/spiffs.c"
     "hardware/ptt.c"
     "helper/api.c"
+    "helper/filesystem.c"
     "web/router.c"
     "web/handlers/root.c"
     "web/handlers/websocket.c"
