@@ -26,7 +26,7 @@
 #define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
 
 // Define chunk size for audio input we process at a time
-#define AUDIO_INPUT_CHUNK_SIZE 4096
+#define AUDIO_INPUT_CHUNK_SIZE 2048
 
 // Define audio input sampling frequency in Hz
 #define AUDIO_INPUT_SAMPLE_FREQ 32000

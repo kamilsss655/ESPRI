@@ -41,7 +41,7 @@ void app_main()
     xTaskCreate(UART_Monitor, "UART_Monitor", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
 
     // Audio listen task
-    xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 10000, NULL, RTOS_PRIORITY_HIGHEST, NULL);
+    xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
 
     // Audio input process task
     xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
