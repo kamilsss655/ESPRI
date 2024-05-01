@@ -109,7 +109,7 @@ esp_err_t AUDIO_Record(size_t samples_count)
     ESP_LOGI(TAG, "Starting recording.");
     // ADC sample
     size_t bytes_received = 0;
-    size_t bytes_written = 0;
+    size_t samples_written = 0;
     AUDIO_ADC_DATA_TYPE *data;
     const size_t chunk_size = AUDIO_INPUT_CHUNK_SIZE;
     AUDIO_ADC_DATA_TYPE *buffer = calloc(chunk_size, sizeof(AUDIO_ADC_DATA_TYPE));
@@ -131,7 +131,7 @@ esp_err_t AUDIO_Record(size_t samples_count)
         return ESP_FAIL;
     }
 
-    for (u_int i = 0; i < samples_count; i += bytes_written * 2)
+    for (u_int i = 0; i < samples_count; i += samples_written)
     {
         // Get ADC data from the ADC ring buffer
         // bytes received is indeed bytes, so now we receive 400 bytes (chunk 200 * sizeof 2 = 400), so thats 200 samples
@@ -162,7 +162,7 @@ esp_err_t AUDIO_Record(size_t samples_count)
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, (void *)buffer);
             // write to file
-            bytes_written = fwrite(buffersigned, sizeof(int16_t), bytes_received / 2, fd);
+            samples_written = fwrite(buffersigned, sizeof(int16_t), bytes_received / sizeof(AUDIO_ADC_DATA_TYPE), fd);
         }
         else
         {
