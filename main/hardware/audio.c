@@ -75,9 +75,10 @@ esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
         // Check received data
         if (data != NULL)
         {
+            // ESP_LOGI(TAG, "VAL:%d", *data);
             // Calculate mean value
             calibration_value += *data;
-            if (i > 2)
+            if (i > 0)
             {
                 calibration_value /= 2;
             }
@@ -244,7 +245,7 @@ static void AUDIO_AdcInit()
     ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &adc_handle));
 
     adc_continuous_config_t dig_cfg = {
-        .sample_freq_hz = AUDIO_INPUT_SAMPLE_FREQ,
+        .sample_freq_hz = AUDIO_INPUT_SAMPLE_FREQ * AUDIO_INPUT_UPSAMPLE_FACTOR,
         .conv_mode = AUDIO_ADC_CONV_MODE,
         .format = AUDIO_ADC_OUTPUT_TYPE,
     };
@@ -456,12 +457,22 @@ void AUDIO_Listen(void *pvParameters)
 
             if (ret == ESP_OK)
             {
-                for (int i = 0; i < received_bytes; i += SOC_ADC_DIGI_RESULT_BYTES)
+                for (int i = 0; i < received_bytes; i += SOC_ADC_DIGI_RESULT_BYTES * AUDIO_INPUT_UPSAMPLE_FACTOR)
                 {
-                    p = (adc_digi_output_data_t *)&result[i];
-                    chan_num = AUDIO_ADC_GET_CHANNEL(p);
-                    // Get actual ADC sample value
-                    data = AUDIO_ADC_GET_DATA(p);
+                    // Calculate mean value from AUDIO_INPUT_UPSAMPLE_FACTOR samples
+                    data = 0;
+                    for (int up = 0; up < SOC_ADC_DIGI_RESULT_BYTES * AUDIO_INPUT_UPSAMPLE_FACTOR; up += SOC_ADC_DIGI_RESULT_BYTES)
+                    {
+                        p = (adc_digi_output_data_t *)&result[i + up];
+                        chan_num = AUDIO_ADC_GET_CHANNEL(p);
+                        // Get actual ADC sample value
+                        data += AUDIO_ADC_GET_DATA(p);
+
+                        if (up > 0)
+                        {
+                            data /= 2;
+                        }
+                    }
 
                     // Check the channel number validation, the data is invalid if the channel num exceed the maximum channel
                     if (chan_num < SOC_ADC_CHANNEL_NUM(audioAdcUnit))
