@@ -248,7 +248,7 @@ static void AUDIO_AdcInit()
     ESP_ERROR_CHECK(adc_continuous_new_handle(&adc_config, &adc_handle));
 
     adc_continuous_config_t dig_cfg = {
-        .sample_freq_hz = AUDIO_INPUT_SAMPLE_FREQ * AUDIO_INPUT_UPSAMPLE_FACTOR,
+        .sample_freq_hz = (AUDIO_INPUT_SAMPLE_FREQ * AUDIO_INPUT_UPSAMPLE_FACTOR * AUDIO_INPUT_SAMPLE_RATE_WORKAROUND),
         .conv_mode = AUDIO_ADC_CONV_MODE,
         .format = AUDIO_ADC_OUTPUT_TYPE,
     };
