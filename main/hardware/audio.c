@@ -56,19 +56,26 @@ uint16_t samplesOverSquelch;
 AudioState_t gAudioState;
 
 SemaphoreHandle_t gAudioStateSemaphore;
+// Guards audio output shared resource
 SemaphoreHandle_t transmitSemaphore;
+// Guards audio input shared resource
+SemaphoreHandle_t receiveSemaphore;
 
-/// @brief Calibrate ADC by calculating mean value of the samples
-/// @param samples_count target samples count used for calibration
-/// @return
-esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
+// Calibrate ADC by calculating mean value of the samples
+void AUDIO_AdcCalibrate(void *pvParameters)
 {
     // ADC sample
     AUDIO_ADC_DATA_TYPE *data;
     size_t received_data_size;
     uint32_t calibration_value = 0;
 
-    for (u_int i = 0; i < samples_count; i++)
+    // If ADC ring buffer is being used by some other task wait indefinitely
+    while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+    {
+        ESP_LOGW(TAG, "Calibration waiting for ADC ring buffer to be released..");
+    }
+
+    for (u_int i = 0; i < AUDIO_ADC_CALIBRATION_SAMPLES; i++)
     {
         // Get ADC data from the ADC ring buffer
         data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
@@ -89,8 +96,8 @@ esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
         else
         {
             // Likely the buffer is empty
-            ESP_LOGI(TAG, "ADC ring buffer empty");
-            return ESP_FAIL;
+            ESP_LOGI(TAG, "Calibration failed. ADC ring buffer empty.");
+            goto Done;
         }
     }
 
@@ -99,18 +106,64 @@ esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count)
 
     ESP_ERROR_CHECK_WITHOUT_ABORT(SETTINGS_Save());
 
-    ESP_LOGI(TAG, "ADC calibrated to: %d. Used %d samples for calibration.", gSettings.calibration.adc.value, samples_count);
-
-    return ESP_OK;
+    ESP_LOGI(TAG, "ADC calibrated to: %d. Used %d samples for calibration.", gSettings.calibration.adc.value, AUDIO_ADC_CALIBRATION_SAMPLES);
+Done:
+    // Release semaphore so others can use the resource
+    xSemaphoreGive(receiveSemaphore);
+    // Delete self
+    vTaskDelete(NULL);
 }
 
-esp_err_t AUDIO_Record(size_t samples_count)
+// Low priority task that will consume ADC samples from the ADC ring buffer if no other tasks need them
+// to prevent ADC ring buffer overflow
+void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
 {
+    // ADC sample
+    AUDIO_ADC_DATA_TYPE *data;
+    size_t received_data_size;
+
+    while (1)
+    {
+        // Check if we can discard samples
+        if (xSemaphoreTake(receiveSemaphore, 2000 / portTICK_PERIOD_MS) == pdFALSE)
+        {
+            ESP_LOGI(TAG, "ADC ring buffer is being accessed by some task.");
+        }
+        else
+        {
+            data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
+            // Check received data
+            if (data != NULL)
+            {
+                // Return item so it gets removed from the ring buffer
+                vRingbufferReturnItem(adcRingBufferHandle, (void *)data);
+            }
+            else
+            {
+                // Likely the buffer is empty
+                ESP_LOGI(TAG, "ADC ring buffer empty");
+            }
+
+            // Give semaphore so other tasks can access ADC ring buffer
+            xSemaphoreGive(receiveSemaphore);
+        }
+    }
+}
+
+// Audio record task
+void AUDIO_Record(void *pvParameters)
+{
+    // If ADC ring buffer is being used by some other task wait indefinitely
+    while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+    {
+        ESP_LOGW(TAG, "Record waiting for ADC ring buffer to be released..");
+    }
+
     ESP_LOGI(TAG, "Starting recording.");
     // ADC sample
+    size_t samples_count = 7 * AUDIO_INPUT_SAMPLE_FREQ;
     size_t bytes_received = 0;
     size_t samples_written = 0;
-    AUDIO_ADC_DATA_TYPE *data;
     const size_t chunk_size = AUDIO_INPUT_CHUNK_SIZE;
     AUDIO_ADC_DATA_TYPE *buffer = calloc(chunk_size, sizeof(AUDIO_ADC_DATA_TYPE));
     int16_t *buffersigned = calloc(chunk_size, sizeof(int16_t));
@@ -128,7 +181,6 @@ esp_err_t AUDIO_Record(size_t samples_count)
     {
         ESP_LOGE(TAG, "Read wav header failed");
         fclose(fd);
-        return ESP_FAIL;
     }
 
     for (u_int i = 0; i < samples_count; i += samples_written)
@@ -139,21 +191,11 @@ esp_err_t AUDIO_Record(size_t samples_count)
         // Check received data
         if (buffer != NULL)
         {
-            // ESP_LOGI(TAG, "bytes_received: %zu", bytes_received);
             // iterate over samples
             for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
             {
-                // this is 1.5 upsample kind off, so need to listen at 24kHz
-                // if (i == (bytes_received / 2) - 1)
-                // {
-                    // last sample in buffer might be not present if we received odd number of samples, so we just use single sample to avoid glitching
+                // Convert signed ADC sample to unsigned one
                 buffersigned[i] = buffer[i];
-                // }
-                // else
-                // {
-                //     buffersigned[i] = (buffer[i] + buffer[i + 1]) / 2;
-                // }
-
                 // Remove DC bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify
@@ -168,20 +210,23 @@ esp_err_t AUDIO_Record(size_t samples_count)
         {
             // Likely the buffer is empty
             ESP_LOGI(TAG, "ADC ring buffer empty");
-            return ESP_FAIL;
+            goto Done;
         }
     }
 
+    ESP_LOGI(TAG, "Written recording to sample.wav");
+
+Done:
     fclose(fd);
 
     // free(buffer);
     // free(buffersigned);
 
     written = true;
-
-    ESP_LOGI(TAG, "Written recording to sample.wav");
-
-    return ESP_OK;
+    // Give semaphore so other tasks can access ADC ring buffer
+    xSemaphoreGive(receiveSemaphore);
+    // Delete self
+    vTaskDelete(NULL);
 }
 
 // I2S handle to receive/listen audio
@@ -290,62 +335,26 @@ void AUDIO_AdcStop()
     adc_continuous_deinit(adc_handle);
 }
 
-u_int16_t audioOnCount = 0;
-
-// Main audio processing task that reads ADC samples from the ADC ring buffer and processes them
-void AUDIO_AudioInputProcess(void *pvParameters)
-{
-    // ADC sample
-    AUDIO_ADC_DATA_TYPE *data;
-    size_t received_data_size;
-
-    while (1)
-    {
-        // Recalibrate if current ADC calibration is invalid
-        if (gSettings.calibration.adc.is_valid == SETTINGS_FALSE)
-        {
-            AUDIO_AdcCalibrate(AUDIO_ADC_CALIBRATION_SAMPLES);
-        }
-        // if squelch on record
-        else if (written == false && gAudioState == AUDIO_RECEIVING)
-        {
-            AUDIO_Record((AUDIO_INPUT_SAMPLE_FREQ) * 7);
-        }
-        // otherwise just consume samples to prevent buffer overflow
-        else
-        {
-            // Get ADC data from the ADC ring buffer
-            // To get the value you need to dereference the pointer, so use *data
-            data = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceive(adcRingBufferHandle, &received_data_size, pdMS_TO_TICKS(1000));
-            // Check received data
-            if (data != NULL)
-            {
-                // Process data here
-
-                // Return item so it gets removed from the ring buffer
-                vRingbufferReturnItem(adcRingBufferHandle, (void *)data);
-            }
-            else
-            {
-                // Likely the buffer is empty
-                ESP_LOGI(TAG, "ADC ring buffer empty");
-            }
-        }
-    }
-}
-
 // Monitors audio state for issues
 void AUDIO_Watchdog(void *pvParameters)
 {
     while (1)
     {
+        // Schedule ADC calibration if its value is not valid
+        if (gSettings.calibration.adc.is_valid == SETTINGS_FALSE)
+        {
+            ESP_LOGW(TAG, "ADC calibration is invalid. Please remove audio input. Scheduling calibration..");
+            xTaskCreate(AUDIO_AdcCalibrate, "AUDIO_AdcCalibrate", 2048, NULL, RTOS_PRIORITY_HIGH, NULL);
+            xTaskCreate(AUDIO_Record, "AUDIO_Record", 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
+        }
+        // Check if there are dropped frames
         if (adcDroppedFrames > 0)
         {
             ESP_LOGW(TAG, "Dropped frames: %d", adcDroppedFrames);
             adcDroppedFrames = 0;
         }
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }
 // Monitors samples over squelch and controls the squelch
@@ -830,11 +839,15 @@ void AUDIO_Init(void)
     // Initialize event group
     audioEventGroup = xEventGroupCreate();
 
+    // Initialize semaphores
     gAudioStateSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(gAudioStateSemaphore);
 
     transmitSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(transmitSemaphore);
+
+    receiveSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(receiveSemaphore);
 
     // Create ADC ring buffer to store ADC samples (FIFO)
     adcRingBufferHandle = xRingbufferCreate(AUDIO_ADC_RING_BUFFER_SIZE, AUDIO_ADC_RING_BUFFER_TYPE);

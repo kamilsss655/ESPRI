@@ -125,8 +125,8 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
 void AUDIO_Init(void);
 void AUDIO_AdcStop(void);
 esp_err_t AUDIO_PlayWav(const char *filepath);
-void AUDIO_AudioInputProcess(void *pvParameters);
-esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count);
+void AUDIO_AdcCalibrate(void *pvParameters);
+void AUDIO_EmptyAdcRingBuffer(void *pvParameters);
 void AUDIO_SquelchControl(void *pvParameters);
 void AUDIO_Watchdog(void *pvParameters);
 

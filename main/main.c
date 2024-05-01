@@ -43,8 +43,8 @@ void app_main()
     // Audio listen task
     xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
 
-    // Audio input process task
-    xTaskCreate(AUDIO_AudioInputProcess, "AUDIO_AudioInputProcess", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
+    // Audio empty ADC ring buffer task
+    xTaskCreate(AUDIO_EmptyAdcRingBuffer, "AUDIO_EmptyAdcRingBuffer", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
 
     // Audio watchdog    
     xTaskCreate(AUDIO_Watchdog, "AUDIO_Watchdog", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);
