@@ -30,7 +30,7 @@
 
 // Define audio input sampling frequency in Hz
 // With 1.5x upsampling this will result in 16000 bitrate
-#define AUDIO_INPUT_SAMPLE_FREQ 16000
+#define AUDIO_INPUT_SAMPLE_FREQ 32000
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 4
 
 // Define amount of samples used for ADC calibration
