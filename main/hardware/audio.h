@@ -129,5 +129,6 @@ void AUDIO_AdcCalibrate(void *pvParameters);
 void AUDIO_EmptyAdcRingBuffer(void *pvParameters);
 void AUDIO_SquelchControl(void *pvParameters);
 void AUDIO_Watchdog(void *pvParameters);
+void AUDIO_Record(void *pvParameters);
 
 #endif

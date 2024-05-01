@@ -22,6 +22,7 @@ set(srcs
     "web/handlers/root.c"
     "web/handlers/websocket.c"
     "web/handlers/static_files.c"
+    "web/handlers/api/audio.c"
     "web/handlers/api/event.c"
     "web/handlers/api/uvk5_message.c"
     "web/handlers/api/settings.c"
