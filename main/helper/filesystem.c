@@ -14,22 +14,29 @@
  *     limitations under the License.
  */
 
-#ifndef HELPER_API_H
-#define HELPER_API_H
-
 #include <esp_err.h>
-#include <esp_http_server.h>
+#include <esp_spiffs.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-#define API_INTEGER_TYPE uint16_t
-
-typedef struct
+// Delete file and garbage collect to prevent issues
+esp_err_t delete_file(const char *filepath)
 {
-    char  *attr;     // json attr representing given value 
-    void  *val;      // pointer to value
-    bool  isInteger; // determines whether value is integer or string
-} ApiAttr_t;
+    struct stat file_stat;
 
-esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *status, const char *content);
-esp_err_t process_api_attributes(httpd_req_t *req, const char *TAG, ApiAttr_t *api_attribute, size_t num_attributes);
+    // If file exists
+    if (stat(filepath, &file_stat) == 0)
+    {
+        // Delete the file
+        unlink(filepath);
 
-#endif
+        // Garbage collect to get enough free space for the file
+        esp_err_t ret = esp_spiffs_gc(NULL, file_stat.st_size);
+
+        return ret;
+    }
+    else
+    {
+        return ESP_ERR_NOT_FOUND;
+    }
+}

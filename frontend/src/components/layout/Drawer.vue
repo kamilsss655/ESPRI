@@ -19,6 +19,15 @@
             <q-item-label caption>Setup beacon</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item clickable to="/recorder" rel="noopener">
+          <q-item-section avatar>
+            <q-icon name="ion-mic" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Recorder</q-item-label>
+            <q-item-label caption>Record audio</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item clickable to="/files" rel="noopener">
           <q-item-section avatar>
             <q-icon name="ion-folder" />

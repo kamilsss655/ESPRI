@@ -8,6 +8,11 @@
       <q-card-section>
         <FileUploader />
       </q-card-section>
+      <q-card-section>
+        <q-banner inline-actions rounded class="bg-info text-white">
+          File should be named <b>sample.wav</b>. Have resolution of <b>16-bit signed</b>, and <b>32kHz or 16kHz</b> sample rate.
+        </q-banner>
+      </q-card-section>
     </q-card>
   </div>
 </template>

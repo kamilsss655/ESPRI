@@ -18,6 +18,7 @@
 #include "web/handlers/root.h"
 #include "web/handlers/websocket.h"
 #include "web/handlers/static_files.h"
+#include "web/handlers/api/audio.h"
 #include "web/handlers/api/event.h"
 #include "web/handlers/api/uvk5_message.h"
 #include "web/handlers/api/settings.h"
@@ -93,6 +94,14 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .handler = API_SETTINGS_Create,
         .user_ctx = server_data};
     httpd_register_uri_handler(server, &api_settings_create_uri);
+
+    // API Audio
+    httpd_uri_t api_audio_record_uri = {
+        .uri = "/api/audio/record",
+        .method = HTTP_PUT,
+        .handler = API_AUDIO_Record,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &api_audio_record_uri);
 
     // API Event
     httpd_uri_t api_event_create_uri = {

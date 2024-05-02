@@ -3,6 +3,7 @@ export enum ApiPaths {
   SystemInfo = "/api/system/info",
   Event = "/api/event",
   Reboot = "/api/system/reboot",
+  Record = "/api/audio/record",
   DeepSleep = "/api/system/deep_sleep",
   FactoryReset = "/api/system/factory_reset",
   FileUpload = "/upload"

@@ -23,16 +23,22 @@
 #define AUDIO_ADC_DATA_TYPE uint16_t
 
 // Define audio input max buffer size
-#define AUDIO_INPUT_MAX_BUFF_SIZE 1024
+#define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
 
 // Define chunk size for audio input we process at a time
-#define AUDIO_INPUT_CHUNK_SIZE 256
+#define AUDIO_INPUT_CHUNK_SIZE 2048
 
 // Define audio input sampling frequency in Hz
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
+// Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
+#define AUDIO_INPUT_UPSAMPLE_FACTOR 2
+// Due to this bug: https://github.com/espressif/esp-idf/issues/10586
+// continous ADC driver samples at 75% of the advertised frequency
+// this value increases the sample frequency by 33% to counter that issue
+#define AUDIO_INPUT_SAMPLE_RATE_WORKAROUND 1.33
 
 // Define amount of samples used for ADC calibration
-#define AUDIO_ADC_CALIBRATION_SAMPLES 16000
+#define AUDIO_ADC_CALIBRATION_SAMPLES AUDIO_INPUT_SAMPLE_FREQ / 2
 
 // Define ADC conv mode
 #define AUDIO_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
@@ -62,7 +68,7 @@
 #define AUDIO_BUFFER_SIZE 2048
 
 // Define ADC Ring buffer
-#define AUDIO_ADC_RING_BUFFER_SIZE 1024
+#define AUDIO_ADC_RING_BUFFER_SIZE AUDIO_INPUT_CHUNK_SIZE * 3
 #define AUDIO_ADC_RING_BUFFER_TYPE RINGBUF_TYPE_BYTEBUF
 
 // Define audio output sampling frequency in Hz
@@ -110,6 +116,12 @@ typedef struct
     int32_t Subchunk2Size;
 } wav_header_t;
 
+typedef struct
+{
+    char        filepath[64];    // filepath under which the file will be saved i.e 'sample.wav' or 'recordings/1.wav'
+    uint16_t    max_duration_ms; // maximum duration of the recording in ms
+} AUDIO_RecordParam_t;
+
 extern AudioState_t gAudioState;
 
 esp_err_t AUDIO_TransmitStart(void);
@@ -120,8 +132,10 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
 void AUDIO_Init(void);
 void AUDIO_AdcStop(void);
 esp_err_t AUDIO_PlayWav(const char *filepath);
-void AUDIO_AudioInputProcess(void *pvParameters);
-esp_err_t AUDIO_AdcCalibrate(uint16_t samples_count);
+void AUDIO_AdcCalibrate(void *pvParameters);
+void AUDIO_EmptyAdcRingBuffer(void *pvParameters);
 void AUDIO_SquelchControl(void *pvParameters);
+void AUDIO_Watchdog(void *pvParameters);
+void AUDIO_Record(void *pvParameters);
 
 #endif

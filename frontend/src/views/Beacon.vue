@@ -60,6 +60,10 @@
           </template>
         </q-field>
 
+        <q-banner v-if="beaconMode == BeaconMode.WAV" inline-actions rounded class="bg-info text-white">
+          Plays <b>sample.wav</b> file.
+        </q-banner>
+
         <q-field
           filled
           label="Baud"

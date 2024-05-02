@@ -14,22 +14,11 @@
  *     limitations under the License.
  */
 
-#ifndef HELPER_API_H
-#define HELPER_API_H
+#ifndef HELPER_FILESYSTEM_H
+#define HELPER_FILESYSTEM_H
 
 #include <esp_err.h>
-#include <esp_http_server.h>
 
-#define API_INTEGER_TYPE uint16_t
-
-typedef struct
-{
-    char  *attr;     // json attr representing given value 
-    void  *val;      // pointer to value
-    bool  isInteger; // determines whether value is integer or string
-} ApiAttr_t;
-
-esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *status, const char *content);
-esp_err_t process_api_attributes(httpd_req_t *req, const char *TAG, ApiAttr_t *api_attribute, size_t num_attributes);
+esp_err_t delete_file(const char *filepath);
 
 #endif

@@ -17,9 +17,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#define SETTINGS_INTEGER_TYPE uint16_t
-
 #include <esp_err.h>
+
+#include "helper/api.h"
 
 #include "board.h"
 
@@ -82,10 +82,10 @@ typedef struct
 // GPIO settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE status_led;
-    SETTINGS_INTEGER_TYPE audio_out;
-    SETTINGS_INTEGER_TYPE audio_in;
-    SETTINGS_INTEGER_TYPE ptt;
+    API_INTEGER_TYPE status_led;
+    API_INTEGER_TYPE audio_out;
+    API_INTEGER_TYPE audio_in;
+    API_INTEGER_TYPE ptt;
 } SETTINGS_GpioConfig_t;
 
 // Beacon mode
@@ -99,28 +99,28 @@ typedef enum {
 // Morse code beacon settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE baud;
-    SETTINGS_INTEGER_TYPE tone_freq;
+    API_INTEGER_TYPE baud;
+    API_INTEGER_TYPE tone_freq;
 } SETTINGS_MorseCodeBeaconConfig_t;
 
 // AFSK beacon settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE baud;
-    SETTINGS_INTEGER_TYPE zero_freq;
-    SETTINGS_INTEGER_TYPE one_freq;
+    API_INTEGER_TYPE baud;
+    API_INTEGER_TYPE zero_freq;
+    API_INTEGER_TYPE one_freq;
 } SETTINGS_AfskBeaconConfig_t;
 
 // Audio out settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE volume; // 0-100 - determines audio output volume
+    API_INTEGER_TYPE volume; // 0-100 - determines audio output volume
 } SETTINGS_AudioOutConfig_t;
 
 // Audio in settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE squelch; // 0-100 - determines squelch sensitivity
+    API_INTEGER_TYPE squelch; // 0-100 - determines squelch sensitivity
 } SETTINGS_AudioInConfig_t;
 
 // Audio settings
@@ -133,7 +133,7 @@ typedef struct
 // LED settings
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE max_brightness;
+    API_INTEGER_TYPE max_brightness;
 } SETTINGS_LedConfig_t;
 
 // Beacon settings
@@ -141,7 +141,7 @@ typedef struct
 {
     SETTINGS_BeaconMode_t            mode;
     char                             text[64];
-    SETTINGS_INTEGER_TYPE            delay_seconds;
+    API_INTEGER_TYPE            delay_seconds;
     SETTINGS_MorseCodeBeaconConfig_t morse_code;
     SETTINGS_AfskBeaconConfig_t      afsk;
 } SETTINGS_BeaconConfig_t;
@@ -149,7 +149,7 @@ typedef struct
 // Calibration subtype
 typedef struct
 {
-    SETTINGS_INTEGER_TYPE value;    // value when there is no audio in signal
+    API_INTEGER_TYPE value;    // value when there is no audio in signal
     SETTINGS_Bool_t       is_valid; // set it to false to trigger calibration
 } SETTINGS_CalibrationSubtype_t;
 
