@@ -218,7 +218,6 @@ void AUDIO_Record(void *pvParameters)
     for (u_int i = 0; i < samples_count; i += samples_written)
     {
         // Get ADC data from the ADC ring buffer
-        // bytes received is indeed bytes, so now we receive 400 bytes (chunk 200 * sizeof 2 = 400), so thats 200 samples
         buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), chunk_size * sizeof(AUDIO_ADC_DATA_TYPE));
         // Check received data
         if (buffer != NULL)
