@@ -196,9 +196,7 @@ void AUDIO_Record(void *pvParameters)
     const size_t samples_count = (param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ;
     size_t bytes_received = 0;
     size_t samples_written = 0;
-    const size_t chunk_size = AUDIO_INPUT_CHUNK_SIZE;
-    AUDIO_ADC_DATA_TYPE *buffer = calloc(chunk_size, sizeof(AUDIO_ADC_DATA_TYPE));
-    int16_t *buffersigned = calloc(chunk_size, sizeof(int16_t));
+    int16_t *buffersigned = calloc(AUDIO_INPUT_CHUNK_SIZE, sizeof(int16_t));
 
     // write wav header
     wav_header_t wav_header = {
@@ -218,22 +216,20 @@ void AUDIO_Record(void *pvParameters)
     for (u_int i = 0; i < samples_count; i += samples_written)
     {
         // Get ADC data from the ADC ring buffer
-        buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), chunk_size * sizeof(AUDIO_ADC_DATA_TYPE));
+        buffersigned = (int16_t *)xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), AUDIO_INPUT_CHUNK_SIZE * sizeof(AUDIO_ADC_DATA_TYPE));
         // Check received data
-        if (buffer != NULL)
+        if (buffersigned != NULL)
         {
             // iterate over samples
             for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
             {
-                // Convert signed ADC sample to unsigned one
-                buffersigned[i] = buffer[i];
                 // Remove DC bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify
                 buffersigned[i] *= 20;
             }
             // Return item so it gets removed from the ring buffer
-            vRingbufferReturnItem(adcRingBufferHandle, (void *)buffer);
+            vRingbufferReturnItem(adcRingBufferHandle, (void *)buffersigned);
             // write to file
             samples_written = fwrite(buffersigned, sizeof(int16_t), bytes_received / sizeof(AUDIO_ADC_DATA_TYPE), fd);
         }
