@@ -20,6 +20,15 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
+#define API_INTEGER_TYPE uint16_t
+
+typedef struct
+{
+    char  *attr;     // json attr representing given value 
+    void  *val;      // pointer to value
+    bool  isInteger; // determines whether value is integer or string
+} ApiAttr_t;
+
 esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *status, const char *content);
 
 #endif

@@ -27,7 +27,7 @@
 static const char *TAG = "WEB/API/SETTINGS";
 
 // List of supported settings
-ApiSetting_t settings[] = {
+ApiAttr_t settings[] = {
     {"wifi.mode",                        &gSettings.wifi.mode,                        1},
     {"wifi.ssid",                        &gSettings.wifi.ssid,                        0},
     {"wifi.password",                    &gSettings.wifi.password,                    0},
@@ -62,7 +62,7 @@ esp_err_t API_SETTINGS_Index(httpd_req_t *req)
     {
         if(settings[i].isInteger)
         {
-            cJSON_AddNumberToObject(root, settings[i].attr,  *(SETTINGS_INTEGER_TYPE *)settings[i].val);
+            cJSON_AddNumberToObject(root, settings[i].attr,  *(API_INTEGER_TYPE *)settings[i].val);
         }
         else
         {
@@ -134,7 +134,7 @@ esp_err_t API_SETTINGS_Create(httpd_req_t *req)
         // set the setting based on the data type
         if(settings[i].isInteger)
         {
-            *(SETTINGS_INTEGER_TYPE *)settings[i].val = cJSON_GetNumberValue(attr);
+            *(API_INTEGER_TYPE *)settings[i].val = cJSON_GetNumberValue(attr);
         }
         else
         {
