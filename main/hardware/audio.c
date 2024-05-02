@@ -233,8 +233,8 @@ void AUDIO_Record(void *pvParameters)
             {
                 // Remove DC bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
-                // Amplify
-                buffersigned[i] *= 20;
+                // Amplify (the higher the squelch and thus audio input level, the lower the gain)
+                buffersigned[i] *= 90 - (85 * gSettings.audio.in.squelch / 100);
             }
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, (void *)buffersigned);
