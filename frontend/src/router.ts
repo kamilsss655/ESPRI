@@ -6,6 +6,7 @@ import About from "./views/About.vue";
 import Notifications from "./views/Notifications.vue";
 import Settings from "./views/Settings.vue";
 import Files from "./views/Files.vue";
+import Recorder from "./views/Recorder.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -16,7 +17,8 @@ const router = createRouter({
       { path: "/about", name: "About", component: About },
       { path: "/notifications", name: "Notifications", component: Notifications },
       { path: "/settings", name: "Settings", component: Settings },
-      { path: "/files", name: "Files", component: Files }
+      { path: "/files", name: "Files", component: Files },
+      { path: "/recorder", name: "Recorder", component: Recorder }
     ]
   });
 
