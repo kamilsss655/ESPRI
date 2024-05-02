@@ -152,8 +152,13 @@ void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
 // Audio record task
 void AUDIO_Record(void *pvParameters)
 {
-    const char *filepath = STORAGE_BASE_PATH "/sample.wav";
+    // Retrieve params
+    AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;
 
+    // Convert relative filepath to absolute filepath
+    char filepath[84];
+    snprintf(filepath, sizeof(filepath), "%s/%s", STORAGE_BASE_PATH, param->filepath);
+    
     FILE *fd = NULL;
 
     // If the file exists delete it
@@ -168,14 +173,14 @@ void AUDIO_Record(void *pvParameters)
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
-    ESP_LOGI(TAG, "Starting recording.");
+    ESP_LOGI(TAG, "Preparing recording.");
 
-    ESP_LOGI(TAG, "Opening file..");
-    fd = fopen("/storage/sample.wav", "wb");
+    ESP_LOGI(TAG, "Opening file: %s", param->filepath);
+    fd = fopen(filepath, "wb");
 
     if (NULL == fd)
     {
-        ESP_LOGE(TAG, "Failed to read sample.wav");
+        ESP_LOGE(TAG, "Failed to read %s", param->filepath);
         goto Done;
     }
 
@@ -188,7 +193,7 @@ void AUDIO_Record(void *pvParameters)
     }
 
     // ADC sample
-    size_t samples_count = 7 * AUDIO_INPUT_SAMPLE_FREQ;
+    const size_t samples_count = (param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ;
     size_t bytes_received = 0;
     size_t samples_written = 0;
     const size_t chunk_size = AUDIO_INPUT_CHUNK_SIZE;
@@ -241,7 +246,7 @@ void AUDIO_Record(void *pvParameters)
         }
     }
 
-    ESP_LOGI(TAG, "Written recording to sample.wav");
+    ESP_LOGI(TAG, "Written recording to %s", param->filepath);
 
 Done:
     fclose(fd);

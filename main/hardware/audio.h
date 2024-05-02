@@ -32,7 +32,8 @@
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
 // Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 2
-// For some reason continous ADC driver samples at 75% of the advertised frequency
+// Due to this bug: https://github.com/espressif/esp-idf/issues/10586
+// continous ADC driver samples at 75% of the advertised frequency
 // this value increases the sample frequency by 33% to counter that issue
 #define AUDIO_INPUT_SAMPLE_RATE_WORKAROUND 1.33
 
@@ -114,6 +115,12 @@ typedef struct
     uint8_t Subchunk2ID[4];
     int32_t Subchunk2Size;
 } wav_header_t;
+
+typedef struct
+{
+    char        filepath[64];    // filepath under which the file will be saved i.e 'sample.wav' or 'recordings/1.wav'
+    uint16_t    max_duration_ms; // maximum duration of the recording in ms
+} AUDIO_RecordParam_t;
 
 extern AudioState_t gAudioState;
 
