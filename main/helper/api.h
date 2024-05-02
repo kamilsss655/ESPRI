@@ -30,5 +30,6 @@ typedef struct
 } ApiAttr_t;
 
 esp_err_t httpd_json_resp_send(httpd_req_t *req, const char *status, const char *content);
+esp_err_t process_api_attributes(httpd_req_t *req, const char *TAG, ApiAttr_t *api_attribute, size_t num_attributes);
 
 #endif
