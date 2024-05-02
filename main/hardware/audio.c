@@ -186,6 +186,14 @@ void AUDIO_Record(void *pvParameters)
 
     ESP_LOGI(TAG, "File opened");
 
+    ESP_LOGI(TAG, "Waiting for squelch to open");
+
+    // Wait until squelch opens
+    while(gAudioState != AUDIO_RECEIVING)
+    {
+        vTaskDelay(1);
+    }
+
     // If ADC ring buffer is being used by some other task wait indefinitely
     while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
     {
