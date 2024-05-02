@@ -94,55 +94,13 @@ curl -d '{
               }' http://192.168.4.1.api/settings */
 esp_err_t API_SETTINGS_Create(httpd_req_t *req)
 {
-    int total_len = req->content_len;
-    int cur_len = 0;
-    char *buf = ((file_server_data *)(req->user_ctx))->scratch;
-    int received = 0;
+    esp_err_t ret = process_api_attributes(req, TAG, settings, (sizeof(settings) / sizeof(settings[0])));
 
-    // Read request content
-    while (cur_len < total_len)
+    // If processing attributes resulted in error we return early
+    if(ret != ESP_OK)
     {
-        received = httpd_req_recv(req, buf + cur_len, total_len);
-        if (received <= 0)
-        {
-            httpd_json_resp_send(req, HTTPD_500, "Failed to process request");
-            return ESP_FAIL;
-        }
-        cur_len += received;
+        return ret;
     }
-    buf[total_len] = '\0';
-
-    // Parse JSON
-    cJSON *root = cJSON_ParseWithLength(buf, total_len);
-
-    // Handle invalid JSON
-    if (root == NULL)
-    {
-        ESP_LOGE(TAG, "Invalid JSON received");
-        httpd_json_resp_send(req, HTTPD_500, "Invalid JSON received");
-        // Free memory
-        cJSON_Delete(root);
-        return ESP_FAIL;
-    }
-
-    // Get all settings from the JSON object
-    for(u_int8_t i=0; i<(sizeof(settings)/sizeof(settings[0])); i++)
-    {
-        cJSON *attr = cJSON_GetObjectItem(root, settings[i].attr);
-        // if attr is null we go to next item
-        if (attr == NULL) continue;
-        // set the setting based on the data type
-        if(settings[i].isInteger)
-        {
-            *(API_INTEGER_TYPE *)settings[i].val = cJSON_GetNumberValue(attr);
-        }
-        else
-        {
-            strcpy((char *)settings[i].val, cJSON_GetStringValue(attr));
-        }
-    }
-    // Free memory, it handles both root and attr
-    cJSON_Delete(root);
     
     httpd_json_resp_send(req, HTTPD_200, "Settings saved.");
 
