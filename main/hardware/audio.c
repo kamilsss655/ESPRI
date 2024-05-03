@@ -17,12 +17,14 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
 #include <pwm_audio.h>
 #include <esp_adc/adc_continuous.h>
+#include <esp_spiffs.h>
 #include <freertos/ringbuf.h>
 #include <driver/gpio.h>
 #include <esp_check.h>
@@ -158,16 +160,28 @@ void AUDIO_Record(void *pvParameters)
     // Convert relative filepath to absolute filepath
     char filepath[84];
     snprintf(filepath, sizeof(filepath), "%s/%s", STORAGE_BASE_PATH, param->filepath);
-    
+
+    int16_t *buffersigned = NULL;
+
     FILE *fd = NULL;
+    struct stat file_stat;
+
+    ESP_LOGI(TAG, "Allocating space for the recording..");
 
     // If the file exists delete it
-    esp_err_t ret = delete_file(filepath);
+    if (stat(filepath, &file_stat) == 0)
+    {
+        // Delete the file
+        unlink(filepath);
+    }
 
-    if (ret != ESP_OK && ret != ESP_ERR_NOT_FOUND)
+    // Garbage collect to get enough free space for the file
+    esp_err_t ret = esp_spiffs_gc(NULL, (param->max_duration_ms * (AUDIO_INPUT_SAMPLE_FREQ / 1000) * sizeof(AUDIO_ADC_DATA_TYPE)));
+    // esp_err_t ret = esp_spiffs_gc(NULL, ((param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ * sizeof(AUDIO_ADC_DATA_TYPE)));
+
+    if (ret != ESP_OK)
     {
         ESP_LOGI(TAG, "Recorder failed to allocate space");
-        ESP_LOGI(TAG, "err: %d", (u_int16_t)ret);
         goto Done;
     }
 
@@ -186,6 +200,14 @@ void AUDIO_Record(void *pvParameters)
 
     ESP_LOGI(TAG, "File opened");
 
+    ESP_LOGI(TAG, "Waiting for squelch to open");
+
+    // Wait until squelch opens
+    while (gAudioState != AUDIO_RECEIVING)
+    {
+        vTaskDelay(1);
+    }
+
     // If ADC ring buffer is being used by some other task wait indefinitely
     while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
     {
@@ -196,9 +218,6 @@ void AUDIO_Record(void *pvParameters)
     const size_t samples_count = (param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ;
     size_t bytes_received = 0;
     size_t samples_written = 0;
-    const size_t chunk_size = AUDIO_INPUT_CHUNK_SIZE;
-    AUDIO_ADC_DATA_TYPE *buffer = calloc(chunk_size, sizeof(AUDIO_ADC_DATA_TYPE));
-    int16_t *buffersigned = calloc(chunk_size, sizeof(int16_t));
 
     // write wav header
     wav_header_t wav_header = {
@@ -212,30 +231,36 @@ void AUDIO_Record(void *pvParameters)
     if (len <= 0)
     {
         ESP_LOGE(TAG, "Read wav header failed");
-        fclose(fd);
+        goto Done;
     }
 
     for (u_int i = 0; i < samples_count; i += samples_written)
     {
+        // Wait until the buffer has enough data, to avoid writing to filesystem in small chunks
+        while (xRingbufferGetCurFreeSize(adcRingBufferHandle) >= AUDIO_INPUT_CHUNK_SIZE)
+        {
+            vTaskDelay(1 / portTICK_PERIOD_MS);
+        }
         // Get ADC data from the ADC ring buffer
-        buffer = (AUDIO_ADC_DATA_TYPE *)xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), chunk_size * sizeof(AUDIO_ADC_DATA_TYPE));
+        buffersigned = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), AUDIO_INPUT_CHUNK_SIZE * sizeof(AUDIO_ADC_DATA_TYPE));
+
+        ESP_LOGI(TAG, "bytes received: %d", bytes_received);
+
         // Check received data
-        if (buffer != NULL)
+        if (buffersigned != NULL)
         {
             // iterate over samples
             for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
             {
-                // Convert signed ADC sample to unsigned one
-                buffersigned[i] = buffer[i];
                 // Remove DC bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
-                // Amplify
-                buffersigned[i] *= 20;
+                // Amplify (the higher the squelch and thus audio input level, the lower the gain)
+                buffersigned[i] *= 90 - (85 * gSettings.audio.in.squelch / 100);
             }
             // Return item so it gets removed from the ring buffer
-            vRingbufferReturnItem(adcRingBufferHandle, (void *)buffer);
+            vRingbufferReturnItem(adcRingBufferHandle, buffersigned);
             // write to file
-            samples_written = fwrite(buffersigned, sizeof(int16_t), bytes_received / sizeof(AUDIO_ADC_DATA_TYPE), fd);
+            samples_written = fwrite(buffersigned, 1, bytes_received, fd) / sizeof(AUDIO_ADC_DATA_TYPE);
         }
         else
         {
@@ -249,9 +274,6 @@ void AUDIO_Record(void *pvParameters)
 
 Done:
     fclose(fd);
-
-    // free(buffer);
-    // free(buffersigned);
 
     // Give semaphore so other tasks can access ADC ring buffer
     xSemaphoreGive(receiveSemaphore);
@@ -531,11 +553,11 @@ void AUDIO_Listen(void *pvParameters)
                         }
 
                         // Send ADC sample to ring buffer
-                        UBaseType_t res = xRingbufferSend(adcRingBufferHandle, &data, sizeof(AUDIO_ADC_DATA_TYPE), pdMS_TO_TICKS(100));
+                        UBaseType_t res = xRingbufferSend(adcRingBufferHandle, &data, sizeof(AUDIO_ADC_DATA_TYPE), pdMS_TO_TICKS(1000));
 
                         if (res != pdTRUE)
                         {
-                            ESP_LOGW(TAG, "Failed to send ADC data to the ring buffer. The buffer is full?");
+                            ESP_LOGE(TAG, "Failed to send ADC data to the ring buffer. The buffer is full?");
                         }
                     }
                     else
@@ -543,6 +565,8 @@ void AUDIO_Listen(void *pvParameters)
                         ESP_LOGW(TAG, "Invalid ADC data");
                     }
                 }
+                // Feed the watchdog
+                vTaskDelay(1);
             }
             else if (ret == ESP_ERR_TIMEOUT)
             {

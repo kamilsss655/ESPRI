@@ -58,11 +58,11 @@ esp_err_t API_AUDIO_Record(httpd_req_t *req)
     if (audioRecordTaskHandle == NULL)
     {
         xTaskCreate(AUDIO_Record, audioRecordTaskName, 4096, &record_param, RTOS_PRIORITY_MEDIUM, NULL);
-        httpd_json_resp_send(req, HTTPD_200, "OK. Recording scheduled.");
+        httpd_json_resp_send(req, HTTPD_200, "OK. Recording will start once the squelch opens.");
     }
     else
     {
-        httpd_json_resp_send(req, HTTPD_500, "Recording is already in progress.");
+        httpd_json_resp_send(req, HTTPD_500, "Recording task is already running.");
     }
 
     return ESP_OK;
