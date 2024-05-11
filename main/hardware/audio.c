@@ -833,6 +833,15 @@ esp_err_t AUDIO_PlayWav(const char *filepath)
     ESP_LOGI(TAG, "frame_rate= %" PRIi32 ", ch=%d, width=%d", wav_head.SampleRate, wav_head.NumChannels, wav_head.BitsPerSample);
 
     pwm_audio_set_param(wav_head.SampleRate, wav_head.BitsPerSample, wav_head.NumChannels);
+
+    int16_t volume = (32 * gSettings.audio.out.volume)/100;
+
+    pwm_audio_set_volume((-16) + volume);
+
+    
+    pwm_audio_get_volume(&volume);
+    ESP_LOGI(TAG, "volume: %hhd", volume);
+
     pwm_audio_start();
 
     /**
