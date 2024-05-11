@@ -62,6 +62,17 @@ SemaphoreHandle_t transmitSemaphore;
 // Guards audio input shared resource
 SemaphoreHandle_t receiveSemaphore;
 
+// Apply settings like sample rate, volume, etc
+static void pwm_audio_apply_settings(void)
+{
+    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1);
+
+    int16_t volume = (32 * gSettings.audio.out.volume) / 100;
+    int8_t adjusted_volume = -16 + volume;
+    // Set volume -16 to 16 based on settings
+    pwm_audio_set_volume(adjusted_volume);
+}
+
 // Calibrate ADC by calculating mean value of the samples
 void AUDIO_AdcCalibrate(void *pvParameters)
 {
@@ -633,7 +644,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     size_t w_bytes = 0;
 
     // Allocate temp buffer
-    int16_t *w_buf = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    int16_t *w_buf = (int16_t *)calloc(1, AUDIO_OUTPUT_BUFFER_SIZE);
     assert(w_buf);
 
     uint32_t duration_sine = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)freq) + 0.5;
@@ -650,8 +661,8 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     // Multiply duration by 2 because we point to u_int8_t and write int16_t
     duration_total *= 2;
 
-    // Turn on PWM audio output
-    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1U);
+    pwm_audio_apply_settings();
+
     pwm_audio_start();
 
     for (int tot_bytes = 0; tot_bytes < duration_total; tot_bytes += w_bytes)
@@ -694,11 +705,11 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     size_t w_bytes = 0;
 
     // Allocate temp buffer one
-    int16_t *w_buf_one = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    int16_t *w_buf_one = (int16_t *)calloc(1, AUDIO_OUTPUT_BUFFER_SIZE);
     assert(w_buf_one);
 
     // Allocate temp buffer zero
-    int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_OUTPUT_BUFFER_SIZE);
     assert(w_buf_zero);
 
     uint32_t duration_sine_zero = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)zero_freq_p) + 0.5;
@@ -742,8 +753,8 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     //         }
     //     }
 
-    // Turn on PWM audio output
-    pwm_audio_set_param(AUDIO_OUTPUT_SAMPLE_FREQ, AUDIO_OUTPUT_BITS_PER_SAMPLE, 1U);
+    pwm_audio_apply_settings();
+
     pwm_audio_start();
 
     for (int i = 0; i < len; i++)
@@ -832,7 +843,8 @@ esp_err_t AUDIO_PlayWav(const char *filepath)
 
     ESP_LOGI(TAG, "frame_rate= %" PRIi32 ", ch=%d, width=%d", wav_head.SampleRate, wav_head.NumChannels, wav_head.BitsPerSample);
 
-    pwm_audio_set_param(wav_head.SampleRate, wav_head.BitsPerSample, wav_head.NumChannels);
+    pwm_audio_apply_settings();
+
     pwm_audio_start();
 
     /**
@@ -875,7 +887,7 @@ static void initialize_pwm_audio(void)
         .gpio_num_right = gSettings.gpio.audio_out,
         .ledc_channel_right = LEDC_CHANNEL_1,
         .ledc_timer_sel = LEDC_TIMER_1,
-        .ringbuf_len = 1024 * 8,
+        .ringbuf_len = AUDIO_OUTPUT_RING_BUFFER_SIZE,
     };
     pwm_audio_init(&pac);
 

@@ -49,7 +49,7 @@ menu "Project configuration"
     config AUDIO_OUT_VOLUME
         int "Audio OUT volume"
         range 0 100
-        default 5
+        default 7
         help
             Audio OUT volume.
 

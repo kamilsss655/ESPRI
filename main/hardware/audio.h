@@ -19,15 +19,18 @@
 
 #include <driver/i2s_pdm.h>
 
+// --- Audio input ---
+
 // Define audio ADC data type representing single audio sample
 #define AUDIO_ADC_DATA_TYPE uint16_t
-
-// Define audio input max buffer size
-#define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
-
 // Define chunk size for audio input we process at a time
 #define AUDIO_INPUT_CHUNK_SIZE 2048
-
+// Define audio input max buffer size
+#define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
+// Define ADC ring buffer size
+#define AUDIO_ADC_RING_BUFFER_SIZE AUDIO_INPUT_CHUNK_SIZE * 3
+// Define ADC ring buffer type
+#define AUDIO_ADC_RING_BUFFER_TYPE RINGBUF_TYPE_BYTEBUF
 // Define audio input sampling frequency in Hz
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
 // Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
@@ -36,22 +39,16 @@
 // continous ADC driver samples at 75% of the advertised frequency
 // this value increases the sample frequency by 33% to counter that issue
 #define AUDIO_INPUT_SAMPLE_RATE_WORKAROUND 1.33
-
 // Define amount of samples used for ADC calibration
 #define AUDIO_ADC_CALIBRATION_SAMPLES AUDIO_INPUT_SAMPLE_FREQ / 2
-
 // Define ADC conv mode
 #define AUDIO_ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
-
 // Define ADC output type
 #define AUDIO_ADC_OUTPUT_TYPE ADC_DIGI_OUTPUT_FORMAT_TYPE1
-
 // Define ADC input attenuation
 #define AUDIO_ADC_ATTEN ADC_ATTEN_DB_12 // ADC_ATTEN_DB_12 allows to measure 0-3.3V
-
 // Define ADC bit width
 #define AUDIO_ADC_BIT_WIDTH SOC_ADC_DIGI_MAX_BITWIDTH
-
 #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
 #define AUDIO_ADC_GET_CHANNEL(p_data)     ((p_data)->type1.channel)
 #define AUDIO_ADC_GET_DATA(p_data)        ((p_data)->type1.data)
@@ -60,25 +57,23 @@
 #define AUDIO_ADC_GET_DATA(p_data)        ((p_data)->type2.data)
 #endif
 
-#define AUDIO_AFSK_TONE_MIN_FREQ 300
-#define AUDIO_AFSK_TONE_MAX_FREQ 4000
-#define AUDIO_AFSK_MIN_BAUD 50
-#define AUDIO_AFSK_MAX_BAUD 2400
+// --- Audio output ---
 
-#define AUDIO_BUFFER_SIZE 2048
-
-// Define ADC Ring buffer
-#define AUDIO_ADC_RING_BUFFER_SIZE AUDIO_INPUT_CHUNK_SIZE * 3
-#define AUDIO_ADC_RING_BUFFER_TYPE RINGBUF_TYPE_BYTEBUF
-
+// Define audio output buffer size
+#define AUDIO_OUTPUT_BUFFER_SIZE 2048
+#define AUDIO_OUTPUT_RING_BUFFER_SIZE AUDIO_OUTPUT_BUFFER_SIZE * 4
 // Define audio output sampling frequency in Hz
 #define AUDIO_OUTPUT_SAMPLE_FREQ 32000
 // Bits per sample
 #define AUDIO_OUTPUT_BITS_PER_SAMPLE 16
 // volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
 #define AUDIO_VOLUME_MULTIPLIER (320.0)
-
 #define CONST_PI (3.1416f)
+// Modulation constraints
+#define AUDIO_AFSK_TONE_MIN_FREQ 300
+#define AUDIO_AFSK_TONE_MAX_FREQ 4000
+#define AUDIO_AFSK_MIN_BAUD 50
+#define AUDIO_AFSK_MAX_BAUD 2400
 
 // At the same time we can either listen to audio, or transmit audio.
 // We cannot do both at the same time. Event bits are used to syncronize shared I2S0 resource.
