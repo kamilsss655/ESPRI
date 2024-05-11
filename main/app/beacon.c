@@ -47,7 +47,7 @@ void BEACON_Scheduler(void *pvParameters)
                 .zero_freq = gSettings.beacon.afsk.zero_freq,
                 .one_freq = gSettings.beacon.afsk.one_freq};
 
-            xTaskCreate(TRANSMIT_Afsk, "TRANSMIT_Afsk", 4096, &afsk_param, RTOS_PRIORITY_MEDIUM, NULL);
+            xTaskCreate(TRANSMIT_Afsk, "TRANSMIT_Afsk", 4096, &afsk_param, RTOS_PRIORITY_HIGHEST, NULL);
             break;
 
         case SETTINGS_BEACON_MODE_MORSE_CODE:
@@ -56,7 +56,7 @@ void BEACON_Scheduler(void *pvParameters)
                 .input = gSettings.beacon.text,
                 .len = strlen(gSettings.beacon.text)};
 
-            xTaskCreate(TRANSMIT_MorseCode, "TRANSMIT_MorseCode", 4096, &morse_code_param, RTOS_PRIORITY_MEDIUM, NULL);
+            xTaskCreate(TRANSMIT_MorseCode, "TRANSMIT_MorseCode", 4096, &morse_code_param, RTOS_PRIORITY_HIGHEST, NULL);
             break;
 
         case SETTINGS_BEACON_MODE_WAV:
@@ -64,7 +64,7 @@ void BEACON_Scheduler(void *pvParameters)
             TRANSMIT_WavParam_t wav_param = {
                 .path="/storage/sample.wav"};
 
-            xTaskCreate(TRANSMIT_Wav, "TRANSMIT_Wav", 4096, &wav_param, RTOS_PRIORITY_MEDIUM, NULL);
+            xTaskCreate(TRANSMIT_Wav, "TRANSMIT_Wav", 4096, &wav_param, RTOS_PRIORITY_HIGHEST, NULL);
             break;
         }
 
