@@ -633,7 +633,7 @@ void AUDIO_PlayTone(uint16_t freq, uint16_t duration_ms)
     size_t w_bytes = 0;
 
     // Allocate temp buffer
-    int16_t *w_buf = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    int16_t *w_buf = (int16_t *)calloc(1, AUDIO_OUTPUT_BUFFER_SIZE);
     assert(w_buf);
 
     uint32_t duration_sine = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)freq) + 0.5;
@@ -694,11 +694,11 @@ void AUDIO_PlayAFSK(const uint8_t *data, size_t len, uint16_t baud, uint16_t zer
     size_t w_bytes = 0;
 
     // Allocate temp buffer one
-    int16_t *w_buf_one = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    int16_t *w_buf_one = (int16_t *)calloc(1, AUDIO_OUTPUT_BUFFER_SIZE);
     assert(w_buf_one);
 
     // Allocate temp buffer zero
-    int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_BUFFER_SIZE);
+    int16_t *w_buf_zero = (int16_t *)calloc(1, AUDIO_OUTPUT_BUFFER_SIZE);
     assert(w_buf_zero);
 
     uint32_t duration_sine_zero = (AUDIO_OUTPUT_SAMPLE_FREQ / (float)zero_freq_p) + 0.5;
@@ -884,7 +884,7 @@ static void initialize_pwm_audio(void)
         .gpio_num_right = gSettings.gpio.audio_out,
         .ledc_channel_right = LEDC_CHANNEL_1,
         .ledc_timer_sel = LEDC_TIMER_1,
-        .ringbuf_len = 1024 * 8,
+        .ringbuf_len = AUDIO_OUTPUT_RING_BUFFER_SIZE,
     };
     pwm_audio_init(&pac);
 
