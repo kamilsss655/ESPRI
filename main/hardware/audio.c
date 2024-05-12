@@ -170,8 +170,8 @@ void AUDIO_Record(void *pvParameters)
     FILTER_ButterworthFilter_t hp_filter;
     FILTER_ButterworthFilter_t lp_filter;
     // Init filters
-    FILTER_Init(&lp_filter, AUDIO_INPUT_LPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, Lowpass, 1);
-    FILTER_Init(&hp_filter, AUDIO_INPUT_HPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, Highpass, 1);
+    FILTER_Init(&lp_filter, AUDIO_INPUT_LPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+    FILTER_Init(&hp_filter, AUDIO_INPUT_HPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
 
     // Retrieve params
     AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;

@@ -27,7 +27,7 @@
 /// @param resonance resonance of the filter
 void FILTER_Init(FILTER_ButterworthFilter_t *filter, float frequency, int sampleRate, FILTER_PassType_t passType, float resonance) {
     switch (passType) {
-        case Lowpass:
+        case FILTER_LOWPASS:
             filter->c = 1.0f / (float)tan(CONST_PI * frequency / sampleRate);
             filter->a1 = 1.0f / (1.0f + resonance * filter->c + filter->c * filter->c);
             filter->a2 = 2.0f * filter->a1;
@@ -35,7 +35,7 @@ void FILTER_Init(FILTER_ButterworthFilter_t *filter, float frequency, int sample
             filter->b1 = 2.0f * (1.0f - filter->c * filter->c) * filter->a1;
             filter->b2 = (1.0f - resonance * filter->c + filter->c * filter->c) * filter->a1;
             break;
-        case Highpass:
+        case FILTER_HIGHPASS:
             filter->c = (float)tan(CONST_PI * frequency / sampleRate);
             filter->a1 = 1.0f / (1.0f + resonance * filter->c + filter->c * filter->c);
             filter->a2 = -2.0f * filter->a1;

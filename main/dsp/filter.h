@@ -15,8 +15,8 @@
  */
 
 typedef enum {
-    Lowpass,
-    Highpass
+    FILTER_LOWPASS,
+    FILTER_HIGHPASS
 } FILTER_PassType_t;
 
 typedef struct {
