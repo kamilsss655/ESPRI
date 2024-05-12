@@ -36,9 +36,9 @@
 // Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 2
 // Due to this bug: https://github.com/espressif/esp-idf/issues/10586
-// continous ADC driver samples at 75% of the advertised frequency
-// this value increases the sample frequency by 33% to counter that issue
-#define AUDIO_INPUT_SAMPLE_RATE_WORKAROUND 1.33
+// continous ADC driver samples at 80% of the advertised frequency
+// this value increases the sample frequency by 25% to counter that issue
+#define AUDIO_INPUT_SAMPLE_RATE_WORKAROUND 1.25
 // Define amount of samples used for ADC calibration
 #define AUDIO_ADC_CALIBRATION_SAMPLES AUDIO_INPUT_SAMPLE_FREQ / 2
 // Define ADC conv mode
