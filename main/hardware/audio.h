@@ -68,7 +68,6 @@
 #define AUDIO_OUTPUT_BITS_PER_SAMPLE 16
 // volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
 #define AUDIO_VOLUME_MULTIPLIER (320.0)
-#define CONST_PI (3.1416f)
 // Modulation constraints
 #define AUDIO_AFSK_TONE_MIN_FREQ 300
 #define AUDIO_AFSK_TONE_MAX_FREQ 4000

@@ -8,6 +8,7 @@ set(srcs
     "app/beacon.c"
     "app/transmit.c"
     "app/uvk5.c"
+    "dsp/filter.c"
     "external/printf/printf.c"
     "hardware/button.c"
     "hardware/led.c"

@@ -32,6 +32,7 @@
 
 #include "audio.h"
 #include "settings.h"
+#include "dsp/filter.h"
 #include "helper/misc.h"
 #include "helper/rtos.h"
 #include "hardware/led.h"
@@ -165,6 +166,11 @@ void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
 // Audio record task
 void AUDIO_Record(void *pvParameters)
 {
+    FILTER_ButterworthFilter_t hp_filter;
+    FILTER_ButterworthFilter_t lp_filter;
+
+    FILTER_Init(&lp_filter, 3500, AUDIO_INPUT_SAMPLE_FREQ, Lowpass, 1);
+    FILTER_Init(&hp_filter, 300, AUDIO_INPUT_SAMPLE_FREQ, Highpass, 1);
     // Retrieve params
     AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;
 
@@ -267,6 +273,9 @@ void AUDIO_Record(void *pvParameters)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify (the higher the squelch and thus audio input level, the lower the gain)
                 buffersigned[i] *= 90 - (85 * gSettings.audio.in.squelch / 100);
+                // Filter through low-pass and high-pass filters
+                buffersigned[i] = FILTER_Update(&lp_filter, buffersigned[i]);
+                buffersigned[i] = FILTER_Update(&hp_filter, buffersigned[i]);
             }
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, buffersigned);

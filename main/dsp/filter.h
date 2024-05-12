@@ -14,27 +14,16 @@
  *     limitations under the License.
  */
 
-#ifndef HELPER_MISC_H
-#define HELPER_MISC_H
+typedef enum {
+    Lowpass,
+    Highpass
+} FILTER_PassType_t;
 
-#ifndef ARRAY_SIZE
-	#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
-#endif
+typedef struct {
+    float c, a1, a2, a3, b1, b2;
+    float inputHistory[2];
+    float outputHistory[2];
+} FILTER_ButterworthFilter_t;
 
-#ifndef MAX
-	#define MAX(a, b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
-#endif
-
-#ifndef MIN
-	#define MIN(a, b) ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a < _b ? _a : _b; })
-#endif
-
-#ifndef SWAP
-	#define SWAP(a, b) ({ __typeof__ (a) _c = (a);  a = b; b = _c; })
-#endif
-
-#ifndef CONST_PI
-	#define CONST_PI (3.1416f)
-#endif
-
-#endif
+void FILTER_Init(FILTER_ButterworthFilter_t *filter, float frequency, int sampleRate, FILTER_PassType_t passType, float resonance);
+float FILTER_Update(FILTER_ButterworthFilter_t *filter, float newInput);
