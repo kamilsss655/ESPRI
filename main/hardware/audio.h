@@ -35,6 +35,10 @@
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
 // Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 2
+// Define lowpass filter cutoff frequency
+#define AUDIO_INPUT_LPF_FREQ 3000
+// Define highpass filter cutoff frequency
+#define AUDIO_INPUT_HPF_FREQ 300
 // Due to this bug: https://github.com/espressif/esp-idf/issues/10586
 // continous ADC driver samples at 80% of the advertised frequency
 // this value increases the sample frequency by 25% to counter that issue
@@ -68,7 +72,6 @@
 #define AUDIO_OUTPUT_BITS_PER_SAMPLE 16
 // volume * AUDIO_VOLUME_MULTIPLIER = 1~32767, affects the volume
 #define AUDIO_VOLUME_MULTIPLIER (320.0)
-#define CONST_PI (3.1416f)
 // Modulation constraints
 #define AUDIO_AFSK_TONE_MIN_FREQ 300
 #define AUDIO_AFSK_TONE_MAX_FREQ 4000
