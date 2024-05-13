@@ -168,10 +168,14 @@ void AUDIO_Record(void *pvParameters)
 {
     // Define filters
     FILTER_ButterworthFilter_t hp_filter;
-    FILTER_ButterworthFilter_t lp_filter;
+    FILTER_ButterworthFilter_t lp_filter_1;
+    FILTER_ButterworthFilter_t lp_filter_2;
+    FILTER_ButterworthFilter_t lp_filter_3;
     // Init filters
-    FILTER_Init(&lp_filter, AUDIO_INPUT_LPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
-    FILTER_Init(&hp_filter, AUDIO_INPUT_HPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
+    FILTER_Init(&hp_filter, AUDIO_INPUT_HPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 0.6);
+    FILTER_Init(&lp_filter_1, AUDIO_INPUT_LPF_1_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.25);
+    FILTER_Init(&lp_filter_2, AUDIO_INPUT_LPF_2_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.40);
+    FILTER_Init(&lp_filter_3, AUDIO_INPUT_LPF_3_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.40);
 
     // Retrieve params
     AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;
@@ -274,10 +278,22 @@ void AUDIO_Record(void *pvParameters)
                 // Remove DC bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify (the higher the squelch and thus audio input level, the lower the gain)
-                buffersigned[i] *= 90 - (85 * gSettings.audio.in.squelch / 100);
-                // Filter through low-pass and high-pass filters
-                buffersigned[i] = FILTER_Update(&lp_filter, buffersigned[i]);
+                // For DTMF:
+                buffersigned[i] *= 15 - (10 * gSettings.audio.in.squelch / 100);
+                // For FM radio:
+                // buffersigned[i] *= 45 - (40 * gSettings.audio.in.squelch / 100);
+                // TODO: Gain needs to be user adjustable
+
+                // Filter through high-pass filter
                 buffersigned[i] = FILTER_Update(&hp_filter, buffersigned[i]);
+                // Filter through 1st order low-pass filter
+                buffersigned[i] = FILTER_Update(&lp_filter_1, buffersigned[i]);
+                // Filter through 2nd order low-pass filter
+                buffersigned[i] = FILTER_Update(&lp_filter_2, buffersigned[i]);
+                // Amplify a bit between filtering to prevent filtering distortions
+                buffersigned[i] *= 2;
+                // Filter through 3rd order low-pass filter
+                buffersigned[i] = FILTER_Update(&lp_filter_3, buffersigned[i]);
             }
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, buffersigned);
