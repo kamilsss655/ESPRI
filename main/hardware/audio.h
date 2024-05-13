@@ -28,7 +28,7 @@
 // Define audio input max buffer size
 #define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
 // Define ADC ring buffer size
-#define AUDIO_ADC_RING_BUFFER_SIZE AUDIO_INPUT_CHUNK_SIZE * 3
+#define AUDIO_ADC_RING_BUFFER_SIZE AUDIO_INPUT_CHUNK_SIZE * 4
 // Define ADC ring buffer type
 #define AUDIO_ADC_RING_BUFFER_TYPE RINGBUF_TYPE_BYTEBUF
 // Define audio input sampling frequency in Hz
