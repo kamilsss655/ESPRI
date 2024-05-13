@@ -35,8 +35,12 @@
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
 // Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 2
-// Define lowpass filter cutoff frequency
-#define AUDIO_INPUT_LPF_FREQ 3000
+// Define 1st order lowpass filter cutoff frequency
+#define AUDIO_INPUT_LPF_1_FREQ 4600
+// Define 2nd order lowpass filter cutoff frequency
+#define AUDIO_INPUT_LPF_2_FREQ 2300
+// Define 3rd order lowpass filter cutoff frequency
+#define AUDIO_INPUT_LPF_3_FREQ 2000
 // Define highpass filter cutoff frequency
 #define AUDIO_INPUT_HPF_FREQ 300
 // Due to this bug: https://github.com/espressif/esp-idf/issues/10586
