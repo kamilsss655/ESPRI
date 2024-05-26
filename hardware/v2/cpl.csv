@@ -1,0 +1,32 @@
+Designator,Val,Package,Mid X,Mid Y,Rotation,Layer
+C1,4.7uF 25V X5R,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,109,-89.3,90,bottom
+C2,100nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,109,-85.3375,-90,bottom
+C3,100uF 6.3V,CP_EIA-3528-21_Kemet-B_Pad1.50x2.35mm_HandSolder,96.25,-87,-90,bottom
+C5,100nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,97.75,-90.75,0,bottom
+C6,100uF 6.3V,CP_EIA-3528-21_Kemet-B_Pad1.50x2.35mm_HandSolder,102.75,-81.5,90,bottom
+C7,100nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,111.25,-73.75,90,bottom
+C8,4.7nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,106.75,-71.7,90,bottom
+C9,4.7nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,109,-75.75,-90,bottom
+C10,100uF 6.3V,CP_EIA-3528-21_Kemet-B_Pad1.50x2.35mm_HandSolder,99.25,-81.5,90,bottom
+C11,100nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,106.5,-85.3375,-90,bottom
+C13,100nF,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder,96.3,-75.25,90,bottom
+D1,GREEN LED,D_0805_2012Metric_Pad1.15x1.40mm_HandSolder,111.5,-81.25,-90,bottom
+D2,SS14,D_SMA,107.9,-107.1,90,bottom
+D3,RED LED,D_0805_2012Metric_Pad1.15x1.40mm_HandSolder,95,-79,0,bottom
+Q1,2N7002,SOT-23,97.1,-108.5625,90,bottom
+Q2,SI2301,SOT-23,103.7,-72.05,90,bottom
+Q3,2N7002,SOT-23,99.5,-71.25,0,bottom
+Q5,SI2301,SOT-23,103.25,-89.5,90,bottom
+R1,330,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,111.5,-85.3375,90,bottom
+R2,2.2k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,109.175,-81.225,90,bottom
+R3,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,103.5,-69,180,bottom
+R4,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,100.7,-75.25,-90,bottom
+R5,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,98.5,-75.25,90,bottom
+R6,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,93.1,-108.5,90,bottom
+R7,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,109,-71.75,90,bottom
+R8,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,96.3,-71.25,-90,bottom
+R10,3.3k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,106.5,-89.3,-90,bottom
+R11,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,103.225,-86.38,180,bottom
+R12,2.2k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,95,-81,0,bottom
+R14,100k,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder,105.75,-75,0,bottom
+U2,HT7333,SOT-89-3,97.25,-94.75,90,bottom
