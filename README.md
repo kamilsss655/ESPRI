@@ -13,9 +13,9 @@ As such following features would be enabled:
     - could be served as webpage by the esp chip itself
     - or have a mobile client as Meshtastic 
 - wireless UART connection to the radio
+- record .wav files
 - broadcast .wav files
 - turning any radio into IoT device via JSON API served from the ESP
-- time domain scrambling (based on the [HEKTOR 128](http://jtxp.org/tech/hektor_en.htm) project)
 
 The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
 
