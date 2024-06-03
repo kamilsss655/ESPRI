@@ -19,8 +19,6 @@ As such following features would be enabled:
 
 The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
 
-The audio input and output (for the means of time domain scrambling) would be through the Kenwood connector.
-
 ## Web panel
 
 Here is a screenshot of a web control panel being served from the ESP:
