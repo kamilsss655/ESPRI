@@ -68,7 +68,13 @@ Reference https://github.com/ludwich66/Quansheng_UV-K5_Wiki/wiki/Programming-Cab
 
 Custom PCB:
 
-![espri-pcb](https://github.com/kamilsss655/ESPRI/assets/8842065/56b6cc3e-1b23-4875-9b87-86ff9d0ace6c)
+V1.0:
+
+<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/56b6cc3e-1b23-4875-9b87-86ff9d0ace6c" width="300" />
+
+V2.2:
+
+<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/3d278a07-ac9c-4f47-964f-0751d49fa481" width="300" />
 
 This firmware uses:
 * Espressif IoT Development Framework (ESP-IDF) `v5.2.1`
