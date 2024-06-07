@@ -7,7 +7,7 @@ V1 board connected to UV-K5 radio:
 
 V2 board:
 
-<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/c9845b3b-564b-4091-832c-0e6b744d2b5e" width="600" />
+<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/f7cfc6b0-e786-44f1-ac95-b4c2cb2dff8c" width="600" />
 
 High level diagram:
 
