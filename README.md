@@ -20,6 +20,15 @@ As such following features would be enabled:
 
 The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
 
+## Table of Contents
+* [Web panel](#web-panel)
+* [Hardware](#hardware)
+* [Getting started](#getting-started)
+* [Manual](#manual)
+* [Development](#development)
+* [How to contribute](#how-to-contribute)
+* [References](#references)
+
 ## Web panel
 
 Here is a screenshot of a web control panel being served from the ESP:
@@ -47,17 +56,14 @@ I (8732) WEB/API/EVENT_HANDLER: Event id:3 received
 I (8732) WEB/API/EVENT_HANDLER: Sent: SMS: API event: 3 received.
 ```
 
-## Dependencies
-Hardware:
-* ESP32
+## Hardware
 
-Some of the recommended boards:
-
+### ESP32 board
 ESP32 Lolin Lite (recommended, confirmed to work, lipo charger built-in):
 
 ![esp32-lolin-lite](https://github.com/kamilsss655/ESPRI/assets/8842065/2e74e723-4347-4efb-b17b-20b4e930523f)
 
-## Analog components
+### ESPRI hat
 
 In order to interface radios through Kenwood connector following analog components have to be added to the ESP board:
 
