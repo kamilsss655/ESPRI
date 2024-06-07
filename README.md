@@ -16,6 +16,7 @@ As such following features would be enabled:
 - record .wav files
 - broadcast .wav files
 - turning any radio into IoT device via JSON API served from the ESP
+- turning radios into wireless modems
 
 The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
 
