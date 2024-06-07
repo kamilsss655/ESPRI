@@ -1,7 +1,15 @@
 # ESPRI
 ESPRI (ESP Radio Interface) project providing extended functionalities to ham radios.
 
+V1 board connected to UV-K5 radio:
+
 ![espri](https://github.com/kamilsss655/ESPRI/assets/8842065/e8632e6c-fe20-4633-ab5d-4eacdee4b952)
+
+V2 board:
+
+<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/c9845b3b-564b-4091-832c-0e6b744d2b5e" width="600" />
+
+High level diagram:
 
 ![high-level-diagram-4](https://github.com/kamilsss655/ESPRI/assets/8842065/813055e7-6729-47e8-8912-1e9155d7ca6d)
 
