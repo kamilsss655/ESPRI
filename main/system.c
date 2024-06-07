@@ -27,6 +27,7 @@
 #include "system.h"
 #include "settings.h"
 #include "hardware/led.h"
+#include "hardware/sd.h"
 
 static const char *TAG = "SYSTEM";
 
@@ -79,6 +80,8 @@ void before_shutdown(void)
     LED_Blink(LED_BLINK_ON_OFF, LED_TIME_FASTEST, LED_BRIGHTNESS_MAX);
     // Take LED semaphore to prevent other tasks interacting with the LED
     xSemaphoreTake(gLedSemaphore, LED_TIME_MAX / portTICK_PERIOD_MS);
+    // Shutdown SD card
+    SD_Shutdown();
 
     // Reset GPIO pins to prevent LED or PTT on during deep sleep etc.
     gpio_config_t io_conf = {

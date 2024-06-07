@@ -14,13 +14,10 @@
  *     limitations under the License.
  */
 
-#ifndef BOARD_H
-#define BOARD_H
+#include <esp_err.h>
 
-// base path for FLASH storage
-#define STORAGE_BASE_PATH "/storage"
+// base path for the SD card storage
+#define SD_BASE_PATH "/sd"
 
-// Initialize the board
-void BOARD_Init(void);
-
-#endif
+esp_err_t SD_Init();
+esp_err_t SD_Shutdown();

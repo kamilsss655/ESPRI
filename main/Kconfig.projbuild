@@ -108,6 +108,13 @@ menu "Project configuration"
         help
             UART TX GPIO Pin.
 
+    config SD_CARD_ENABLE_GPIO
+        int "SD CARD ENABLE GPIO Pin"
+        range 1 30
+        default 5
+        help
+            SD CARD ENABLE GPIO Pin.
+
     config UART_BAUD_RATE
         int "UART baud rate"
         range 1200 230400
