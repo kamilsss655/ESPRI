@@ -42,7 +42,7 @@ menu "Project configuration"
     config AUDIO_OUT_GPIO
         int "Audio OUT GPIO Pin"
         range 1 30
-        default 18
+        default 25
         help
             Audio OUT GPIO Pin to use.
 
@@ -56,7 +56,7 @@ menu "Project configuration"
     config PTT_GPIO
         int "PTT GPIO Pin"
         range 1 30
-        default 13
+        default 26
         help
             PTT GPIO Pin to use.
 
@@ -76,21 +76,21 @@ menu "Project configuration"
 
     config STATUS_LED_GPIO
         int "Status LED GPIO Pin"
-        range 1 30
-        default 19
+        range 1 33
+        default 33
         help
             Audio OUT GPIO Pin to use.
 
     config STATUS_LED_GPIO_MAX_BRIGHTNESS 
         int "Status LED max brightness"
         range 0 100
-        default 20
+        default 50
         help
             Status LED max brightness.
 
     config TOUCH_BUTTON_1_NUMBER
         int "Touch button 1 number"
-        default 3
+        default 9
         help
             Touch button 1 number.
 
