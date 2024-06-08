@@ -21,6 +21,7 @@
 #include "hardware/uart.h"
 #include "hardware/wifi.h"
 #include "hardware/button.h"
+#include "hardware/sd.h"
 #include "hardware/spiffs.h"
 #include "hardware/ptt.h"
 #include "settings.h"
@@ -34,6 +35,9 @@ void BOARD_Init(void)
 
     // Load SETTINGS
     ESP_ERROR_CHECK(SETTINGS_Init());
+
+    // Initialize SD card
+    SD_Init();
 
     // Init LED
     LED_Init();

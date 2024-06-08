@@ -37,7 +37,7 @@ static void IRAM_ATTR BUTTON_isr_handler(void *arg)
     touch_pad_intr_disable();
 }
 
-static void calibrate_touch_pad(touch_pad_t pad)
+static esp_err_t calibrate_touch_pad(touch_pad_t pad)
 {
     int avg = 0;
     const size_t calibration_count = 128;
@@ -56,17 +56,21 @@ static void calibrate_touch_pad(touch_pad_t pad)
                       "Not using for deep sleep wakeup.",
                  pad, avg, min_reading);
         touch_pad_config(pad, 0);
+
+        return ESP_FAIL;
     }
     else
     {
         int threshold = avg - 100;
         ESP_LOGI(TAG, "Calibrated touch pad #%d. Count average: %d, wakeup threshold set to %d.", pad, avg, threshold);
         touch_pad_config(pad, threshold);
+
+        return ESP_OK;
     }
 }
 
 // Initialize touch pad
-void BUTTON_InitTouchPad(touch_pad_t num)
+esp_err_t BUTTON_InitTouchPad(touch_pad_t num)
 {
     // Initialize touch pad peripheral.
     // The default fsm mode is software trigger mode.
@@ -77,8 +81,7 @@ void BUTTON_InitTouchPad(touch_pad_t num)
     touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
     // init RTC IO and mode for touch pad.
     touch_pad_config(num, 400);
-    // touch_pad_config(num, TOUCH_THRESH_NO_USE);
-    calibrate_touch_pad(num);
+    return calibrate_touch_pad(num);
 }
 
 // initialize button handling
@@ -86,11 +89,15 @@ void BUTTON_Init()
 {
     buttonQueue = xQueueCreate(10, sizeof(uint32_t));
     // init and configure touch button 1
-    BUTTON_InitTouchPad(CONFIG_TOUCH_BUTTON_1_NUMBER);
-    // register interrupt callback function
-    touch_pad_isr_register(BUTTON_isr_handler, NULL);
-    // enable interrupts
-    touch_pad_intr_enable();
+    esp_err_t ret = BUTTON_InitTouchPad(CONFIG_TOUCH_BUTTON_1_NUMBER);
+
+    if (ret == ESP_OK)
+    {
+        // register interrupt callback function
+        touch_pad_isr_register(BUTTON_isr_handler, NULL);
+        // enable interrupts
+        touch_pad_intr_enable();
+    }
 }
 
 // monitor button pressed queue

@@ -16,6 +16,7 @@ set(srcs
     "hardware/uart.c"
     "hardware/audio.c"
     "hardware/wifi.c"
+    "hardware/sd.c"
     "hardware/spiffs.c"
     "hardware/ptt.c"
     "helper/api.c"

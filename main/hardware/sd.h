@@ -14,22 +14,11 @@
  *     limitations under the License.
  */
 
-#ifndef HARDWARE_UART_H
-#define HARDWARE_UART_H
+#include <esp_err.h>
 
-#include <stddef.h>
+// base path for the SD card storage
+#define SD_BASE_PATH "/sd"
 
-#define ECHO_TEST_TXD CONFIG_UART_TX_GPIO
-#define ECHO_TEST_RXD CONFIG_UART_RX_GPIO
-
-#define ECHO_UART_PORT_NUM   1
-#define ECHO_UART_BAUD_RATE  CONFIG_UART_BAUD_RATE
-#define ECHO_TASK_STACK_SIZE 2048
-
-#define BUF_SIZE (1024)
-
-void UART_Init(void);
-void UART_Send(const void *src, size_t size);
-void UART_Monitor(void *pvParameters);
-
-#endif
+esp_err_t SD_Init(void);
+esp_err_t SD_Shutdown(void);
+esp_err_t SD_Format(void);
