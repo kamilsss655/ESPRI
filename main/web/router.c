@@ -15,6 +15,7 @@
  */
 
 #include "helper/http.h"
+#include "hardware/sd.h"
 #include "web/handlers/root.h"
 #include "web/handlers/websocket.h"
 #include "web/handlers/static_files.h"
@@ -135,11 +136,19 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .user_ctx = server_data};
     httpd_register_uri_handler(server, &static_file_upload_uri);
 
+    // Serve static files from the SD card
+    httpd_uri_t static_file_download_from_sd_uri = {
+        .uri = SD_BASE_PATH "/*", // Match all other URIs
+        .method = HTTP_GET,
+        .handler = STATIC_FILES_DownloadFromSD,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &static_file_download_from_sd_uri);
+
     // Match all and try to serve static files
-    httpd_uri_t static_file_download_uri = {
+    httpd_uri_t static_file_download_from_flash_uri = {
         .uri = "/*", // Match all other URIs
         .method = HTTP_GET,
-        .handler = STATIC_FILES_Download,
+        .handler = STATIC_FILES_DownloadFromFlash,
         .user_ctx = server_data};
-    httpd_register_uri_handler(server, &static_file_download_uri);
+    httpd_register_uri_handler(server, &static_file_download_from_flash_uri);
 }
