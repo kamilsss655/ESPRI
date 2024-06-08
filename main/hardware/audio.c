@@ -213,12 +213,12 @@ void AUDIO_Record(void *pvParameters)
 
     ESP_LOGI(TAG, "Preparing recording.");
 
-    ESP_LOGI(TAG, "Opening file: %s", param->filepath);
+    ESP_LOGI(TAG, "Opening file: %s", filepath);
     fd = fopen(filepath, "wb");
 
     if (NULL == fd)
     {
-        ESP_LOGE(TAG, "Failed to read %s", param->filepath);
+        ESP_LOGE(TAG, "Failed to read %s", filepath);
         goto Done;
     }
 
@@ -309,7 +309,7 @@ void AUDIO_Record(void *pvParameters)
         }
     }
 
-    ESP_LOGI(TAG, "Written recording to %s", param->filepath);
+    ESP_LOGI(TAG, "Written recording to %s", filepath);
 
 Done:
     fclose(fd);

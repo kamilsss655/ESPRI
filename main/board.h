@@ -18,7 +18,7 @@
 #define BOARD_H
 
 // base path for FLASH storage
-#define STORAGE_BASE_PATH "/storage"
+#define FLASH_BASE_PATH "/storage"
 
 // Initialize the board
 void BOARD_Init(void);

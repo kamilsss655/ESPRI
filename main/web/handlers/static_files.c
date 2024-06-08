@@ -19,6 +19,7 @@
 #include <esp_spiffs.h>
 
 #include "static_files.h"
+#include "hardware/sd.h"
 #include "helper/http.h"
 #include "helper/api.h"
 #include "helper/filesystem.h"
@@ -26,14 +27,13 @@
 
 static const char *TAG = "WEB/STATIC_FILES";
 
-/* Handler to download a file kept on the server */
-esp_err_t STATIC_FILES_Download(httpd_req_t *req)
+static esp_err_t download_file(httpd_req_t *req, const char *base_path)
 {
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;
     struct stat file_stat;
 
-    const char *filename = get_path_from_uri(filepath, STORAGE_BASE_PATH,
+    const char *filename = get_path_from_uri(filepath, base_path,
                                              req->uri, sizeof(filepath));
     if (!filename)
     {
@@ -95,6 +95,18 @@ esp_err_t STATIC_FILES_Download(httpd_req_t *req)
 
     httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
+}
+
+// Handler to download a file kept on flash
+esp_err_t STATIC_FILES_DownloadFromFlash(httpd_req_t *req)
+{
+    return download_file(req, FLASH_BASE_PATH);
+}
+
+// Handler to download a file kept on SD card
+esp_err_t STATIC_FILES_DownloadFromSD(httpd_req_t *req)
+{
+    return download_file(req, "");
 }
 
 /* Copies the full path into destination buffer and returns
@@ -175,7 +187,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
 
     /* Skip leading "/upload" from URI to get filename */
     /* Note sizeof() counts NULL termination hence the -1 */
-    const char *filename = get_path_from_uri(filepath, STORAGE_BASE_PATH,
+    const char *filename = get_path_from_uri(filepath, FLASH_BASE_PATH,
                                              req->uri + sizeof("/upload") - 1, sizeof(filepath));
     if (!filename)
     {

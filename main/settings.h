@@ -25,7 +25,7 @@
 
 #define CONFIG_FILE_PATH "/config.bin"
 // Determines location of where the config file is stored ie. /storage/config.bin
-#define CONFIG_LOCATION STORAGE_BASE_PATH CONFIG_FILE_PATH
+#define CONFIG_LOCATION FLASH_BASE_PATH CONFIG_FILE_PATH
 
 // BOOL type
 typedef enum

@@ -31,7 +31,7 @@
 void BOARD_Init(void)
 {
     // Initialize SPIFFS
-    ESP_ERROR_CHECK(SPIFFS_Init(STORAGE_BASE_PATH));
+    ESP_ERROR_CHECK(SPIFFS_Init(FLASH_BASE_PATH));
 
     // Load SETTINGS
     ESP_ERROR_CHECK(SETTINGS_Init());
@@ -49,7 +49,7 @@ void BOARD_Init(void)
     WIFI_Init();
 
     // Initialize HTTP Server
-    ESP_ERROR_CHECK(HTTP_SERVER_Init(STORAGE_BASE_PATH));
+    ESP_ERROR_CHECK(HTTP_SERVER_Init(FLASH_BASE_PATH));
 
     // Initialize BUTTON
     BUTTON_Init();

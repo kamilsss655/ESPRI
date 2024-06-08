@@ -43,7 +43,7 @@ esp_err_t SD_Init(void)
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
         .format_if_mount_failed = true,
         .max_files = 4, // max number of open files
-        .allocation_unit_size = 16 * 1024};
+        .allocation_unit_size = 32 * 1024};
 
     ESP_LOGI(TAG, "Initializing SD card");
 
@@ -53,7 +53,7 @@ esp_err_t SD_Init(void)
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
 
     // Set frequency to 40Mhz (max), lower it if you run into issues
-    host.max_freq_khz = 40000;
+    // host.max_freq_khz = 40000;
 
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
