@@ -36,6 +36,7 @@
 #include "helper/misc.h"
 #include "helper/rtos.h"
 #include "hardware/led.h"
+#include "hardware/sd.h"
 #include "web/handlers/websocket.h"
 #include "helper/filesystem.h"
 
@@ -182,7 +183,7 @@ void AUDIO_Record(void *pvParameters)
 
     // Convert relative filepath to absolute filepath
     char filepath[84];
-    snprintf(filepath, sizeof(filepath), "%s/%s", STORAGE_BASE_PATH, param->filepath);
+    snprintf(filepath, sizeof(filepath), "%s/%s", SD_BASE_PATH, param->filepath);
 
     int16_t *buffersigned = NULL;
 
@@ -199,14 +200,14 @@ void AUDIO_Record(void *pvParameters)
     }
 
     // Garbage collect to get enough free space for the file
-    esp_err_t ret = esp_spiffs_gc(NULL, (param->max_duration_ms * (AUDIO_INPUT_SAMPLE_FREQ / 1000) * sizeof(AUDIO_ADC_DATA_TYPE)));
-    // esp_err_t ret = esp_spiffs_gc(NULL, ((param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ * sizeof(AUDIO_ADC_DATA_TYPE)));
-
-    if (ret != ESP_OK)
-    {
-        ESP_LOGI(TAG, "Recorder failed to allocate space");
-        goto Done;
-    }
+    // Only needed for SPIFFS (when file is stored in flash, not on sd card)
+    // esp_err_t ret = esp_spiffs_gc(NULL, (param->max_duration_ms * (AUDIO_INPUT_SAMPLE_FREQ / 1000) * sizeof(AUDIO_ADC_DATA_TYPE)));
+    //// esp_err_t ret = esp_spiffs_gc(NULL, ((param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ * sizeof(AUDIO_ADC_DATA_TYPE)));
+    // if (ret != ESP_OK)
+    // {
+    //     ESP_LOGI(TAG, "Recorder failed to allocate space");
+    //     goto Done;
+    // }
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
 

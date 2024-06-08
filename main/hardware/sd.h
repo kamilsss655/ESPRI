@@ -19,5 +19,6 @@
 // base path for the SD card storage
 #define SD_BASE_PATH "/sd"
 
-esp_err_t SD_Init();
-esp_err_t SD_Shutdown();
+esp_err_t SD_Init(void);
+esp_err_t SD_Shutdown(void);
+esp_err_t SD_Format(void);
