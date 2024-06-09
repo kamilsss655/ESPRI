@@ -182,4 +182,10 @@ menu "Project configuration"
         default 1200
         help
             AFSK one frequency.
+
+    config WAV_BEACON_FILEPATH
+        string "WAV beacon filepath"
+        default "/storage/sample.wav"
+        help
+            Filepath of the .wav file.
 endmenu

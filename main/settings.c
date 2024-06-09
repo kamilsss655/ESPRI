@@ -129,6 +129,8 @@ esp_err_t SETTINGS_FactoryReset(bool reboot)
     gSettings.beacon.afsk.baud = CONFIG_AFSK_BEACON_BAUD;
     gSettings.beacon.afsk.zero_freq = CONFIG_AFSK_ZERO_FREQ;
     gSettings.beacon.afsk.one_freq = CONFIG_AFSK_ONE_FREQ;
+    // WAV beacon
+    strcpy(gSettings.beacon.wav.filepath, CONFIG_WAV_BEACON_FILEPATH);
     // Calibration
     gSettings.calibration.adc.value = 0;
     gSettings.calibration.adc.is_valid = SETTINGS_FALSE;
