@@ -101,6 +101,8 @@ esp_err_t SD_Shutdown(void)
 {
     // Unmount the SD card
     esp_vfs_fat_sdcard_unmount(SD_BASE_PATH, card);
+    // Wait 50ms to ensure SD card is unmounted
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     // Turn off P-MOSFET powering the SD card
     ESP_ERROR_CHECK(gpio_reset_pin(CONFIG_SD_CARD_ENABLE_GPIO));
 

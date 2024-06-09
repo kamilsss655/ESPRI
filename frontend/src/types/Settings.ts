@@ -32,4 +32,5 @@ export interface Settings {
   "beacon.afsk.baud": number;
   "beacon.afsk.zero_freq": number;
   "beacon.afsk.one_freq": number;
+  "beacon.wav.filepath": string;
 }

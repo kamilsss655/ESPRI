@@ -111,6 +111,12 @@ typedef struct
     API_INTEGER_TYPE one_freq;
 } SETTINGS_AfskBeaconConfig_t;
 
+// WAV beacon settings
+typedef struct
+{
+    char filepath[64]; // path to .wav file
+} SETTINGS_WavBeaconConfig_t;
+
 // Audio out settings
 typedef struct
 {
@@ -144,6 +150,7 @@ typedef struct
     API_INTEGER_TYPE            delay_seconds;
     SETTINGS_MorseCodeBeaconConfig_t morse_code;
     SETTINGS_AfskBeaconConfig_t      afsk;
+    SETTINGS_WavBeaconConfig_t       wav;
 } SETTINGS_BeaconConfig_t;
 
 // Calibration subtype

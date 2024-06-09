@@ -47,7 +47,8 @@ ApiAttr_t settings[] = {
     {"beacon.morse_code.tone_freq",      &gSettings.beacon.morse_code.tone_freq,      1},
     {"beacon.afsk.baud",                 &gSettings.beacon.afsk.baud,                 1},
     {"beacon.afsk.zero_freq",            &gSettings.beacon.afsk.zero_freq,            1},
-    {"beacon.afsk.one_freq",             &gSettings.beacon.afsk.one_freq,             1}
+    {"beacon.afsk.one_freq",             &gSettings.beacon.afsk.one_freq,             1},
+    {"beacon.wav.filepath",              &gSettings.beacon.wav.filepath,              0}
 };
 
 // Shows current settings
