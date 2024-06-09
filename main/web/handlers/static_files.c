@@ -33,7 +33,6 @@ static esp_err_t list_directory_contents(httpd_req_t *req, const char *dirpath)
 {
     char entrypath[FILE_PATH_MAX];
     char entrysize[16];
-    const char *entrytype;
 
     struct dirent *entry;
     struct stat entry_stat;
@@ -44,39 +43,51 @@ static esp_err_t list_directory_contents(httpd_req_t *req, const char *dirpath)
     // Retrieve the base path of file storage to construct the full path
     strlcpy(entrypath, dirpath, sizeof(entrypath));
 
-    cJSON *array = cJSON_CreateArray();
+    cJSON *root = cJSON_CreateObject();
+    cJSON *files = cJSON_CreateArray();
+    cJSON *directories = cJSON_CreateArray();
 
     // Iterate over all files / folders
     while ((entry = readdir(dir)) != NULL)
     {
-        entrytype = (entry->d_type == DT_DIR ? "directory" : "file");
 
         strlcpy(entrypath + dirpath_len, entry->d_name, sizeof(entrypath) - dirpath_len);
         if (stat(entrypath, &entry_stat) == -1)
         {
-            ESP_LOGE(TAG, "Failed to stat %s : %s", entrytype, entry->d_name);
+            ESP_LOGE(TAG, "Failed to stat: %s", entry->d_name);
             continue;
         }
         sprintf(entrysize, "%ld", entry_stat.st_size);
-        // ESP_LOGI(TAG, "Found %s : %s (%s bytes)", entrytype, entry->d_name, entrysize);
 
         cJSON *object = cJSON_CreateObject();
 
-        cJSON_AddStringToObject(object, "name", entry->d_name);
-        cJSON_AddStringToObject(object, "type", entrytype);
-        cJSON_AddStringToObject(object, "size", entrysize);
+        if (entry->d_type == DT_DIR)
+        {
+            // it's a directory
+            cJSON_AddStringToObject(object, "name", entry->d_name);
+            cJSON_AddItemToArray(directories, object);
+        }
+        else
+        {
+            // it's a file
+            cJSON_AddStringToObject(object, "name", entry->d_name);
+            cJSON_AddStringToObject(object, "size", entrysize);
+            cJSON_AddItemToArray(files, object);
+        }
 
-        cJSON_AddItemToArray(array, object);
+        
     }
     closedir(dir);
 
+    cJSON_AddItemToObject(root, "files", files);
+    cJSON_AddItemToObject(root, "directories", directories);
+
+    // Generate JSON string
+    const char *json_str = cJSON_Print(root);
+    // Free memory, it handles all the objects belonging to root
+    cJSON_Delete(root);
 
     httpd_resp_set_type(req, "application/json");
-    const char *json_str = cJSON_Print(array);
-
-    // Free memory, it handles all the objects belonging to root
-    cJSON_Delete(array);
-
     // Send response
     httpd_resp_sendstr(req, json_str);
 
