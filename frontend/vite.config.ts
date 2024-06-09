@@ -3,7 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 
 // TODO: Rewrite to .env
-let espIpAddress = "10.0.5.6";
+let espIpAddress = "10.0.5.8";
 
 // https://vitejs.dev/config/
 export default defineConfig({

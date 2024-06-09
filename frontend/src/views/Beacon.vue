@@ -40,6 +40,18 @@
           filled
         />
 
+        <q-input
+          v-model="settingsStore['beacon.wav.filepath']"
+          label="Filepath"
+          hint="Define path to .wav file"
+          v-if="beaconMode == BeaconMode.WAV"
+          filled
+        />
+
+        <q-banner v-if="beaconMode == BeaconMode.WAV" inline-actions rounded class="bg-info text-white">
+          For flash storage use <b>/storage</b> prefix. For SD card storage use <b>/sd</b> prefix.
+        </q-banner>
+
         <q-field
           filled
           label="Delay in seconds"
@@ -59,10 +71,6 @@
             />
           </template>
         </q-field>
-
-        <q-banner v-if="beaconMode == BeaconMode.WAV" inline-actions rounded class="bg-info text-white">
-          Plays <b>sample.wav</b> file.
-        </q-banner>
 
         <q-field
           filled

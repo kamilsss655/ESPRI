@@ -30,7 +30,8 @@ export const useSettingsStore = defineStore({
     "beacon.morse_code.tone_freq": 800,
     "beacon.afsk.baud": 1200,
     "beacon.afsk.zero_freq": 2200,
-    "beacon.afsk.one_freq": 1200
+    "beacon.afsk.one_freq": 1200,
+    "beacon.wav.filepath": "/storage/sample.wav"
   }),
   actions: {
     async fetchSettings() {
