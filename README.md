@@ -5,9 +5,13 @@ V1 board connected to UV-K5 radio:
 
 ![espri](https://github.com/kamilsss655/ESPRI/assets/8842065/e8632e6c-fe20-4633-ab5d-4eacdee4b952)
 
-V2 board:
+V2.2 board:
 
 <img src="https://github.com/kamilsss655/ESPRI/assets/8842065/f7cfc6b0-e786-44f1-ac95-b4c2cb2dff8c" width="600" />
+
+V2.2 (back with uSD card inserted):
+
+<img src="https://github.com/kamilsss655/ESPRI/assets/8842065/cbeb386b-8c6f-4b21-ba9d-f91ef8f97f21" width="600" />
 
 High level diagram:
 
