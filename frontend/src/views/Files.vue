@@ -6,7 +6,10 @@
       </q-card-section>
       <q-separator />
       <q-card-section>
-        <FileUploader />
+        <Uploader />
+      </q-card-section>
+      <q-card-section>
+        <Browser />
       </q-card-section>
       <q-card-section>
         <q-banner inline-actions rounded class="bg-info text-white">
@@ -18,5 +21,6 @@
 </template>
 
 <script setup lang="ts">
-import FileUploader from "../components/system/FileUploader.vue";
+import Uploader from "../components/files/Uploader.vue";
+import Browser from "../components/files/Browser.vue";
 </script>
