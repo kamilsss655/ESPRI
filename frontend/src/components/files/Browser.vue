@@ -1,6 +1,7 @@
 <template>
   <q-table
     title="Directories"
+    :grid="$q.screen.xs"
     :rows="listing.directories"
     :columns="columnsDirectories"
     row-key="name"
@@ -8,6 +9,7 @@
   <p></p>
   <q-table
     title="Files"
+    :grid="$q.screen.xs"
     :rows="listing.files"
     :columns="columnsFiles"
     row-key="name"
