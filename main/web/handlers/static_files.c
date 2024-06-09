@@ -17,6 +17,7 @@
 #include <sys/param.h>
 #include <esp_log.h>
 #include <esp_spiffs.h>
+#include <cJSON.h>
 
 #include "static_files.h"
 #include "hardware/sd.h"
@@ -26,6 +27,61 @@
 #include "board.h"
 
 static const char *TAG = "WEB/STATIC_FILES";
+
+// Send list of all files and directories
+static esp_err_t list_directory_contents(httpd_req_t *req, const char *dirpath)
+{
+    char entrypath[FILE_PATH_MAX];
+    char entrysize[16];
+    const char *entrytype;
+
+    struct dirent *entry;
+    struct stat entry_stat;
+
+    DIR *dir = opendir(dirpath);
+    const size_t dirpath_len = strlen(dirpath);
+
+    // Retrieve the base path of file storage to construct the full path
+    strlcpy(entrypath, dirpath, sizeof(entrypath));
+
+    cJSON *array = cJSON_CreateArray();
+
+    // Iterate over all files / folders
+    while ((entry = readdir(dir)) != NULL)
+    {
+        entrytype = (entry->d_type == DT_DIR ? "directory" : "file");
+
+        strlcpy(entrypath + dirpath_len, entry->d_name, sizeof(entrypath) - dirpath_len);
+        if (stat(entrypath, &entry_stat) == -1)
+        {
+            ESP_LOGE(TAG, "Failed to stat %s : %s", entrytype, entry->d_name);
+            continue;
+        }
+        sprintf(entrysize, "%ld", entry_stat.st_size);
+        // ESP_LOGI(TAG, "Found %s : %s (%s bytes)", entrytype, entry->d_name, entrysize);
+
+        cJSON *object = cJSON_CreateObject();
+
+        cJSON_AddStringToObject(object, "name", entry->d_name);
+        cJSON_AddStringToObject(object, "type", entrytype);
+        cJSON_AddStringToObject(object, "size", entrysize);
+
+        cJSON_AddItemToArray(array, object);
+    }
+    closedir(dir);
+
+
+    httpd_resp_set_type(req, "application/json");
+    const char *json_str = cJSON_Print(array);
+
+    // Free memory, it handles all the objects belonging to root
+    cJSON_Delete(array);
+
+    // Send response
+    httpd_resp_sendstr(req, json_str);
+
+    return ESP_OK;
+}
 
 static esp_err_t download_file(httpd_req_t *req, const char *base_path)
 {
@@ -41,6 +97,12 @@ static esp_err_t download_file(httpd_req_t *req, const char *base_path)
         /* Respond with 500 Internal Server Error */
         httpd_json_resp_send(req, HTTPD_500, "Filename too long");
         return ESP_FAIL;
+    }
+
+    // If name has trailing '/', respond with directory contents
+    if (filename[strlen(filename) - 1] == '/')
+    {
+        return list_directory_contents(req, filepath);
     }
 
     if (stat(filepath, &file_stat) == -1)
