@@ -1,3 +1,8 @@
+export enum FilesystemBasePath {
+  Flash = "/storage",
+  SdCard = "/sd"
+}
+
 export interface File {
   name: string;
   size: string;

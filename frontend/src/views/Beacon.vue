@@ -48,8 +48,14 @@
           filled
         />
 
-        <q-banner v-if="beaconMode == BeaconMode.WAV" inline-actions rounded class="bg-info text-white">
-          For flash storage use <b>/storage</b> prefix. For SD card storage use <b>/sd</b> prefix.
+        <q-banner
+          v-if="beaconMode == BeaconMode.WAV"
+          inline-actions
+          rounded
+          class="bg-info text-white"
+        >
+          For flash storage use <b>{{ FilesystemBasePath.Flash }}</b> prefix.
+          For SD card storage use <b>{{ FilesystemBasePath.SdCard }}</b> prefix.
         </q-banner>
 
         <q-field
@@ -189,6 +195,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { BeaconMode } from "../types/Settings";
+import { FilesystemBasePath } from "../types/Filesystem";
 
 const settingsStore = useSettingsStore();
 

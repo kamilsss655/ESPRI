@@ -1,4 +1,6 @@
 <template>
+  <q-input v-model="currentPath" label="Current path" />
+  <br />
   <q-table
     title="Directories"
     :grid="$q.screen.xs"
@@ -6,7 +8,7 @@
     :columns="columnsDirectories"
     row-key="name"
   />
-  <p></p>
+  <br />
   <q-table
     title="Files"
     :grid="$q.screen.xs"
@@ -17,13 +19,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { Notify } from "quasar";
 import axios from "axios";
-import { Listing } from "../../types/Filesystem";
+import { debounce } from "lodash";
+import { FilesystemBasePath, Listing } from "../../types/Filesystem";
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.timeout = 600;
+
+const currentPath = ref(FilesystemBasePath.SdCard);
 
 const listing = ref<Listing>({
   files: [],
@@ -46,20 +51,38 @@ const columnsDirectories = [
   { name: "name", label: "Name", field: "name", sortable: true }
 ];
 
-onMounted(async () => {
+const fetchData = async () => {
   try {
-    const response = await axios.get("/sd/");
+    const response = await axios.get(currentPath.value + "/");
     listing.value = response.data;
     Notify.create({
-      message: "Fetched listing for the /sd/ directory.",
+      message: `Fetched listing for the ${currentPath.value} directory.`,
       color: "positive"
     });
   } catch (error) {
     Notify.create({
-      message: "Failed to fetch listing for the /sd/ directory",
+      message: `Failed to fetch listing for the ${currentPath.value} directory`,
       color: "negative"
     });
     console.error(error);
   }
+};
+
+// Debounced version of the fetchData() function - can only be called once per 500ms
+const debouncedFetchData = debounce(async () => {
+  fetchData();
+}, 500);
+
+// On component render we fetch data
+onMounted(() => {
+  debouncedFetchData();
 });
+
+// If current path changes we fetch data
+watch(
+  () => currentPath.value,
+  () => {
+    debouncedFetchData();
+  }
+);
 </script>
