@@ -7,6 +7,9 @@
     :rows="listing.directories"
     :columns="columnsDirectories"
     row-key="name"
+    :loading="loading"
+    flat
+    bordered
   />
   <br />
   <q-table
@@ -15,6 +18,9 @@
     :rows="listing.files"
     :columns="columnsFiles"
     row-key="name"
+    :loading="loading"
+    flat
+    bordered
   />
 </template>
 
@@ -27,6 +33,8 @@ import { FilesystemBasePath, Listing } from "../../types/Filesystem";
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.timeout = 600;
+
+const loading = ref(false);
 
 const currentPath = ref(FilesystemBasePath.SdCard);
 
@@ -65,6 +73,8 @@ const fetchData = async () => {
       color: "negative"
     });
     console.error(error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -82,6 +92,7 @@ onMounted(() => {
 watch(
   () => currentPath.value,
   () => {
+    loading.value = true;
     debouncedFetchData();
   }
 );
