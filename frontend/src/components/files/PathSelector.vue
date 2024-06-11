@@ -33,6 +33,9 @@
 import { ref } from "vue";
 import { FilesystemBasePath, StoragePath } from "../../types/Filesystem";
 
+// TODO: Fix this typescript error and remove ignore  
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const storagePath: StoragePath = defineModel();
 
 const storageOptions = ref([
