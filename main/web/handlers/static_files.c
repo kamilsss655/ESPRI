@@ -94,6 +94,17 @@ static esp_err_t list_directory_contents(httpd_req_t *req, const char *dirpath)
     return ESP_OK;
 }
 
+/// @brief Strips leading prexif from str text
+/// @param str 
+/// @param prefix 
+static void strip_prefix(char *str, char *prefix) {
+    int uploadTextLength = strlen(prefix);
+
+    if (strncmp(str, prefix, uploadTextLength) == 0) {
+        memmove(str, str + uploadTextLength, strlen(str) - uploadTextLength + 1);
+    }
+}
+
 static esp_err_t download_file(httpd_req_t *req, const char *base_path)
 {
     char filepath[FILE_PATH_MAX];
@@ -258,21 +269,13 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;
 
-    /* Skip leading "/upload" from URI to get filename */
-    /* Note sizeof() counts NULL termination hence the -1 */
-    const char *filename = get_path_from_uri(filepath, FLASH_BASE_PATH,
-                                             req->uri + sizeof("/upload") - 1, sizeof(filepath));
-    if (!filename)
-    {
-        /* Respond with 500 Internal Server Error */
-        httpd_json_resp_send(req, HTTPD_500, "Filename too long");
-        return ESP_OK;
-    }
+    strcpy(filepath, req->uri);
+    strip_prefix(filepath, "/upload");
 
     /* Filename cannot have a trailing '/' */
-    if (filename[strlen(filename) - 1] == '/')
+    if (filepath[strlen(filepath) - 1] == '/')
     {
-        ESP_LOGE(TAG, "Invalid filename : %s", filename);
+        ESP_LOGE(TAG, "Invalid filename : %s", filepath);
         httpd_json_resp_send(req, HTTPD_500, "Invalid filename");
         return ESP_OK;
     }
@@ -312,7 +315,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
         return ESP_OK;
     }
 
-    ESP_LOGI(TAG, "Receiving file : %s...", filename);
+    ESP_LOGI(TAG, "Receiving file : %s...", filepath);
 
     /* Retrieve the pointer to scratch buffer for temporary storage */
     char *buf = ((file_server_data *)req->user_ctx)->scratch;
