@@ -1,5 +1,5 @@
 <template>
-  <q-input v-model="currentPath" label="Current path" />
+  <PathSelector v-model="storagePath"/>
   <br />
   <q-table
     title="Directories"
@@ -31,10 +31,22 @@
           {{ props.row.size }}
         </q-td>
         <q-td key="actions" :props="props">
-          <q-btn dense flat icon="ion-play" color="white" @click="notImplemented()">
+          <q-btn
+            dense
+            flat
+            icon="ion-play"
+            color="white"
+            @click="notImplemented()"
+          >
             <q-tooltip> Play {{ props.row.name }} </q-tooltip>
           </q-btn>
-          <q-btn dense flat icon="ion-call" color="white" @click="notImplemented()">
+          <q-btn
+            dense
+            flat
+            icon="ion-call"
+            color="white"
+            @click="notImplemented()"
+          >
             <q-tooltip> Transmit {{ props.row.name }} </q-tooltip>
           </q-btn>
           <q-btn
@@ -42,9 +54,18 @@
             flat
             icon="ion-cloud-download"
             color="white"
-            @click="downloadFile(currentPath, props.row.name)"
+            @click="downloadFile(storagePath.prefix+storagePath.path, props.row.name)"
           >
             <q-tooltip> Download {{ props.row.name }} </q-tooltip>
+          </q-btn>
+          <q-btn
+            dense
+            flat
+            icon="ion-trash"
+            color="white"
+            @click="notImplemented()"
+          >
+            <q-tooltip> Delete {{ props.row.name }} </q-tooltip>
           </q-btn>
         </q-td>
       </q-tr>
@@ -57,14 +78,15 @@ import { onMounted, ref, watch } from "vue";
 import { Notify } from "quasar";
 import axios from "axios";
 import { debounce } from "lodash";
-import { FilesystemBasePath, Listing } from "../../types/Filesystem";
+import { Listing, StoragePath, FilesystemBasePath } from "../../types/Filesystem";
+import PathSelector from "./PathSelector.vue";
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.timeout = 600;
 
 const loading = ref(false);
 
-const currentPath = ref(FilesystemBasePath.SdCard);
+const storagePath = ref<StoragePath>({ prefix: FilesystemBasePath.SdCard, path: "/" });
 
 const listing = ref<Listing>({
   files: [],
@@ -90,19 +112,19 @@ const columnsDirectories = [
 
 const notImplemented = async () => {
   alert("Not implemented.");
-}
+};
 
 const fetchData = async () => {
   try {
-    const response = await axios.get(currentPath.value + "/");
+    const response = await axios.get(storagePath.value.prefix+storagePath.value.path + "/");
     listing.value = response.data;
     Notify.create({
-      message: `Fetched listing for the ${currentPath.value} directory.`,
+      message: `Fetched listing for the ${storagePath.value.prefix+storagePath.value.path} directory.`,
       color: "positive"
     });
   } catch (error) {
     Notify.create({
-      message: `Failed to fetch listing for the ${currentPath.value} directory`,
+      message: `Failed to fetch listing for the ${storagePath.value.prefix+storagePath.value.path} directory`,
       color: "negative"
     });
     console.error(error);
@@ -113,9 +135,9 @@ const fetchData = async () => {
 
 const downloadFile = async (relativePath: string, filename: string) => {
   Notify.create({
-      message: `Downloading file. Please wait.`,
-      color: "positive"
-    });
+    message: `Downloading file. Please wait.`,
+    color: "positive"
+  });
   fetch(`${relativePath}/${filename}`)
     .then((response) => response.blob())
     .then((blob) => {
@@ -147,10 +169,12 @@ onMounted(() => {
 
 // If current path changes we fetch data
 watch(
-  () => currentPath.value,
-  () => {
-    loading.value = true;
-    debouncedFetchData();
+  () => [storagePath.value.prefix, storagePath.value.path],
+  ([currentPath, storage]) => {
+    if (currentPath || storage) {
+      loading.value = true;
+      debouncedFetchData();
+    }
   }
 );
 </script>

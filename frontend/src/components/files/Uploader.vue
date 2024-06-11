@@ -49,7 +49,7 @@ function onFailed(info: {files: readonly any[], xhr: XMLHttpRequest}) {
 // Resolve upload URL
 const factoryFn: QUploaderFactoryFn = (files: readonly File[]) => {
   return {
-    url: ApiPaths.FileUpload + "/" + files[0].name,
+    url: ApiPaths.FileUpload + "/sd/" + files[0].name,
     method: "POST"
   };
 };

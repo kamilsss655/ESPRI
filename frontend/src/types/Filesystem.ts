@@ -16,3 +16,8 @@ export interface Listing {
   files: File[];
   directories: Directory[];
 }
+
+export interface StoragePath {
+  prefix :string;
+  path :string;
+}
