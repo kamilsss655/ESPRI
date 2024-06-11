@@ -75,8 +75,6 @@ static esp_err_t list_directory_contents(httpd_req_t *req, const char *dirpath)
             cJSON_AddStringToObject(object, "size", entrysize);
             cJSON_AddItemToArray(files, object);
         }
-
-        
     }
     closedir(dir);
 
@@ -96,12 +94,14 @@ static esp_err_t list_directory_contents(httpd_req_t *req, const char *dirpath)
 }
 
 /// @brief Strips leading prexif from str text
-/// @param str 
-/// @param prefix 
-static void strip_prefix(char *str, char *prefix) {
+/// @param str
+/// @param prefix
+static void strip_prefix(char *str, char *prefix)
+{
     int uploadTextLength = strlen(prefix);
 
-    if (strncmp(str, prefix, uploadTextLength) == 0) {
+    if (strncmp(str, prefix, uploadTextLength) == 0)
+    {
         memmove(str, str + uploadTextLength, strlen(str) - uploadTextLength + 1);
     }
 }
@@ -185,7 +185,19 @@ static esp_err_t download_file(httpd_req_t *req, const char *base_path)
 // Handler to download a file kept on flash
 esp_err_t STATIC_FILES_DownloadFromFlash(httpd_req_t *req)
 {
-    return download_file(req, FLASH_BASE_PATH);
+    char last_char = req->uri[strlen(req->uri) - 1];
+
+    if (last_char == '/')
+    {
+        // if last char is a slash do not add base path
+        // as it is likely needed for flash directory listing
+        return download_file(req, "");
+    }
+    else
+    {
+        // otherwise serve files from FLASH_BASE_PATH as root URL
+        return download_file(req, FLASH_BASE_PATH);
+    }
 }
 
 // Handler to download a file kept on SD card
