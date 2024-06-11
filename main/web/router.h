@@ -17,6 +17,8 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
+#define UPLOAD_URI_PREFIX "/upload"
+
 #include "helper/http.h"
 
 void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server);

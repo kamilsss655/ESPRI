@@ -20,6 +20,7 @@
 #include <cJSON.h>
 
 #include "static_files.h"
+#include "web/router.h"
 #include "hardware/sd.h"
 #include "helper/http.h"
 #include "helper/api.h"
@@ -270,7 +271,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     FILE *fd = NULL;
 
     strcpy(filepath, req->uri);
-    strip_prefix(filepath, "/upload");
+    strip_prefix(filepath, UPLOAD_URI_PREFIX);
 
     /* Filename cannot have a trailing '/' */
     if (filepath[strlen(filepath) - 1] == '/')

@@ -14,6 +14,7 @@
  *     limitations under the License.
  */
 
+#include "router.h"
 #include "helper/http.h"
 #include "hardware/sd.h"
 #include "web/handlers/root.h"
@@ -130,7 +131,7 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
 
     // File upload
     httpd_uri_t static_file_upload_uri = {
-        .uri = "/upload/*",
+        .uri = UPLOAD_URI_PREFIX "/*",
         .method = HTTP_POST,
         .handler = STATIC_FILES_Upload,
         .user_ctx = server_data};
