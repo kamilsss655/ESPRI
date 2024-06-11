@@ -23,7 +23,8 @@
       </q-select>
     </div>
     <div class="col-12 col-md-10">
-      <q-input v-model="storagePath.path" label="Path" />
+      <q-input v-model="storagePath.path" label="Path" 
+      :rules="[ (val) => endsWithSlash(val) || 'Please make sure the path ends with a slash']"/>
     </div>
   </div>
 </template>
@@ -48,4 +49,8 @@ const storageOptions = ref([
     icon: "ion-save"
   }
 ]);
+
+function endsWithSlash(str :string) {
+    return str.endsWith("/");
+}
 </script>
