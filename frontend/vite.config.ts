@@ -41,6 +41,16 @@ export default defineConfig({
         target: "http://" + espIpAddress, // IP address for the ESP web server
         changeOrigin: true,
         secure: false,
+      },
+      "/storage": {
+        target: "http://" + espIpAddress, // IP address for the ESP web server
+        changeOrigin: true,
+        secure: false,
+      },
+      "/sd": {
+        target: "http://" + espIpAddress, // IP address for the ESP web server
+        changeOrigin: true,
+        secure: false,
       }
     }
   },

@@ -17,8 +17,10 @@
 #include <sys/param.h>
 #include <esp_log.h>
 #include <esp_spiffs.h>
+#include <cJSON.h>
 
 #include "static_files.h"
+#include "web/router.h"
 #include "hardware/sd.h"
 #include "helper/http.h"
 #include "helper/api.h"
@@ -26,6 +28,83 @@
 #include "board.h"
 
 static const char *TAG = "WEB/STATIC_FILES";
+
+// Send list of all files and directories
+static esp_err_t list_directory_contents(httpd_req_t *req, const char *dirpath)
+{
+    char entrypath[FILE_PATH_MAX];
+    char entrysize[16];
+
+    struct dirent *entry;
+    struct stat entry_stat;
+
+    DIR *dir = opendir(dirpath);
+    const size_t dirpath_len = strlen(dirpath);
+
+    // Retrieve the base path of file storage to construct the full path
+    strlcpy(entrypath, dirpath, sizeof(entrypath));
+
+    cJSON *root = cJSON_CreateObject();
+    cJSON *files = cJSON_CreateArray();
+    cJSON *directories = cJSON_CreateArray();
+
+    // Iterate over all files / folders
+    while ((entry = readdir(dir)) != NULL)
+    {
+
+        strlcpy(entrypath + dirpath_len, entry->d_name, sizeof(entrypath) - dirpath_len);
+        if (stat(entrypath, &entry_stat) == -1)
+        {
+            ESP_LOGE(TAG, "Failed to stat: %s", entry->d_name);
+            continue;
+        }
+        sprintf(entrysize, "%ld", entry_stat.st_size);
+
+        cJSON *object = cJSON_CreateObject();
+
+        if (entry->d_type == DT_DIR)
+        {
+            // it's a directory
+            cJSON_AddStringToObject(object, "name", entry->d_name);
+            cJSON_AddItemToArray(directories, object);
+        }
+        else
+        {
+            // it's a file
+            cJSON_AddStringToObject(object, "name", entry->d_name);
+            cJSON_AddStringToObject(object, "size", entrysize);
+            cJSON_AddItemToArray(files, object);
+        }
+    }
+    closedir(dir);
+
+    cJSON_AddItemToObject(root, "files", files);
+    cJSON_AddItemToObject(root, "directories", directories);
+
+    // Generate JSON string
+    const char *json_str = cJSON_Print(root);
+    // Free memory, it handles all the objects belonging to root
+    cJSON_Delete(root);
+
+    httpd_resp_set_type(req, "application/json");
+    // Send response
+    httpd_resp_sendstr(req, json_str);
+
+    return ESP_OK;
+}
+
+/// @brief Strips leading prexif from str text
+/// @param str
+/// @param prefix
+static void strip_prefix(char *str, char *prefix)
+{
+    int uploadTextLength = strlen(prefix);
+
+    if (strncmp(str, prefix, uploadTextLength) == 0)
+    {
+        memmove(str, str + uploadTextLength, strlen(str) - uploadTextLength + 1);
+    }
+}
 
 static esp_err_t download_file(httpd_req_t *req, const char *base_path)
 {
@@ -41,6 +120,12 @@ static esp_err_t download_file(httpd_req_t *req, const char *base_path)
         /* Respond with 500 Internal Server Error */
         httpd_json_resp_send(req, HTTPD_500, "Filename too long");
         return ESP_FAIL;
+    }
+
+    // If name has trailing '/', respond with directory contents
+    if (filename[strlen(filename) - 1] == '/')
+    {
+        return list_directory_contents(req, filepath);
     }
 
     if (stat(filepath, &file_stat) == -1)
@@ -100,7 +185,19 @@ static esp_err_t download_file(httpd_req_t *req, const char *base_path)
 // Handler to download a file kept on flash
 esp_err_t STATIC_FILES_DownloadFromFlash(httpd_req_t *req)
 {
-    return download_file(req, FLASH_BASE_PATH);
+    char last_char = req->uri[strlen(req->uri) - 1];
+
+    if (last_char == '/')
+    {
+        // if last char is a slash do not add base path
+        // as it is likely needed for flash directory listing
+        return download_file(req, "");
+    }
+    else
+    {
+        // otherwise serve files from FLASH_BASE_PATH as root URL
+        return download_file(req, FLASH_BASE_PATH);
+    }
 }
 
 // Handler to download a file kept on SD card
@@ -185,21 +282,13 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;
 
-    /* Skip leading "/upload" from URI to get filename */
-    /* Note sizeof() counts NULL termination hence the -1 */
-    const char *filename = get_path_from_uri(filepath, FLASH_BASE_PATH,
-                                             req->uri + sizeof("/upload") - 1, sizeof(filepath));
-    if (!filename)
-    {
-        /* Respond with 500 Internal Server Error */
-        httpd_json_resp_send(req, HTTPD_500, "Filename too long");
-        return ESP_OK;
-    }
+    strcpy(filepath, req->uri);
+    strip_prefix(filepath, UPLOAD_URI_PREFIX);
 
     /* Filename cannot have a trailing '/' */
-    if (filename[strlen(filename) - 1] == '/')
+    if (filepath[strlen(filepath) - 1] == '/')
     {
-        ESP_LOGE(TAG, "Invalid filename : %s", filename);
+        ESP_LOGE(TAG, "Invalid filename : %s", filepath);
         httpd_json_resp_send(req, HTTPD_500, "Invalid filename");
         return ESP_OK;
     }
@@ -239,7 +328,7 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
         return ESP_OK;
     }
 
-    ESP_LOGI(TAG, "Receiving file : %s...", filename);
+    ESP_LOGI(TAG, "Receiving file : %s...", filepath);
 
     /* Retrieve the pointer to scratch buffer for temporary storage */
     char *buf = ((file_server_data *)req->user_ctx)->scratch;
