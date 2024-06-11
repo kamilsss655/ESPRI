@@ -6,10 +6,13 @@
       </q-card-section>
       <q-separator />
       <q-card-section>
-        <Browser />
+        <PathSelector v-model="storagePath"/>
       </q-card-section>
       <q-card-section>
-        <Uploader />
+        <Browser :prefix="storagePath.prefix" :path="storagePath.path"  />
+      </q-card-section>
+      <q-card-section>
+        <Uploader :prefix="storagePath.prefix" :path="storagePath.path"/>
       </q-card-section>
       <q-card-section>
         <q-banner inline-actions rounded class="bg-info text-white">
@@ -23,4 +26,9 @@
 <script setup lang="ts">
 import Uploader from "../components/files/Uploader.vue";
 import Browser from "../components/files/Browser.vue";
+import PathSelector from "../components/files/PathSelector.vue";
+import { FilesystemBasePath, StoragePath } from "../types/Filesystem";
+import { ref } from "vue";
+
+const storagePath = ref<StoragePath>({ prefix: FilesystemBasePath.SdCard, path: "/" });
 </script>

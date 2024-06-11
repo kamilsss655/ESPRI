@@ -1,6 +1,4 @@
 <template>
-  <PathSelector v-model="storagePath"/>
-  <br />
   <q-table
     title="Directories"
     :dense="$q.screen.lt.lg"
@@ -22,15 +20,15 @@
     flat
     bordered
   >
-    <template v-slot:body="props">
-      <q-tr :props="props">
-        <q-td key="name" :props="props">
-          {{ props.row.name }}
+    <template v-slot:body="tableProps">
+      <q-tr :props="tableProps">
+        <q-td key="name" :props="tableProps">
+          {{ tableProps.row.name }}
         </q-td>
-        <q-td key="size" :props="props">
-          {{ props.row.size }}
+        <q-td key="size" :props="tableProps">
+          {{ tableProps.row.size }}
         </q-td>
-        <q-td key="actions" :props="props">
+        <q-td key="actions" :props="tableProps">
           <q-btn
             dense
             flat
@@ -38,7 +36,7 @@
             color="white"
             @click="notImplemented()"
           >
-            <q-tooltip> Play {{ props.row.name }} </q-tooltip>
+            <q-tooltip> Play {{ tableProps.row.name }} </q-tooltip>
           </q-btn>
           <q-btn
             dense
@@ -47,16 +45,21 @@
             color="white"
             @click="notImplemented()"
           >
-            <q-tooltip> Transmit {{ props.row.name }} </q-tooltip>
+            <q-tooltip> Transmit {{ tableProps.row.name }} </q-tooltip>
           </q-btn>
           <q-btn
             dense
             flat
             icon="ion-cloud-download"
             color="white"
-            @click="downloadFile(storagePath.prefix+storagePath.path, props.row.name)"
+            @click="
+              downloadFile(
+                props.prefix + props.path,
+                tableProps.row.name
+              )
+            "
           >
-            <q-tooltip> Download {{ props.row.name }} </q-tooltip>
+            <q-tooltip> Download {{ tableProps.row.name }} </q-tooltip>
           </q-btn>
           <q-btn
             dense
@@ -65,7 +68,7 @@
             color="white"
             @click="notImplemented()"
           >
-            <q-tooltip> Delete {{ props.row.name }} </q-tooltip>
+            <q-tooltip> Delete {{ tableProps.row.name }} </q-tooltip>
           </q-btn>
         </q-td>
       </q-tr>
@@ -78,15 +81,23 @@ import { onMounted, ref, watch } from "vue";
 import { Notify } from "quasar";
 import axios from "axios";
 import { debounce } from "lodash";
-import { Listing, StoragePath, FilesystemBasePath } from "../../types/Filesystem";
-import PathSelector from "./PathSelector.vue";
+import { Listing } from "../../types/Filesystem";
+
+const props = defineProps({
+  prefix: {
+    type: String,
+    required: true
+  },
+  path: {
+    type: String,
+    required: true
+  }
+});
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.timeout = 600;
 
 const loading = ref(false);
-
-const storagePath = ref<StoragePath>({ prefix: FilesystemBasePath.SdCard, path: "/" });
 
 const listing = ref<Listing>({
   files: [],
@@ -116,15 +127,15 @@ const notImplemented = async () => {
 
 const fetchData = async () => {
   try {
-    const response = await axios.get(storagePath.value.prefix+storagePath.value.path + "/");
+    const response = await axios.get(props.prefix+props.path);
     listing.value = response.data;
     Notify.create({
-      message: `Fetched listing for the ${storagePath.value.prefix+storagePath.value.path} directory.`,
+      message: `Fetched listing for the ${props.prefix+props.path} directory.`,
       color: "positive"
     });
   } catch (error) {
     Notify.create({
-      message: `Failed to fetch listing for the ${storagePath.value.prefix+storagePath.value.path} directory`,
+      message: `Failed to fetch listing for the ${props.prefix+props.path} directory`,
       color: "negative"
     });
     console.error(error);
@@ -169,7 +180,7 @@ onMounted(() => {
 
 // If current path changes we fetch data
 watch(
-  () => [storagePath.value.prefix, storagePath.value.path],
+  () => [props.prefix, props.path],
   ([currentPath, storage]) => {
     if (currentPath || storage) {
       loading.value = true;

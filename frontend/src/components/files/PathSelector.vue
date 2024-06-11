@@ -4,7 +4,7 @@
       <q-select
         v-model="storagePath.prefix"
         :options="storageOptions"
-        label="Storage option"
+        label="Prefix"
         behavior="dialog"
         emit-value
         map-options
@@ -23,7 +23,7 @@
       </q-select>
     </div>
     <div class="col-12 col-md-10">
-      <q-input v-model="storagePath.path" label="Current path" />
+      <q-input v-model="storagePath.path" label="Path" />
     </div>
   </div>
 </template>

@@ -17,6 +17,17 @@
 import { Notify, QUploaderFactoryFn } from "quasar";
 import { ApiPaths, ApiResponse, GetApiResponseFromJson } from "../../types/Api";
 
+const props = defineProps({
+  prefix: {
+    type: String,
+    required: true
+  },
+  path: {
+    type: String,
+    required: true
+  }
+});
+
 function onUploaded(info: {files: readonly any[], xhr: XMLHttpRequest}) {
   const response: ApiResponse = GetApiResponseFromJson(info.xhr.response);
 
@@ -49,7 +60,7 @@ function onFailed(info: {files: readonly any[], xhr: XMLHttpRequest}) {
 // Resolve upload URL
 const factoryFn: QUploaderFactoryFn = (files: readonly File[]) => {
   return {
-    url: ApiPaths.FileUpload + "/sd/" + files[0].name,
+    url: ApiPaths.FileUpload + props.prefix + props.path + files[0].name,
     method: "POST"
   };
 };
