@@ -65,7 +65,7 @@
             flat
             icon="ion-trash"
             color="white"
-            @click="notImplemented()"
+            @click="deleteFile(props.prefix + props.path + tableProps.row.name)"
           >
             <q-tooltip> Delete {{ tableProps.row.name }} </q-tooltip>
           </q-btn>
@@ -82,6 +82,7 @@ import axios from "axios";
 import { debounce } from "lodash";
 import { Listing } from "../../types/Filesystem";
 import { transmitWAV } from "../../helpers/Transmit"
+import { deleteFile } from "../../helpers/Filesystem";
 
 const props = defineProps({
   prefix: {

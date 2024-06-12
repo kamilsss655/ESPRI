@@ -42,6 +42,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/delete": {
+        target: "http://" + espIpAddress, // IP address for the ESP web server
+        changeOrigin: true,
+        secure: false,
+      },
       "/storage": {
         target: "http://" + espIpAddress, // IP address for the ESP web server
         changeOrigin: true,
