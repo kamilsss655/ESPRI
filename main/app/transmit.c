@@ -114,7 +114,7 @@ void TRANSMIT_Wav(void *pvParameters)
 
     PTT_Press();
 
-    AUDIO_PlayWav(param->path);
+    AUDIO_PlayWav(param->filepath);
 
     AUDIO_TransmitStop();
 

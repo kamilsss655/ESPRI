@@ -36,7 +36,7 @@ typedef struct
 
 typedef struct
 {
-    const char *path;
+    char filepath[64];
 } TRANSMIT_WavParam_t;
 
 void TRANSMIT_MorseCode(void *pvParameters);

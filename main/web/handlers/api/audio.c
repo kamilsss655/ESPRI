@@ -23,21 +23,29 @@
 #include "helper/rtos.h"
 #include "helper/api.h"
 #include "helper/http.h"
+#include <app/transmit.h>
 
 static const char *TAG = "WEB/API/AUDIO";
+
 static const char *audioRecordTaskName = "AUDIO_Record";
+static const char *audioTransmitWAVTaskName = "TRANSMIT_Wav";
 
 // Default values
 AUDIO_RecordParam_t record_param = {
-    .filepath = "sample.wav",
-    .max_duration_ms = 2000
-};
+    .filepath = AUDIO_DEFAULT_WAV_SAMPLE_FILEPATH,
+    .max_duration_ms = 2000};
 
-// List of record attributes
+TRANSMIT_WavParam_t transmit_wav_param = {
+    .filepath = AUDIO_DEFAULT_WAV_SAMPLE_FILEPATH};
+
+// List of audio record attributes
 ApiAttr_t record_attributes[] = {
-    {"filepath",                         &record_param.filepath,                      0},
-    {"max_duration_ms",                  &record_param.max_duration_ms,               1}
-};
+    {"filepath", &record_param.filepath, 0},
+    {"max_duration_ms", &record_param.max_duration_ms, 1}};
+
+// List of audio transmit WAV attributes
+ApiAttr_t transmit_wav_attributes[] = {
+    {"filepath", &transmit_wav_param.filepath, 0}};
 
 // Schedule audio record task
 esp_err_t API_AUDIO_Record(httpd_req_t *req)
@@ -50,7 +58,7 @@ esp_err_t API_AUDIO_Record(httpd_req_t *req)
     esp_err_t ret = process_api_attributes(req, TAG, record_attributes, (sizeof(record_attributes) / sizeof(record_attributes[0])));
 
     // If processing attributes resulted in error we return early
-    if(ret != ESP_OK)
+    if (ret != ESP_OK)
     {
         return ret;
     }
@@ -63,6 +71,35 @@ esp_err_t API_AUDIO_Record(httpd_req_t *req)
     else
     {
         httpd_json_resp_send(req, HTTPD_500, "Recording task is already running.");
+    }
+
+    return ESP_OK;
+}
+
+// Schedule audio transmit wav task
+esp_err_t API_AUDIO_TransmitWAV(httpd_req_t *req)
+{
+    // Check if there is other instance of the task running
+    TaskHandle_t audioRecordTaskHandle = xTaskGetHandle(audioTransmitWAVTaskName);
+
+    esp_err_t ret = process_api_attributes(req, TAG, transmit_wav_attributes, (sizeof(transmit_wav_attributes) / sizeof(transmit_wav_attributes[0])));
+
+    ESP_LOGI(TAG, "Received audio play request for: %s", transmit_wav_param.filepath);
+
+    // If processing attributes resulted in error we return early
+    if (ret != ESP_OK)
+    {
+        return ret;
+    }
+
+    if (audioRecordTaskHandle == NULL)
+    {
+        xTaskCreate(TRANSMIT_Wav, audioTransmitWAVTaskName, 4096, &transmit_wav_param, RTOS_PRIORITY_HIGHEST, NULL);
+        httpd_json_resp_send(req, HTTPD_200, "OK. Scheduled transmision of the WAV file.");
+    }
+    else
+    {
+        httpd_json_resp_send(req, HTTPD_500, "Transmit task is already running.");
     }
 
     return ESP_OK;
