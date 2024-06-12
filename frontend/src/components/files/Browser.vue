@@ -29,7 +29,7 @@
           {{ tableProps.row.size }}
         </q-td>
         <q-td key="actions" :props="tableProps">
-          <q-btn
+          <!-- <q-btn
             dense
             flat
             icon="ion-play"
@@ -37,11 +37,11 @@
             @click="notImplemented()"
           >
             <q-tooltip> Play {{ tableProps.row.name }} </q-tooltip>
-          </q-btn>
+          </q-btn> -->
           <q-btn
             dense
             flat
-            icon="ion-call"
+            icon="ion-play"
             color="white"
             @click="
               transmitWAV(props.prefix + props.path + tableProps.row.name)
@@ -65,7 +65,11 @@
             flat
             icon="ion-trash"
             color="white"
-            @click="notImplemented()"
+            @click="
+              loading = true;
+              deleteFile(props.prefix + props.path + tableProps.row.name);
+              debouncedFetchData();
+            "
           >
             <q-tooltip> Delete {{ tableProps.row.name }} </q-tooltip>
           </q-btn>
@@ -81,7 +85,8 @@ import { Notify } from "quasar";
 import axios from "axios";
 import { debounce } from "lodash";
 import { Listing } from "../../types/Filesystem";
-import { transmitWAV } from "../../types/Transmit"
+import { transmitWAV } from "../../helpers/Transmit";
+import { deleteFile } from "../../helpers/Filesystem";
 
 const props = defineProps({
   prefix: {
@@ -119,10 +124,6 @@ const columnsFiles = [
 const columnsDirectories = [
   { name: "name", label: "Name", field: "name", sortable: true }
 ];
-
-const notImplemented = async () => {
-  alert("Not implemented.");
-};
 
 const fetchData = async () => {
   try {

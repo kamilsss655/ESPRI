@@ -18,6 +18,7 @@
 #define ROUTER_H
 
 #define UPLOAD_URI_PREFIX "/upload"
+#define DELETE_URI_PREFIX "/delete"
 
 #include "helper/http.h"
 

@@ -19,6 +19,14 @@
 
 #include <esp_err.h>
 
+typedef enum
+{
+    FILESYSTEM_PATH_FLASH,
+    FILESYSTEM_PATH_SD,
+    FILESYSTEM_PATH_UNKNOWN
+} FILESYSTEM_Path_t;
+
 esp_err_t delete_file(const char *filepath);
+FILESYSTEM_Path_t get_path_type(const char *filepath);
 
 #endif

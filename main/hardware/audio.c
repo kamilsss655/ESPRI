@@ -186,24 +186,25 @@ void AUDIO_Record(void *pvParameters)
     FILE *fd = NULL;
     struct stat file_stat;
 
-    ESP_LOGI(TAG, "Allocating space for the recording..");
-
     // If the file exists delete it
     if (stat(param->filepath, &file_stat) == 0)
     {
         // Delete the file
-        unlink(param->filepath);
+        delete_file(param->filepath);
     }
 
-    // Garbage collect to get enough free space for the file
-    // Only needed for SPIFFS (when file is stored in flash, not on sd card)
-    // esp_err_t ret = esp_spiffs_gc(NULL, (param->max_duration_ms * (AUDIO_INPUT_SAMPLE_FREQ / 1000) * sizeof(AUDIO_ADC_DATA_TYPE)));
-    //// esp_err_t ret = esp_spiffs_gc(NULL, ((param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ * sizeof(AUDIO_ADC_DATA_TYPE)));
-    // if (ret != ESP_OK)
-    // {
-    //     ESP_LOGI(TAG, "Recorder failed to allocate space");
-    //     goto Done;
-    // }
+    if (get_path_type(param->filepath) == FILESYSTEM_PATH_FLASH)
+    {
+        ESP_LOGI(TAG, "Performing garbage collection..");
+        // Garbage collect to get enough free space for the file
+        esp_err_t ret = esp_spiffs_gc(NULL, (param->max_duration_ms * (AUDIO_INPUT_SAMPLE_FREQ / 1000) * sizeof(AUDIO_ADC_DATA_TYPE)));
+        // esp_err_t ret = esp_spiffs_gc(NULL, ((param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ * sizeof(AUDIO_ADC_DATA_TYPE)));
+        if (ret != ESP_OK)
+        {
+            ESP_LOGI(TAG, "Recorder failed to allocate space");
+            goto Done;
+        }
+    }
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
 

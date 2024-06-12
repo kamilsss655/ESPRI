@@ -18,6 +18,11 @@
 #include <esp_spiffs.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
+
+#include "filesystem.h"
+#include "board.h"
+#include <hardware/sd.h>
 
 // Delete file and garbage collect to prevent issues
 esp_err_t delete_file(const char *filepath)
@@ -30,13 +35,35 @@ esp_err_t delete_file(const char *filepath)
         // Delete the file
         unlink(filepath);
 
-        // Garbage collect to get enough free space for the file
-        esp_err_t ret = esp_spiffs_gc(NULL, file_stat.st_size);
-
-        return ret;
+        if (get_path_type(filepath) == FILESYSTEM_PATH_FLASH)
+        {
+            // Garbage collect to get enough free space for the file
+            esp_err_t ret = esp_spiffs_gc(NULL, file_stat.st_size);
+            return ret;
+        }
+        return ESP_OK;
     }
     else
     {
         return ESP_ERR_NOT_FOUND;
+    }
+}
+
+// returns path type based on filepath
+FILESYSTEM_Path_t get_path_type(const char *filepath)
+{
+    // if filepath starts with /storage
+    if (strncmp(filepath, FLASH_BASE_PATH, strlen(FLASH_BASE_PATH)) == 0)
+    {
+        return FILESYSTEM_PATH_FLASH;
+    }
+    // if filepath starts with /sd
+    else if (strncmp(filepath, SD_BASE_PATH, strlen(SD_BASE_PATH)) == 0)
+    {
+        return FILESYSTEM_PATH_SD;
+    }
+    else
+    {
+        return FILESYSTEM_PATH_UNKNOWN;
     }
 }

@@ -7,20 +7,12 @@ export enum ApiPaths {
   TransmitWAV = "/api/audio/transmit_wav",
   DeepSleep = "/api/system/deep_sleep",
   FactoryReset = "/api/system/factory_reset",
-  FileUpload = "/upload"
+  FileUpload = "/upload",
+  FileDelete = "/delete"
 }
 
 export interface ApiResponse {
   data: {
     response: string;
   };
-}
-
-// Convert JSON API response into ApiResponse
-export function GetApiResponseFromJson(jsonText: string): ApiResponse {
-  if (jsonText === "") {
-    return { data: { response: "" } };
-  } else {
-    return { data: { response: JSON.parse(jsonText).response } };
-  }
 }

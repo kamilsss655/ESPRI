@@ -388,3 +388,29 @@ esp_err_t STATIC_FILES_Upload(httpd_req_t *req)
     httpd_json_resp_send(req, HTTPD_200, "File upload complete");
     return ESP_OK;
 }
+
+// Delete file handler
+esp_err_t STATIC_FILES_Delete(httpd_req_t *req)
+{
+    char filepath[FILE_PATH_MAX];
+
+    strcpy(filepath, req->uri);
+    strip_prefix(filepath, DELETE_URI_PREFIX);
+
+    esp_err_t ret = delete_file(filepath);
+
+    if(ret == ESP_OK)
+    {
+        httpd_json_resp_send(req, HTTPD_200, "File deleted");
+    }
+    else if (ret == ESP_ERR_NOT_FOUND)
+    {
+        httpd_json_resp_send(req, HTTPD_404, "File not found");
+    }
+    else
+    {
+        httpd_json_resp_send(req, HTTPD_500, "Unknown error");
+    }
+
+    return ESP_OK;
+}

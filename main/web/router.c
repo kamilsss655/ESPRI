@@ -144,6 +144,14 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .user_ctx = server_data};
     httpd_register_uri_handler(server, &static_file_upload_uri);
 
+    // File delete
+    httpd_uri_t static_file_delete_uri = {
+        .uri = DELETE_URI_PREFIX "/*",
+        .method = HTTP_DELETE,
+        .handler = STATIC_FILES_Delete,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &static_file_delete_uri);
+
     // Serve static files from the SD card
     httpd_uri_t static_file_download_from_sd_uri = {
         .uri = SD_BASE_PATH "/*", // Match all other URIs
