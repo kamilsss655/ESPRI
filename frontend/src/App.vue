@@ -25,14 +25,14 @@ onMounted(() => {
     <q-page-container>
       <Banner />
       <div class="row">
-        <div class="col-0 col-sm-3"></div>
-        <div class="col-12 col-sm-6">
+        <div class="col-0 col-sm-1"></div>
+        <div class="col-12 col-sm-10">
           <div class="q-pa-md">
             <RouterView />
           </div>
         </div>
       </div>
-      <div class="col-0 col-sm-3"></div>
+      <div class="col-0 col-sm-1"></div>
     </q-page-container>
     <Footer />
   </q-layout>

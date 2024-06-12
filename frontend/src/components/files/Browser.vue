@@ -1,43 +1,66 @@
 <template>
-  <q-table
-    title="Directories"
-    :dense="$q.screen.lt.lg"
-    :rows="listing.directories"
-    :columns="columnsDirectories"
-    row-key="name"
-    :loading="loading"
-    flat
-    bordered
-  />
-  <br />
-  <q-table
-    title="Files"
-    :dense="$q.screen.lt.lg"
-    :rows="listing.files"
-    :columns="columnsFiles"
-    row-key="name"
-    :loading="loading"
-    flat
-    bordered
-  >
-    <template v-slot:top>
-      <p class="text-h6">Files</p>
-      <q-space />
-      <q-btn round dense flat icon="ion-refresh" @click="debouncedFetchData()">
-        <q-tooltip>Refresh</q-tooltip>
-      </q-btn>
-    </template>
+  <div class="row">
+    <div class="col-12 col-md-6">
+      <q-table
+        title="Directories"
+        :dense="$q.screen.lt.lg"
+        :rows="listing.directories"
+        :columns="columnsDirectories"
+        row-key="name"
+        :loading="loading"
+        flat
+        bordered
+      >
+      <template v-slot:top>
+          <p class="text-h6">Directories</p>
+          <q-space />
+          <q-btn
+            round
+            dense
+            flat
+            icon="ion-refresh"
+            @click="debouncedFetchData()"
+          >
+            <q-tooltip>Refresh</q-tooltip>
+          </q-btn>
+        </template>
+      </q-table>
+    </div>
+    <div class="col-12 col-md-6">
+      <q-table
+        title="Files"
+        :dense="$q.screen.lt.lg"
+        :rows="listing.files"
+        :columns="columnsFiles"
+        row-key="name"
+        :loading="loading"
+        flat
+        bordered
+      >
+        <template v-slot:top>
+          <p class="text-h6">Files</p>
+          <q-space />
+          <q-btn
+            round
+            dense
+            flat
+            icon="ion-refresh"
+            @click="debouncedFetchData()"
+          >
+            <q-tooltip>Refresh</q-tooltip>
+          </q-btn>
+        </template>
 
-    <template v-slot:body="tableProps">
-      <q-tr :props="tableProps">
-        <q-td key="name" :props="tableProps">
-          {{ tableProps.row.name }}
-        </q-td>
-        <q-td key="size" :props="tableProps">
-          {{ tableProps.row.size }}
-        </q-td>
-        <q-td key="actions" :props="tableProps">
-          <!-- <q-btn
+        <template v-slot:body="tableProps">
+          <q-tr :props="tableProps">
+            <q-td key="name" :props="tableProps">
+              {{ tableProps.row.name }}
+            </q-td>
+            <q-td key="size" :props="tableProps">
+              {{ tableProps.row.size }}
+            </q-td>
+            <q-td key="actions" :props="tableProps">
+              <!-- <q-btn
             dense
             flat
             icon="ion-play"
@@ -46,45 +69,47 @@
           >
             <q-tooltip> Play {{ tableProps.row.name }} </q-tooltip>
           </q-btn> -->
-          <q-btn
-            dense
-            flat
-            icon="ion-play"
-            color="white"
-            @click="
-              transmitWAV(props.prefix + props.path + tableProps.row.name)
-            "
-          >
-            <q-tooltip> Transmit {{ tableProps.row.name }} </q-tooltip>
-          </q-btn>
-          <q-btn
-            dense
-            flat
-            icon="ion-cloud-download"
-            color="white"
-            @click="
-              downloadFile(props.prefix + props.path, tableProps.row.name)
-            "
-          >
-            <q-tooltip> Download {{ tableProps.row.name }} </q-tooltip>
-          </q-btn>
-          <q-btn
-            dense
-            flat
-            icon="ion-trash"
-            color="white"
-            @click="
-              loading = true;
-              deleteFile(props.prefix + props.path + tableProps.row.name);
-              debouncedFetchData();
-            "
-          >
-            <q-tooltip> Delete {{ tableProps.row.name }} </q-tooltip>
-          </q-btn>
-        </q-td>
-      </q-tr>
-    </template>
-  </q-table>
+              <q-btn
+                dense
+                flat
+                icon="ion-play"
+                color="white"
+                @click="
+                  transmitWAV(props.prefix + props.path + tableProps.row.name)
+                "
+              >
+                <q-tooltip> Transmit {{ tableProps.row.name }} </q-tooltip>
+              </q-btn>
+              <q-btn
+                dense
+                flat
+                icon="ion-cloud-download"
+                color="white"
+                @click="
+                  downloadFile(props.prefix + props.path, tableProps.row.name)
+                "
+              >
+                <q-tooltip> Download {{ tableProps.row.name }} </q-tooltip>
+              </q-btn>
+              <q-btn
+                dense
+                flat
+                icon="ion-trash"
+                color="white"
+                @click="
+                  loading = true;
+                  deleteFile(props.prefix + props.path + tableProps.row.name);
+                  debouncedFetchData();
+                "
+              >
+                <q-tooltip> Delete {{ tableProps.row.name }} </q-tooltip>
+              </q-btn>
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
