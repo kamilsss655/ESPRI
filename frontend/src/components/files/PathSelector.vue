@@ -23,7 +23,8 @@
       </q-select>
     </div>
     <div class="col-12 col-md-10">
-      <q-input v-model="storagePath.path" label="Path" 
+      <q-input v-model="storagePath.path" label="Filepath" v-if="props.filepath"/>
+      <q-input v-model="storagePath.path" label="Folder path" v-else
       :rules="[ (val) => endsWithSlash(val) || 'Please make sure the path ends with a slash']"/>
     </div>
   </div>
@@ -37,6 +38,12 @@ import { FilesystemBasePath, StoragePath } from "../../types/Filesystem";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const storagePath: StoragePath = defineModel();
+
+const props = defineProps({
+  filepath: {
+    type: Boolean
+  }
+});
 
 const storageOptions = ref([
   {

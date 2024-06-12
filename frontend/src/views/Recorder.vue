@@ -7,15 +7,10 @@
       <q-separator />
       <q-card-section>
         <q-form class="q-gutter-md" @submit="recorderStore.scheduleRecording">
-          <q-input
-            v-model="recorderStore.filepath"
-            label="Filepath"
-            hint="Define filepath for the file"
-            filled
-          />
+          <PathSelector v-model="storagePath" filepath />
 
           <q-field
-            filled
+            borderless
             label="Max duration in ms"
             :hint="'Define max duration of the recording in ms'"
             clearable
@@ -24,8 +19,8 @@
               <q-slider
                 v-model="recorderStore.max_duration_ms"
                 :min="1000"
-                :max="10000"
-                :step="500"
+                :max="30000"
+                :step="1000"
                 label
                 label-always
                 class="q-mt-lg"
@@ -47,7 +42,30 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref, watch } from "vue";
 import { useRecorderStore } from "../stores/recorder";
+import { FilesystemBasePath, StoragePath } from "../types/Filesystem";
+import PathSelector from "../components/files/PathSelector.vue";
 
 const recorderStore = useRecorderStore();
+const storagePath = ref<StoragePath>({
+  prefix: FilesystemBasePath.SdCard,
+  path: "/sample.wav"
+});
+
+// sync changes to store
+function updateRecorderStore() {
+  recorderStore.filepath = storagePath.value.prefix + storagePath.value.path;
+}
+
+onMounted(() => {
+  updateRecorderStore();
+});
+
+watch(
+  () => [storagePath.value.prefix, storagePath.value.path],
+  ([_prefix, _path]) => {
+    updateRecorderStore();
+  }
+);
 </script>
