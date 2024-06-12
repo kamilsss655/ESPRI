@@ -125,10 +125,6 @@ const columnsDirectories = [
   { name: "name", label: "Name", field: "name", sortable: true }
 ];
 
-const notImplemented = async () => {
-  alert("Not implemented.");
-};
-
 const fetchData = async () => {
   try {
     const response = await axiosInstance.get(props.prefix + props.path);
