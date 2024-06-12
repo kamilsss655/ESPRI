@@ -1,12 +1,12 @@
 <template>
   <q-uploader
     :factory="factoryFn"
-    label="Max file size (1.2MB)"
+    label="Max file size (50MB)"
     multiple
     send-raw
     accept=".wav"
-    max-file-size="1228800"
-    max-total-size="1228800"
+    max-file-size="52428800"
+    max-total-size="52428800"
     @rejected="onRejected"
     @failed="onFailed"
     @uploaded="onUploaded"
