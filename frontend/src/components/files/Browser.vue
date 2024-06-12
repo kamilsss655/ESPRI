@@ -20,6 +20,14 @@
     flat
     bordered
   >
+    <template v-slot:top>
+      <p class="text-h6">Files</p>
+      <q-space />
+      <q-btn round dense flat icon="ion-refresh" @click="debouncedFetchData()">
+        <q-tooltip>Refresh</q-tooltip>
+      </q-btn>
+    </template>
+
     <template v-slot:body="tableProps">
       <q-tr :props="tableProps">
         <q-td key="name" :props="tableProps">
@@ -177,6 +185,7 @@ const downloadFile = async (relativePath: string, filename: string) => {
 
 // Debounced version of the fetchData() function - can only be called once per 500ms
 const debouncedFetchData = debounce(async () => {
+  loading.value = true;
   fetchData();
 }, 500);
 
