@@ -15,12 +15,3 @@ export interface ApiResponse {
     response: string;
   };
 }
-
-// Convert JSON API response into ApiResponse
-export function GetApiResponseFromJson(jsonText: string): ApiResponse {
-  if (jsonText === "") {
-    return { data: { response: "" } };
-  } else {
-    return { data: { response: JSON.parse(jsonText).response } };
-  }
-}

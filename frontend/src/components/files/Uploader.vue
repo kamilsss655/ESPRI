@@ -1,6 +1,6 @@
 <template>
   <q-uploader
-    :factory=factoryFn
+    :factory="factoryFn"
     label="Max file size (1.2MB)"
     multiple
     send-raw
@@ -15,7 +15,8 @@
 
 <script setup lang="ts">
 import { Notify, QUploaderFactoryFn } from "quasar";
-import { ApiPaths, ApiResponse, GetApiResponseFromJson } from "../../types/Api";
+import { ApiPaths, ApiResponse } from "../../types/Api";
+import { getApiResponseFromJson } from "../../helpers/Api";
 
 const props = defineProps({
   prefix: {
@@ -28,8 +29,8 @@ const props = defineProps({
   }
 });
 
-function onUploaded(info: {files: readonly any[], xhr: XMLHttpRequest}) {
-  const response: ApiResponse = GetApiResponseFromJson(info.xhr.response);
+function onUploaded(info: { files: readonly any[]; xhr: XMLHttpRequest }) {
+  const response: ApiResponse = getApiResponseFromJson(info.xhr.response);
 
   Notify.create({
     type: "positive",
@@ -45,11 +46,11 @@ function onRejected(rejectedEntries: any) {
   });
 }
 
-function onFailed(info: {files: readonly any[], xhr: XMLHttpRequest}) {
+function onFailed(info: { files: readonly any[]; xhr: XMLHttpRequest }) {
   console.log(info.files);
   console.log(info.xhr);
 
-  const response: ApiResponse = GetApiResponseFromJson(info.xhr.response);
+  const response: ApiResponse = getApiResponseFromJson(info.xhr.response);
 
   Notify.create({
     type: "negative",

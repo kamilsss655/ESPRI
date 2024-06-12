@@ -81,7 +81,7 @@ import { Notify } from "quasar";
 import axios from "axios";
 import { debounce } from "lodash";
 import { Listing } from "../../types/Filesystem";
-import { transmitWAV } from "../../types/Transmit"
+import { transmitWAV } from "../../helpers/Transmit"
 
 const props = defineProps({
   prefix: {
