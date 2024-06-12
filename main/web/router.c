@@ -105,6 +105,13 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
         .user_ctx = server_data};
     httpd_register_uri_handler(server, &api_audio_record_uri);
 
+    httpd_uri_t api_audio_transmit_wav_uri = {
+        .uri = "/api/audio/transmit_wav",
+        .method = HTTP_PUT,
+        .handler = API_AUDIO_TransmitWAV,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &api_audio_transmit_wav_uri);
+
     // API Event
     httpd_uri_t api_event_create_uri = {
         .uri = "/api/event",

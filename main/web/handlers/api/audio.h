@@ -21,5 +21,6 @@
 #include <esp_http_server.h>
 
 esp_err_t API_AUDIO_Record(httpd_req_t *req);
+esp_err_t API_AUDIO_TransmitWAV(httpd_req_t *req);
 
 #endif

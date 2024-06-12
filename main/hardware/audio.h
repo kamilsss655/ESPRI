@@ -19,6 +19,8 @@
 
 #include <driver/i2s_pdm.h>
 
+#include "board.h"
+
 // --- Audio input ---
 
 // Define audio ADC data type representing single audio sample
@@ -81,6 +83,9 @@
 #define AUDIO_AFSK_TONE_MAX_FREQ 4000
 #define AUDIO_AFSK_MIN_BAUD 50
 #define AUDIO_AFSK_MAX_BAUD 2400
+
+// Define filepath of default included sample wav file
+#define AUDIO_DEFAULT_WAV_SAMPLE_FILEPATH FLASH_BASE_PATH "/sample.wav"
 
 // At the same time we can either listen to audio, or transmit audio.
 // We cannot do both at the same time. Event bits are used to syncronize shared I2S0 resource.

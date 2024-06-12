@@ -43,7 +43,9 @@
             flat
             icon="ion-call"
             color="white"
-            @click="notImplemented()"
+            @click="
+              transmitWAV(props.prefix + props.path + tableProps.row.name)
+            "
           >
             <q-tooltip> Transmit {{ tableProps.row.name }} </q-tooltip>
           </q-btn>
@@ -53,10 +55,7 @@
             icon="ion-cloud-download"
             color="white"
             @click="
-              downloadFile(
-                props.prefix + props.path,
-                tableProps.row.name
-              )
+              downloadFile(props.prefix + props.path, tableProps.row.name)
             "
           >
             <q-tooltip> Download {{ tableProps.row.name }} </q-tooltip>
@@ -82,6 +81,7 @@ import { Notify } from "quasar";
 import axios from "axios";
 import { debounce } from "lodash";
 import { Listing } from "../../types/Filesystem";
+import { transmitWAV } from "../../types/Transmit"
 
 const props = defineProps({
   prefix: {
@@ -95,7 +95,6 @@ const props = defineProps({
 });
 
 const axiosInstance = axios.create();
-axiosInstance.defaults.timeout = 600;
 
 const loading = ref(false);
 
@@ -127,15 +126,19 @@ const notImplemented = async () => {
 
 const fetchData = async () => {
   try {
-    const response = await axios.get(props.prefix+props.path);
+    const response = await axiosInstance.get(props.prefix + props.path);
     listing.value = response.data;
     Notify.create({
-      message: `Fetched listing for the ${props.prefix+props.path} directory.`,
+      message: `Fetched listing for the ${
+        props.prefix + props.path
+      } directory.`,
       color: "positive"
     });
   } catch (error) {
     Notify.create({
-      message: `Failed to fetch listing for the ${props.prefix+props.path} directory`,
+      message: `Failed to fetch listing for the ${
+        props.prefix + props.path
+      } directory`,
       color: "negative"
     });
     console.error(error);
@@ -149,10 +152,13 @@ const downloadFile = async (relativePath: string, filename: string) => {
     message: `Downloading file. Please wait.`,
     color: "positive"
   });
-  fetch(`${relativePath}/${filename}`)
-    .then((response) => response.blob())
-    .then((blob) => {
-      const url = window.URL.createObjectURL(new Blob([blob]));
+  axiosInstance({
+    url: `${relativePath}/${filename}`,
+    method: "GET",
+    responseType: "blob"
+  })
+    .then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", filename);
