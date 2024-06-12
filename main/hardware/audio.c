@@ -181,10 +181,6 @@ void AUDIO_Record(void *pvParameters)
     // Retrieve params
     AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;
 
-    // Convert relative filepath to absolute filepath
-    char filepath[84];
-    snprintf(filepath, sizeof(filepath), "%s/%s", SD_BASE_PATH, param->filepath);
-
     int16_t *buffersigned = NULL;
 
     FILE *fd = NULL;
@@ -193,10 +189,10 @@ void AUDIO_Record(void *pvParameters)
     ESP_LOGI(TAG, "Allocating space for the recording..");
 
     // If the file exists delete it
-    if (stat(filepath, &file_stat) == 0)
+    if (stat(param->filepath, &file_stat) == 0)
     {
         // Delete the file
-        unlink(filepath);
+        unlink(param->filepath);
     }
 
     // Garbage collect to get enough free space for the file
@@ -213,12 +209,12 @@ void AUDIO_Record(void *pvParameters)
 
     ESP_LOGI(TAG, "Preparing recording.");
 
-    ESP_LOGI(TAG, "Opening file: %s", filepath);
-    fd = fopen(filepath, "wb");
+    ESP_LOGI(TAG, "Opening file: %s", param->filepath);
+    fd = fopen(param->filepath, "wb");
 
     if (NULL == fd)
     {
-        ESP_LOGE(TAG, "Failed to read %s", filepath);
+        ESP_LOGE(TAG, "Failed to read %s", param->filepath);
         goto Done;
     }
 
@@ -309,7 +305,7 @@ void AUDIO_Record(void *pvParameters)
         }
     }
 
-    ESP_LOGI(TAG, "Written recording to %s", filepath);
+    ESP_LOGI(TAG, "Written recording to %s", param->filepath);
 
 Done:
     fclose(fd);
