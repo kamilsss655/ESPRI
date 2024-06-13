@@ -32,13 +32,15 @@
 
 #include "audio.h"
 #include "settings.h"
-#include "dsp/filter.h"
 #include "helper/misc.h"
 #include "helper/rtos.h"
 #include "hardware/led.h"
 #include "hardware/sd.h"
 #include "web/handlers/websocket.h"
 #include "helper/filesystem.h"
+#ifdef AUDIO_RECORDER_FILTER_ENABLED
+#include "dsp/filter.h"
+#endif
 
 static const char *TAG = "HW/AUDIO";
 
@@ -167,6 +169,7 @@ void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
 // Audio record task
 void AUDIO_Record(void *pvParameters)
 {
+#ifdef AUDIO_RECORDER_FILTER_ENABLED
     // Define filters
     FILTER_ButterworthFilter_t hp_filter;
     FILTER_ButterworthFilter_t lp_filter_1;
@@ -177,6 +180,7 @@ void AUDIO_Record(void *pvParameters)
     FILTER_Init(&lp_filter_1, AUDIO_INPUT_LPF_1_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.25);
     FILTER_Init(&lp_filter_2, AUDIO_INPUT_LPF_2_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.40);
     FILTER_Init(&lp_filter_3, AUDIO_INPUT_LPF_3_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.40);
+#endif
 
     // Retrieve params
     AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;
@@ -277,11 +281,12 @@ void AUDIO_Record(void *pvParameters)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify (the higher the squelch and thus audio input level, the lower the gain)
                 // For DTMF:
-                buffersigned[i] *= 15 - (10 * gSettings.audio.in.squelch / 100);
+                // buffersigned[i] *= 15 - (10 * gSettings.audio.in.squelch / 100);
                 // For FM radio:
-                // buffersigned[i] *= 45 - (40 * gSettings.audio.in.squelch / 100);
-                // TODO: Gain needs to be user adjustable
+                buffersigned[i] *= 45 - (40 * gSettings.audio.in.squelch / 100);
+                // TODO: Gain needs to be user adjustable or implement AGC
 
+#ifdef AUDIO_RECORDER_FILTER_ENABLED
                 // Filter through high-pass filter
                 buffersigned[i] = FILTER_Update(&hp_filter, buffersigned[i]);
                 // Filter through 1st order low-pass filter
@@ -292,6 +297,7 @@ void AUDIO_Record(void *pvParameters)
                 buffersigned[i] *= 2;
                 // Filter through 3rd order low-pass filter
                 buffersigned[i] = FILTER_Update(&lp_filter_3, buffersigned[i]);
+#endif
             }
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, buffersigned);

@@ -52,8 +52,8 @@ esp_err_t SD_Init(void)
     // Example: for fixed frequency of 10MHz, use host.max_freq_khz = 10000;
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
 
-    // Set frequency to 40Mhz (max), lower it if you run into issues
-    // host.max_freq_khz = 40000;
+    // Set frequency to 400kHz (lowest) as it seems to lower audio noise during recording
+    host.max_freq_khz = 400;
 
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();

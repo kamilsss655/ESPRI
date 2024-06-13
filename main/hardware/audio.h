@@ -37,6 +37,8 @@
 #define AUDIO_INPUT_SAMPLE_FREQ 32000
 // Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 2
+// Determine whether to digitally filter the audio input recorded
+// #define AUDIO_RECORDER_FILTER_ENABLED
 // Define 1st order lowpass filter cutoff frequency
 #define AUDIO_INPUT_LPF_1_FREQ 4600
 // Define 2nd order lowpass filter cutoff frequency
