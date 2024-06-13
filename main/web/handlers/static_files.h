@@ -25,8 +25,8 @@
 
 // Max size of an individual file
 // Make sure this is reflected in upload front-end
-#define MAX_FILE_SIZE   (1200*1024) // 1200 KB -> 1.2MB
-#define MAX_FILE_SIZE_STR "1.2MB"
+#define MAX_FILE_SIZE   (50000*1024) // 50000 KB -> 50MB
+#define MAX_FILE_SIZE_STR "50MB"
 
 // Determine whether system should prevent overwriting files during file upload
 // #define UPLOAD_PREVENT_FILE_OVERWRITE
