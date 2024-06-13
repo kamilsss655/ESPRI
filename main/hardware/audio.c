@@ -201,7 +201,7 @@ void AUDIO_Record(void *pvParameters)
     {
         ESP_LOGI(TAG, "Performing garbage collection..");
         // Garbage collect to get enough free space for the file
-        esp_err_t ret = esp_spiffs_gc(NULL, (param->max_duration_ms * (AUDIO_INPUT_SAMPLE_FREQ / 1000) * sizeof(AUDIO_ADC_DATA_TYPE)));
+        esp_err_t ret = esp_spiffs_gc(NULL, (param->duration_sec * AUDIO_INPUT_SAMPLE_FREQ * sizeof(AUDIO_ADC_DATA_TYPE)));
         // esp_err_t ret = esp_spiffs_gc(NULL, ((param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ * sizeof(AUDIO_ADC_DATA_TYPE)));
         if (ret != ESP_OK)
         {
@@ -241,7 +241,7 @@ void AUDIO_Record(void *pvParameters)
     }
 
     // Determines how many samples we want to save
-    const size_t target_samples_written = (param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ;
+    const size_t target_samples_written = param->duration_sec * AUDIO_INPUT_SAMPLE_FREQ;
     size_t bytes_received = 0;
     size_t samples_written = 0;
 
@@ -282,9 +282,9 @@ void AUDIO_Record(void *pvParameters)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify (the higher the squelch and thus audio input level, the lower the gain)
                 // For DTMF:
-                // buffersigned[i] *= 15 - (10 * gSettings.audio.in.squelch / 100);
+                buffersigned[i] *= 15 - (10 * gSettings.audio.in.squelch / 100);
                 // For FM radio:
-                buffersigned[i] *= 45 - (40 * gSettings.audio.in.squelch / 100);
+                // buffersigned[i] *= 45 - (40 * gSettings.audio.in.squelch / 100);
                 // TODO: Gain needs to be user adjustable or implement AGC
 
 #ifdef AUDIO_RECORDER_FILTER_ENABLED
