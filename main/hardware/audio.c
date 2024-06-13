@@ -310,6 +310,12 @@ void AUDIO_Record(void *pvParameters)
             ESP_LOGI(TAG, "ADC ring buffer empty");
             goto Done;
         }
+
+        // If squelch closed then abort recording early
+        if(gAudioState != AUDIO_RECEIVING)
+        {
+            break;
+        }
     }
 
     ESP_LOGI(TAG, "Written recording to %s", param->filepath);
