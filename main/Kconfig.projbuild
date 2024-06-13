@@ -49,7 +49,7 @@ menu "Project configuration"
     config AUDIO_OUT_VOLUME
         int "Audio OUT volume"
         range 0 100
-        default 7
+        default 4
         help
             Audio OUT volume.
 
@@ -125,7 +125,7 @@ menu "Project configuration"
     config AUDIO_IN_SQUELCH
         int "Squelch value for audio input"
         range 0 100
-        default 3
+        default 5
         help
             Squelch value for audio input
 
