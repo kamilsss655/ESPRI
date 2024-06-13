@@ -127,8 +127,8 @@ typedef struct
 
 typedef struct
 {
-    char        filepath[64];    // filepath under which the file will be saved i.e 'sample.wav' or 'recordings/1.wav'
-    uint16_t    max_duration_ms; // maximum duration of the recording in ms
+    char        filepath[64]; // filepath under which the file will be saved i.e 'sample.wav' or 'recordings/1.wav'
+    uint16_t    duration_sec; // desired recording length in seconds
 } AUDIO_RecordParam_t;
 
 extern AudioState_t gAudioState;

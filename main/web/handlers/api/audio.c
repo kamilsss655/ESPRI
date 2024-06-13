@@ -33,7 +33,7 @@ static const char *audioTransmitWAVTaskName = "TRANSMIT_Wav";
 // Default values
 AUDIO_RecordParam_t record_param = {
     .filepath = AUDIO_DEFAULT_WAV_SAMPLE_FILEPATH,
-    .max_duration_ms = 2000};
+    .duration_sec = 10};
 
 TRANSMIT_WavParam_t transmit_wav_param = {
     .filepath = AUDIO_DEFAULT_WAV_SAMPLE_FILEPATH};
@@ -41,7 +41,7 @@ TRANSMIT_WavParam_t transmit_wav_param = {
 // List of audio record attributes
 ApiAttr_t record_attributes[] = {
     {"filepath", &record_param.filepath, 0},
-    {"max_duration_ms", &record_param.max_duration_ms, 1}};
+    {"duration_sec", &record_param.duration_sec, 1}};
 
 // List of audio transmit WAV attributes
 ApiAttr_t transmit_wav_attributes[] = {

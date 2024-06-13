@@ -11,16 +11,16 @@
 
           <q-field
             borderless
-            label="Max duration in ms"
-            :hint="'Define max duration of the recording in ms'"
+            label="Duration in seconds"
+            :hint="'Define record length in seconds'"
             clearable
           >
             <template v-slot:control>
               <q-slider
-                v-model="recorderStore.max_duration_ms"
-                :min="1000"
-                :max="30000"
-                :step="1000"
+                v-model="recorderStore.duration_sec"
+                :min="10"
+                :max="32767"
+                :step="10"
                 label
                 label-always
                 class="q-mt-lg"
@@ -36,6 +36,11 @@
             />
           </div>
         </q-form>
+      </q-card-section>
+      <q-card-section>
+        <q-banner inline-actions rounded class="bg-info text-white">
+          When activated, the audio recorder will be on standby and will only record when the squelch is open. Please note that the audio record task will not persist device reboot or deep-sleep.
+        </q-banner>
       </q-card-section>
     </q-card>
   </div>

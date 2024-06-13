@@ -11,7 +11,7 @@ export const useRecorderStore = defineStore({
   id: "recorder",
   state: (): Recorder => ({
     filepath: "sample.wav",
-    max_duration_ms: 4000
+    duration_sec: 10
   }),
   actions: {
     async scheduleRecording() {
