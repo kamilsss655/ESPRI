@@ -13,7 +13,7 @@ mp3towav() {
         }
         [[ -f "$i" ]] && { 
             echo -n "Resampling ${out}...";
-            sox "${out}" -r 32000 "out/${out}"  &>/dev/null && echo "done." || echo "failed.";
+            sox "${out}" -r 32k -e signed -b 16 -c 1 "out/${out}"  &>/dev/null && echo "done." || echo "failed.";
         }
     done
 }
