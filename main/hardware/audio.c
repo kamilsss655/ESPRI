@@ -225,25 +225,6 @@ void AUDIO_Record(void *pvParameters)
 
     ESP_LOGI(TAG, "File opened");
 
-    ESP_LOGI(TAG, "Waiting for squelch to open");
-
-    // Wait until squelch opens
-    while (gAudioState != AUDIO_RECEIVING)
-    {
-        vTaskDelay(1);
-    }
-
-    // If ADC ring buffer is being used by some other task wait indefinitely
-    while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
-    {
-        ESP_LOGW(TAG, "Record waiting for ADC ring buffer to be released..");
-    }
-
-    // ADC sample
-    const size_t samples_count = (param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ;
-    size_t bytes_received = 0;
-    size_t samples_written = 0;
-
     // write wav header
     wav_header_t wav_header = {
         .Subchunk1ID = "fmt",
@@ -253,19 +234,39 @@ void AUDIO_Record(void *pvParameters)
         .BitsPerSample = 16};
 
     int len = fwrite(&wav_header, 1, sizeof(wav_header_t), fd);
+
     if (len <= 0)
     {
         ESP_LOGE(TAG, "Read wav header failed");
-        goto Done;
     }
 
-    for (u_int i = 0; i < samples_count; i += samples_written)
+    // Determines how many samples we want to save
+    const size_t target_samples_written = (param->max_duration_ms / 1000) * AUDIO_INPUT_SAMPLE_FREQ;
+    size_t bytes_received = 0;
+    size_t samples_written = 0;
+
+    ESP_LOGI(TAG, "Waiting for squelch to open");
+
+    while (1)
     {
+        // Wait until squelch opens
+        while (gAudioState != AUDIO_RECEIVING)
+        {
+            vTaskDelay(1);
+        }
+
+        // If ADC ring buffer is being used by some other task wait indefinitely
+        while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+        {
+            ESP_LOGW(TAG, "Record waiting for ADC ring buffer to be released..");
+        }
+
         // Wait until the buffer has enough data, to avoid writing to filesystem in small chunks
         while (xRingbufferGetCurFreeSize(adcRingBufferHandle) >= AUDIO_INPUT_CHUNK_SIZE)
         {
             vTaskDelay(1 / portTICK_PERIOD_MS);
         }
+
         // Get ADC data from the ADC ring buffer
         buffersigned = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), AUDIO_INPUT_CHUNK_SIZE * sizeof(AUDIO_ADC_DATA_TYPE));
 
@@ -301,8 +302,16 @@ void AUDIO_Record(void *pvParameters)
             }
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, buffersigned);
-            // write to file
-            samples_written = fwrite(buffersigned, 1, bytes_received, fd) / sizeof(AUDIO_ADC_DATA_TYPE);
+            // Write to file
+            samples_written += fwrite(buffersigned, 1, bytes_received, fd) / sizeof(AUDIO_ADC_DATA_TYPE);
+            // Give semaphore so other tasks can access ADC ring buffer
+            xSemaphoreGive(receiveSemaphore);
+
+            // Check if we've written enough samples
+            if (samples_written >= target_samples_written)
+            {
+                goto Done;
+            }
         }
         else
         {
@@ -310,21 +319,13 @@ void AUDIO_Record(void *pvParameters)
             ESP_LOGI(TAG, "ADC ring buffer empty");
             goto Done;
         }
-
-        // If squelch closed then abort recording early
-        if(gAudioState != AUDIO_RECEIVING)
-        {
-            break;
-        }
     }
-
-    ESP_LOGI(TAG, "Written recording to %s", param->filepath);
 
 Done:
     fclose(fd);
 
-    // Give semaphore so other tasks can access ADC ring buffer
-    xSemaphoreGive(receiveSemaphore);
+    ESP_LOGI(TAG, "Written recording to %s", param->filepath);
+
     // Delete self
     vTaskDelete(NULL);
 }
