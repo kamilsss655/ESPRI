@@ -38,6 +38,7 @@
 #include "hardware/sd.h"
 #include "web/handlers/websocket.h"
 #include "helper/filesystem.h"
+#include <dsp/agc.h>
 #ifdef AUDIO_RECORDER_FILTER_ENABLED
 #include "dsp/filter.h"
 #endif
@@ -65,6 +66,8 @@ SemaphoreHandle_t gAudioStateSemaphore;
 SemaphoreHandle_t transmitSemaphore;
 // Guards audio input shared resource
 SemaphoreHandle_t receiveSemaphore;
+// Auto Gain Control handle
+AGC_t agc;
 
 // Apply settings like sample rate, volume, etc
 static void pwm_audio_apply_settings(void)
@@ -280,13 +283,8 @@ void AUDIO_Record(void *pvParameters)
             {
                 // Remove DC bias (center signal)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
-                // Amplify (the higher the squelch and thus audio input level, the lower the gain)
-                // For DTMF:
-                buffersigned[i] *= 15 - (10 * gSettings.audio.in.squelch / 100);
-                // For FM radio:
-                // buffersigned[i] *= 45 - (40 * gSettings.audio.in.squelch / 100);
-                // TODO: Gain needs to be user adjustable or implement AGC
-
+                // Amplify signal using AGC (clipping prevention built-in)
+                buffersigned[i] = AGC_Update(&agc, buffersigned[i]);
 #ifdef AUDIO_RECORDER_FILTER_ENABLED
                 // Filter through high-pass filter
                 buffersigned[i] = FILTER_Update(&hp_filter, buffersigned[i]);
@@ -959,4 +957,6 @@ void AUDIO_Init(void)
     }
 
     initialize_pwm_audio();
+    // Init AGC
+    AGC_Init(&agc, AUDIO_INPUT_AGC_INITIAL_GAIN);
 }

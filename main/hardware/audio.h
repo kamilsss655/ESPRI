@@ -39,6 +39,7 @@
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 2
 // Determine whether to digitally filter the audio input recorded
 // #define AUDIO_RECORDER_FILTER_ENABLED
+#ifdef AUDIO_RECORDER_FILTER_ENABLED
 // Define 1st order lowpass filter cutoff frequency
 #define AUDIO_INPUT_LPF_1_FREQ 4600
 // Define 2nd order lowpass filter cutoff frequency
@@ -47,6 +48,9 @@
 #define AUDIO_INPUT_LPF_3_FREQ 2000
 // Define highpass filter cutoff frequency
 #define AUDIO_INPUT_HPF_FREQ 300
+#endif
+// Define initial gain used for incoming audio
+#define AUDIO_INPUT_AGC_INITIAL_GAIN 10
 // Due to this bug: https://github.com/espressif/esp-idf/issues/10586
 // continous ADC driver samples at 80% of the advertised frequency
 // this value increases the sample frequency by 25% to counter that issue
