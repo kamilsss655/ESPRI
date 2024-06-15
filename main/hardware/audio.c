@@ -228,13 +228,26 @@ void AUDIO_Record(void *pvParameters)
 
     ESP_LOGI(TAG, "File opened");
 
+    // Determines how many samples we want to save
+    const size_t target_samples_written = param->duration_sec * AUDIO_INPUT_SAMPLE_FREQ;
+    size_t bytes_received = 0;
+    size_t samples_written = 0;
+
     // write wav header
     wav_header_t wav_header = {
-        .Subchunk1ID = "fmt",
-        .Subchunk2ID = "data",
-        .SampleRate = AUDIO_INPUT_SAMPLE_FREQ,
+        .ChunkID = "RIFF",
+        .ChunkSize = (2 * target_samples_written) - 8,
+        .Format = "WAVE",
+        .Subchunk1ID = "fmt ",
+        .Subchunk1Size = 16,
+        .AudioFormat = 1,
         .NumChannels = 1,
-        .BitsPerSample = 16};
+        .SampleRate = AUDIO_INPUT_SAMPLE_FREQ,
+        .ByteRate = 64000,
+        .BlockAlign = 2,
+        .BitsPerSample = 16,
+        .Subchunk2ID = "data",
+        .Subchunk2Size = target_samples_written * 2};
 
     int len = fwrite(&wav_header, 1, sizeof(wav_header_t), fd);
 
@@ -242,11 +255,6 @@ void AUDIO_Record(void *pvParameters)
     {
         ESP_LOGE(TAG, "Read wav header failed");
     }
-
-    // Determines how many samples we want to save
-    const size_t target_samples_written = param->duration_sec * AUDIO_INPUT_SAMPLE_FREQ;
-    size_t bytes_received = 0;
-    size_t samples_written = 0;
 
     ESP_LOGI(TAG, "Waiting for squelch to open");
 
