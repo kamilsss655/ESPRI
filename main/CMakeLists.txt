@@ -9,6 +9,7 @@ set(srcs
     "app/transmit.c"
     "app/uvk5.c"
     "dsp/filter.c"
+    "dsp/agc.c"
     "external/printf/printf.c"
     "hardware/button.c"
     "hardware/led.c"

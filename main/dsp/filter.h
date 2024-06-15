@@ -14,6 +14,9 @@
  *     limitations under the License.
  */
 
+#ifndef DSP_FILTER_H
+#define DSP_FILTER_H
+
 typedef enum {
     FILTER_LOWPASS,
     FILTER_HIGHPASS
@@ -23,7 +26,9 @@ typedef struct {
     float c, a1, a2, a3, b1, b2;
     float inputHistory[2];
     float outputHistory[2];
-} FILTER_ButterworthFilter_t;
+} FILTER_BiquadFilter_t;
 
-void FILTER_Init(FILTER_ButterworthFilter_t *filter, float frequency, int sampleRate, FILTER_PassType_t passType, float resonance);
-float FILTER_Update(FILTER_ButterworthFilter_t *filter, float newInput);
+void FILTER_Init(FILTER_BiquadFilter_t *filter, float frequency, int sampleRate, FILTER_PassType_t passType, float resonance);
+float FILTER_Update(FILTER_BiquadFilter_t *filter, float newInput);
+
+#endif
