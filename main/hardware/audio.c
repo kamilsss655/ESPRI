@@ -171,10 +171,10 @@ void AUDIO_Record(void *pvParameters)
 {
 #ifdef AUDIO_RECORDER_FILTER_ENABLED
     // Define filters
-    FILTER_ButterworthFilter_t hp_filter;
-    FILTER_ButterworthFilter_t lp_filter_1;
-    FILTER_ButterworthFilter_t lp_filter_2;
-    FILTER_ButterworthFilter_t lp_filter_3;
+    FILTER_BiquadFilter_t hp_filter;
+    FILTER_BiquadFilter_t lp_filter_1;
+    FILTER_BiquadFilter_t lp_filter_2;
+    FILTER_BiquadFilter_t lp_filter_3;
     // Init filters
     FILTER_Init(&hp_filter, AUDIO_INPUT_HPF_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 0.6);
     FILTER_Init(&lp_filter_1, AUDIO_INPUT_LPF_1_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.25);

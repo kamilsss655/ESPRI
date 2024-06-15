@@ -19,13 +19,13 @@
 #include "filter.h"
 #include "helper/misc.h"
 
-/// @brief Calculate and set parameters for the Butterworth filter
+/// @brief Calculate and set parameters for the IIR Biquad filter
 /// @param filter pointer to filter
 /// @param frequency filter cutoff frequency in Hz
 /// @param sampleRate sample rate in Hz
 /// @param passType type of filter
 /// @param resonance resonance of the filter
-void FILTER_Init(FILTER_ButterworthFilter_t *filter, float frequency, int sampleRate, FILTER_PassType_t passType, float resonance) {
+void FILTER_Init(FILTER_BiquadFilter_t *filter, float frequency, int sampleRate, FILTER_PassType_t passType, float resonance) {
     switch (passType) {
         case FILTER_LOWPASS:
             filter->c = 1.0f / (float)tan(CONST_PI * frequency / sampleRate);
@@ -50,7 +50,7 @@ void FILTER_Init(FILTER_ButterworthFilter_t *filter, float frequency, int sample
 /// @param filter  pointer to filter
 /// @param newInput data input to be filtered
 /// @return filtered data output
-float FILTER_Update(FILTER_ButterworthFilter_t *filter, float newInput) {
+float FILTER_Update(FILTER_BiquadFilter_t *filter, float newInput) {
     float newOutput = filter->a1 * newInput + filter->a2 * filter->inputHistory[0] + filter->a3 * filter->inputHistory[1] - filter->b1 * filter->outputHistory[0] - filter->b2 * filter->outputHistory[1];
     filter->inputHistory[1] = filter->inputHistory[0];
     filter->inputHistory[0] = newInput;
