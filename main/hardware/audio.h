@@ -50,7 +50,7 @@
 #define AUDIO_INPUT_HPF_FREQ 300
 #endif
 // Define initial gain used for incoming audio
-#define AUDIO_INPUT_AGC_INITIAL_GAIN 10
+#define AUDIO_INPUT_AGC_INITIAL_GAIN 40
 // Due to this bug: https://github.com/espressif/esp-idf/issues/10586
 // continous ADC driver samples at 80% of the advertised frequency
 // this value increases the sample frequency by 25% to counter that issue

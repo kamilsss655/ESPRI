@@ -39,9 +39,9 @@
 #include "web/handlers/websocket.h"
 #include "helper/filesystem.h"
 #include <dsp/agc.h>
-#ifdef AUDIO_RECORDER_FILTER_ENABLED
+// #ifdef AUDIO_RECORDER_FILTER_ENABLED
 #include "dsp/filter.h"
-#endif
+// #endif
 
 static const char *TAG = "HW/AUDIO";
 
@@ -185,6 +185,22 @@ void AUDIO_Record(void *pvParameters)
     FILTER_Init(&lp_filter_3, AUDIO_INPUT_LPF_3_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.40);
 #endif
 
+    FILTER_BiquadFilter_t hp_1200;
+    FILTER_BiquadFilter_t lp_1200;
+    FILTER_BiquadFilter_t lp_1000;
+    FILTER_BiquadFilter_t lp_2000;
+    FILTER_BiquadFilter_t hp_2200;
+    FILTER_BiquadFilter_t lp_2200;
+
+    FILTER_Init(&hp_1200, 1200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
+    FILTER_Init(&lp_1200, 1200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&hp_2200, 2200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
+    FILTER_Init(&lp_2200, 2200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&lp_1000, 1000, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+    FILTER_Init(&lp_2000, 2000, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
     // Retrieve params
     AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;
 
@@ -227,6 +243,9 @@ void AUDIO_Record(void *pvParameters)
     }
 
     ESP_LOGI(TAG, "File opened");
+
+    int16_t mark_bit;
+    int16_t space_bit;
 
     // Determines how many samples we want to save
     const size_t target_samples_written = param->duration_sec * AUDIO_INPUT_SAMPLE_FREQ;
@@ -293,6 +312,26 @@ void AUDIO_Record(void *pvParameters)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify signal using AGC (clipping prevention built-in)
                 buffersigned[i] = AGC_Update(&agc, buffersigned[i]);
+
+                // Filter through high-pass filter
+                mark_bit = FILTER_Update(&hp_1200, buffersigned[i]);
+                // Filter through low-pass filter
+                mark_bit = FILTER_Update(&lp_1200, mark_bit);
+                // Mark envelope detection, first get absolute value
+                mark_bit = abs(mark_bit);
+                // Then filter through low-pass filter
+                mark_bit = FILTER_Update(&lp_1000, mark_bit);
+
+                // Filter through high-pass filter
+                space_bit = FILTER_Update(&hp_2200, buffersigned[i]);
+                // Filter through low-pass filter
+                space_bit = FILTER_Update(&lp_2200, space_bit);
+                // Space envelope detection, first get absolute value
+                space_bit = abs(space_bit);
+                // Then filter through low-pass filter
+                space_bit = FILTER_Update(&lp_2000, space_bit);
+                // Substract mark from bit as part of decision tree
+                buffersigned[i] = mark_bit - space_bit;
 #ifdef AUDIO_RECORDER_FILTER_ENABLED
                 // Filter through high-pass filter
                 buffersigned[i] = FILTER_Update(&hp_filter, buffersigned[i]);
