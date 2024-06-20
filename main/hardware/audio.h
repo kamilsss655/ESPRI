@@ -50,7 +50,16 @@
 #define AUDIO_INPUT_HPF_FREQ 300
 #endif
 // Define initial gain used for incoming audio
-#define AUDIO_INPUT_AGC_INITIAL_GAIN 40
+#define AUDIO_INPUT_AGC_INITIAL_GAIN 45
+
+#define AUDIO_AFSK_BAUD 300
+
+
+#define AUDIO_AFSK_SAMPLESPERBIT (AUDIO_INPUT_SAMPLE_FREQ / AUDIO_AFSK_BAUD)
+
+#define AUDIO_AFSK_SAMPLES_THRESHOLD (AUDIO_AFSK_SAMPLESPERBIT / 2)
+
+#define AUDIO_AFSK_SAMPLES_STEP (AUDIO_AFSK_SAMPLESPERBIT / 10)
 // Due to this bug: https://github.com/espressif/esp-idf/issues/10586
 // continous ADC driver samples at 80% of the advertised frequency
 // this value increases the sample frequency by 25% to counter that issue
@@ -146,6 +155,7 @@ void AUDIO_Init(void);
 void AUDIO_AdcStop(void);
 esp_err_t AUDIO_PlayWav(const char *filepath);
 void AUDIO_AdcCalibrate(void *pvParameters);
+void AUDIO_DemodulateAFSK(void *pvParameters);
 void AUDIO_EmptyAdcRingBuffer(void *pvParameters);
 void AUDIO_SquelchControl(void *pvParameters);
 void AUDIO_Watchdog(void *pvParameters);
