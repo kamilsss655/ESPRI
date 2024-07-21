@@ -27,6 +27,7 @@ export interface Settings {
   "beacon.mode": BeaconMode;
   "beacon.text": string;
   "beacon.delay_seconds": number;
+  "beacon.morse_code.text": string;
   "beacon.morse_code.baud": number;
   "beacon.morse_code.tone_freq": number;
   "beacon.afsk.baud": number;

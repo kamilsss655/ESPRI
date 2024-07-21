@@ -137,7 +137,7 @@ menu "Project configuration"
 
     config BEACON_TEXT
         string "Beacon text"
-        default "--- -.- - . ... - - . ... -"
+        default "Default text"
         help
             Beacon text.
 

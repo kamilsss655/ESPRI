@@ -41,6 +41,15 @@
         />
 
         <q-input
+          v-model = "settingsStore['beacon.morse_code.text']"
+          readonly
+          label="Morse code"
+          disable
+          v-if="beaconMode != BeaconMode.OFF && beaconMode != BeaconMode.WAV"
+          filled
+        />
+
+        <q-input
           v-model="settingsStore['beacon.wav.filepath']"
           label="Filepath"
           hint="Define path to .wav file"
@@ -192,10 +201,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { BeaconMode } from "../types/Settings";
 import { FilesystemBasePath } from "../types/Filesystem";
+//import { String } from "lodash";
+
+
 
 const settingsStore = useSettingsStore();
 
@@ -209,6 +221,34 @@ const beaconMode = computed(() => {
 
 function submitForm() {
   settingsStore.updateSettings();
+}
+
+function string2morse(str: string) {
+
+  interface StringIndexedObject {
+    [key: string]: string;
+  }
+  
+  const alphabet: StringIndexedObject = {
+    'a': '.-',    'b': '-...',  'c': '-.-.', 'd': '-..',
+    'e': '.',     'f': '..-.',  'g': '--.',  'h': '....',
+    'i': '..',    'j': '.---',  'k': '-.-',  'l': '.-..',
+    'm': '--',    'n': '-.',    'o': '---',  'p': '.--.',
+    'q': '--.-',  'r': '.-.',   's': '...',  't': '-',
+    'u': '..-',   'v': '...-',  'w': '.--',  'x': '-..-',
+    'y': '-.--',  'z': '--..',  ' ': '   ',
+    '1': '.----', '2': '..---', '3': '...--', '4': '....-', 
+    '5': '.....', '6': '-....', '7': '--...', '8': '---..', 
+    '9': '----.', '0': '-----'
+}
+
+  return str
+    .split('')            // Transform the string into an array: ['T', 'h', 'i', 's'...
+    .map(function(e){     // Replace each character with a morse "letter"
+        return alphabet[e] || ''; // Lowercase only, ignore unknown characters.
+    })
+    .join(' ')            // Convert the array back to a string.
+    //.replace(/ +/g, ' '); // Replace double spaces that may occur when unknow characters were in the source string.
 }
 
 const beaconModeOptions = ref([
@@ -237,4 +277,12 @@ const beaconModeOptions = ref([
     icon: "ion-musical-notes"
   }
 ]);
+
+watch(
+  () => [settingsStore["beacon.text"]],
+  (text) => {
+    settingsStore["beacon.morse_code.text"] = string2morse(text[0])
+  }
+
+)
 </script>
