@@ -11,22 +11,24 @@
 
           <q-field
             borderless
-            label="Duration in seconds"
-            :hint="'Define record length in seconds'"
             clearable
           >
             <template v-slot:control>
-              <q-slider
-                v-model="recorderStore.duration_sec"
-                :min="10"
-                :max="32767"
-                :step="10"
-                label
-                label-always
-                class="q-mt-lg"
-              />
+                <q-input
+                  v-model.number="recorderStore.duration_sec"
+                  inputmode="numeric"
+                  mask="#####"
+                  step=10
+                  type="number"
+                  filled
+                  style="max-width: 200px"
+                  label = "Duration in seconds"
+                  class="q-mt-lg"
+                  :rules="[ val => val <= 32767 || 'Maximum size is 32767 seconds']">
+                </q-input>
             </template>
           </q-field>
+
           <div class="text-right q-pa-md">
             <q-btn
               icon="ion-play"
@@ -51,11 +53,15 @@ import { onMounted, ref, watch } from "vue";
 import { useRecorderStore } from "../stores/recorder";
 import { FilesystemBasePath, StoragePath } from "../types/Filesystem";
 import PathSelector from "../components/files/PathSelector.vue";
+import { date } from 'quasar'
+
+const timeStamp = Date.now()
+const formattedTimeStamp = date.formatDate(timeStamp, 'YYYYMMDD_HHmmss')
 
 const recorderStore = useRecorderStore();
 const storagePath = ref<StoragePath>({
   prefix: FilesystemBasePath.SdCard,
-  path: "/sample.wav"
+  path: "/sample_" + formattedTimeStamp + ".wav"
 });
 
 // sync changes to store
