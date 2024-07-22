@@ -123,6 +123,7 @@ esp_err_t SETTINGS_FactoryReset(bool reboot)
     gSettings.beacon.delay_seconds = CONFIG_BEACON_DELAY_SECONDS;
     strcpy(gSettings.beacon.text, CONFIG_BEACON_TEXT);
     // Morse code beacon
+    strcpy(gSettings.beacon.morse_code.text, CONFIG_MORSE_CODE_BEACON_TEXT);
     gSettings.beacon.morse_code.tone_freq = CONFIG_MORSE_CODE_BEACON_TONE_FREQ;
     gSettings.beacon.morse_code.baud = CONFIG_MORSE_CODE_BEACON_BAUD;
     // AFSK beacon

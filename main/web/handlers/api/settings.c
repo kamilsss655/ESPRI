@@ -43,6 +43,7 @@ ApiAttr_t settings[] = {
     {"beacon.mode",                      &gSettings.beacon.mode,                      1},
     {"beacon.text",                      &gSettings.beacon.text,                      0},
     {"beacon.delay_seconds",             &gSettings.beacon.delay_seconds,             1},
+    {"beacon.morse_code.text",           &gSettings.beacon.morse_code.text,           0},
     {"beacon.morse_code.baud",           &gSettings.beacon.morse_code.baud,           1},
     {"beacon.morse_code.tone_freq",      &gSettings.beacon.morse_code.tone_freq,      1},
     {"beacon.afsk.baud",                 &gSettings.beacon.afsk.baud,                 1},

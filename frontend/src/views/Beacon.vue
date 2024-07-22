@@ -40,14 +40,15 @@
           filled
         />
 
+        
         <q-input
-          v-model = "settingsStore['beacon.morse_code.text']"
-          readonly
+          v-model="settingsStore['beacon.morse_code.text']"
           label="Morse code"
           disable
           v-if="beaconMode != BeaconMode.OFF && beaconMode != BeaconMode.WAV"
           filled
         />
+        
 
         <q-input
           v-model="settingsStore['beacon.wav.filepath']"
@@ -205,7 +206,6 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { BeaconMode } from "../types/Settings";
 import { FilesystemBasePath } from "../types/Filesystem";
-//import { String } from "lodash";
 
 
 
@@ -213,6 +213,7 @@ const settingsStore = useSettingsStore();
 
 onMounted(() => {
   settingsStore.fetchSettings();
+  updateMorseString();
 });
 
 const beaconMode = computed(() => {
@@ -220,6 +221,7 @@ const beaconMode = computed(() => {
 });
 
 function submitForm() {
+  updateMorseString();
   settingsStore.updateSettings();
 }
 
@@ -239,13 +241,13 @@ function string2morse(str: string) {
     'y': '-.--',  'z': '--..',  ' ': '   ',
     '1': '.----', '2': '..---', '3': '...--', '4': '....-', 
     '5': '.....', '6': '-....', '7': '--...', '8': '---..', 
-    '9': '----.', '0': '-----'
+    '9': '----.', '0': '-----', '.': '.',     '-': '-',
 }
 
   return str
     .split('')            // Transform the string into an array: ['T', 'h', 'i', 's'...
     .map(function(e){     // Replace each character with a morse "letter"
-        return alphabet[e] || ''; // Lowercase only, ignore unknown characters.
+        return alphabet[e.toLowerCase()] || ''; // Lowercase only, ignore unknown characters.
     })
     .join(' ')            // Convert the array back to a string.
     //.replace(/ +/g, ' '); // Replace double spaces that may occur when unknow characters were in the source string.
@@ -278,11 +280,22 @@ const beaconModeOptions = ref([
   }
 ]);
 
+function updateMorseString(){
+  settingsStore["beacon.morse_code.text"] = string2morse(settingsStore["beacon.text"]);
+}
+
+
 watch(
-  () => [settingsStore["beacon.text"]],
-  (text) => {
-    settingsStore["beacon.morse_code.text"] = string2morse(text[0])
+  () => [settingsStore["beacon.morse_code.text"], settingsStore["beacon.text"]],
+    ([_code, _text]) => {
+      updateMorseString();
   }
+
+
+/*() => [settingsStore["beacon.morse_code.text"], settingsStore["beacon.text"]],
+  ([code,text]) => {
+    code = string2morse(text)
+  }*/
 
 )
 </script>
