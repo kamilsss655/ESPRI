@@ -72,7 +72,7 @@
               <q-btn
                 dense
                 flat
-                icon="ion-play"
+                icon="ion-flag"
                 color="white"
                 @click="
                   transmitWAV(props.prefix + props.path + tableProps.row.name)
