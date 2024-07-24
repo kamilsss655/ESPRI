@@ -12,21 +12,35 @@
           <q-field
             borderless
             clearable
-          >
+            label="Duration in seconds"
+            >
             <template v-slot:control>
-                <q-input
+            
+              <q-input dark 
                   v-model.number="recorderStore.duration_sec"
                   inputmode="numeric"
+                  input-style="text-align: right"           
                   mask="#####"
                   step=10
                   type="number"
-                  filled
-                  style="max-width: 200px"
-                  label = "Duration in seconds"
-                  class="q-mt-lg"
+                  style="max-width: 75px"
+                  suffix="sec"
                   :rules="[ val => val <= 32767 || 'Maximum size is 32767 seconds']">
                 </q-input>
+
+                <q-slider
+                  v-model="recorderStore.duration_sec"
+                  :min="10"
+                  :max="600"
+                  :step="10"
+                  snap
+                  label
+                  color="blue"
+                  :hint="'Define record length in seconds'"  
+              ></q-slider>
             </template>
+
+
           </q-field>
 
           <div class="text-right q-pa-md">
