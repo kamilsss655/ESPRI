@@ -23,7 +23,7 @@
                   mask="#####"
                   step=10
                   type="number"
-                  style="max-width: 75px"
+                  style="max-width: 100px"
                   suffix="sec"
                   :rules="[ val => val <= 32767 || 'Maximum size is 32767 seconds']">
                 </q-input>
