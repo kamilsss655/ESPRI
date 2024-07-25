@@ -22,6 +22,7 @@
 #include "settings.h"
 #include "transmit.h"
 #include "helper/rtos.h"
+#include "morse.h"
 
 static const char *TAG = "APP/BEACON";
 
@@ -53,8 +54,8 @@ void BEACON_Scheduler(void *pvParameters)
         case SETTINGS_BEACON_MODE_MORSE_CODE:
             // Schedule transmit task
             TRANSMIT_MorseCodeParam_t morse_code_param = {
-                .input = gSettings.beacon.morse_code.text,
-                .len = strlen(gSettings.beacon.morse_code.text)};
+                .input = string2morse(gSettings.beacon.text),
+                .len = strlen(string2morse(gSettings.beacon.text))};
 
             xTaskCreate(TRANSMIT_MorseCode, "TRANSMIT_MorseCode", 4096, &morse_code_param, RTOS_PRIORITY_HIGHEST, NULL);
             break;

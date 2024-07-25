@@ -5,6 +5,7 @@ set(srcs
     "settings.c"
     "system.c"
     "app/button.c"
+    "app/morse.c"
     "app/beacon.c"
     "app/transmit.c"
     "app/uvk5.c"
