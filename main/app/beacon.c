@@ -42,8 +42,8 @@ void BEACON_Scheduler(void *pvParameters)
         case SETTINGS_BEACON_MODE_AFSK:
             // Schedule transmit task
             TRANSMIT_AfskParam_t afsk_param = {
-                .input = gSettings.beacon.morse_code.text,
-                .len = strlen(gSettings.beacon.morse_code.text),
+                .input = gSettings.beacon.text,
+                .len = strlen(gSettings.beacon.text),
                 .baud = gSettings.beacon.afsk.baud,
                 .zero_freq = gSettings.beacon.afsk.zero_freq,
                 .one_freq = gSettings.beacon.afsk.one_freq};
