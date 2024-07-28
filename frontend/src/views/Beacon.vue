@@ -38,17 +38,17 @@
           hint="Define what message will be transmitted"
           v-if="beaconMode != BeaconMode.OFF && beaconMode != BeaconMode.WAV"
           filled
+          @input = "updateMorseString"
         />
 
         
         <q-input
-          v-model="settingsStore['beacon.morse_code.text']"
+          v-model="morse_code"
           label="Morse code"
           disable
-          v-if="beaconMode != BeaconMode.OFF && beaconMode != BeaconMode.WAV"
+          v-if="beaconMode == BeaconMode.MORSE_CODE"
           filled
         />
-        
 
         <q-input
           v-model="settingsStore['beacon.wav.filepath']"
@@ -202,14 +202,15 @@
 </template>
 
 <script setup lang="ts">
+
 import { computed, onMounted, ref, watch } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { BeaconMode } from "../types/Settings";
 import { FilesystemBasePath } from "../types/Filesystem";
 
 
-
 const settingsStore = useSettingsStore();
+const morse_code = ref<string>('');
 
 onMounted(() => {
   settingsStore.fetchSettings();
@@ -221,9 +222,9 @@ const beaconMode = computed(() => {
 });
 
 function submitForm() {
-  updateMorseString();
   settingsStore.updateSettings();
 }
+
 
 function string2morse(str: string) {
 
@@ -250,7 +251,6 @@ function string2morse(str: string) {
         return alphabet[e.toLowerCase()] || ''; // Lowercase only, ignore unknown characters.
     })
     .join(' ')            // Convert the array back to a string.
-    //.replace(/ +/g, ' '); // Replace double spaces that may occur when unknow characters were in the source string.
 }
 
 const beaconModeOptions = ref([
@@ -280,22 +280,16 @@ const beaconModeOptions = ref([
   }
 ]);
 
-function updateMorseString(){
-  settingsStore["beacon.morse_code.text"] = string2morse(settingsStore["beacon.text"]);
+const updateMorseString = () => {
+  morse_code.value = string2morse(settingsStore["beacon.text"]);
 }
 
-
 watch(
-  () => [settingsStore["beacon.morse_code.text"], settingsStore["beacon.text"]],
-    ([_code, _text]) => {
-      updateMorseString();
+  () => settingsStore["beacon.text"],
+  () => {
+    updateMorseString();
   }
+);
 
 
-/*() => [settingsStore["beacon.morse_code.text"], settingsStore["beacon.text"]],
-  ([code,text]) => {
-    code = string2morse(text)
-  }*/
-
-)
 </script>

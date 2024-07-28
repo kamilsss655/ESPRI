@@ -26,7 +26,6 @@ export const useSettingsStore = defineStore({
     "beacon.mode": BeaconMode.MORSE_CODE,
     "beacon.text": "Default text",
     "beacon.delay_seconds": 12,
-    "beacon.morse_code.text": "-.. . ..-. .- ..- .-.. - / - . -..- -",
     "beacon.morse_code.baud": 5,
     "beacon.morse_code.tone_freq": 800,
     "beacon.afsk.baud": 1200,
