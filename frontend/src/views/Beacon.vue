@@ -38,6 +38,16 @@
           hint="Define what message will be transmitted"
           v-if="beaconMode != BeaconMode.OFF && beaconMode != BeaconMode.WAV"
           filled
+          @input = "updateMorseString"
+        />
+
+        
+        <q-input
+          v-model="morse_code"
+          label="Morse code"
+          disable
+          v-if="beaconMode == BeaconMode.MORSE_CODE"
+          filled
         />
 
         <q-input
@@ -192,15 +202,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+
+import { computed, onMounted, ref, watch } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { BeaconMode } from "../types/Settings";
 import { FilesystemBasePath } from "../types/Filesystem";
 
+
 const settingsStore = useSettingsStore();
+const morse_code = ref<string>('');
 
 onMounted(() => {
   settingsStore.fetchSettings();
+  updateMorseString();
 });
 
 const beaconMode = computed(() => {
@@ -209,6 +223,34 @@ const beaconMode = computed(() => {
 
 function submitForm() {
   settingsStore.updateSettings();
+}
+
+
+function string2morse(str: string) {
+
+  interface StringIndexedObject {
+    [key: string]: string;
+  }
+  
+  const alphabet: StringIndexedObject = {
+    'a': '.-',    'b': '-...',  'c': '-.-.', 'd': '-..',
+    'e': '.',     'f': '..-.',  'g': '--.',  'h': '....',
+    'i': '..',    'j': '.---',  'k': '-.-',  'l': '.-..',
+    'm': '--',    'n': '-.',    'o': '---',  'p': '.--.',
+    'q': '--.-',  'r': '.-.',   's': '...',  't': '-',
+    'u': '..-',   'v': '...-',  'w': '.--',  'x': '-..-',
+    'y': '-.--',  'z': '--..',  ' ': '   ',
+    '1': '.----', '2': '..---', '3': '...--', '4': '....-', 
+    '5': '.....', '6': '-....', '7': '--...', '8': '---..', 
+    '9': '----.', '0': '-----', '.': '.',     '-': '-',
+}
+
+  return str
+    .split('')            // Transform the string into an array: ['T', 'h', 'i', 's'...
+    .map(function(e){     // Replace each character with a morse "letter"
+        return alphabet[e.toLowerCase()] || ''; // Lowercase only, ignore unknown characters.
+    })
+    .join(' ')            // Convert the array back to a string.
 }
 
 const beaconModeOptions = ref([
@@ -237,4 +279,17 @@ const beaconModeOptions = ref([
     icon: "ion-musical-notes"
   }
 ]);
+
+const updateMorseString = () => {
+  morse_code.value = string2morse(settingsStore["beacon.text"]);
+}
+
+watch(
+  () => settingsStore["beacon.text"],
+  () => {
+    updateMorseString();
+  }
+);
+
+
 </script>

@@ -101,6 +101,7 @@ typedef struct
 {
     API_INTEGER_TYPE baud;
     API_INTEGER_TYPE tone_freq;
+    char             text[64];
 } SETTINGS_MorseCodeBeaconConfig_t;
 
 // AFSK beacon settings

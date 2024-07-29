@@ -242,7 +242,7 @@ function submitForm() {
     cancel: true,
     persistent: true
   }).onOk(() => {
-    settingsStore.updateSettings(true);
+    settingsStore.updateSettings();
   });
 }
 

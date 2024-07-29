@@ -22,6 +22,7 @@
 
 #include "settings.h"
 #include "system.h"
+#include "app/morse.h"
 
 static const char *TAG = "SETTINGS";
 

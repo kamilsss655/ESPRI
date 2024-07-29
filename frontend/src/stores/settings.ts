@@ -24,7 +24,7 @@ export const useSettingsStore = defineStore({
     "audio.in.squelch": 3,
     "led.max_brightness": 5,
     "beacon.mode": BeaconMode.MORSE_CODE,
-    "beacon.text": "-..--.",
+    "beacon.text": "Default text",
     "beacon.delay_seconds": 12,
     "beacon.morse_code.baud": 5,
     "beacon.morse_code.tone_freq": 800,
