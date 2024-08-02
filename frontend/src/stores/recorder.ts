@@ -3,13 +3,12 @@ import { ApiPaths, ApiResponse } from "../types/Api";
 import { Notify } from "quasar";
 import axios from "axios";
 import { Recorder } from "../types/Recorder";
-import { date } from 'quasar'
+import { useFormattedTimeStamp } from '../helpers/Time'
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.timeout = 600;
 
-const timeStamp = Date.now()
-const formattedTimeStamp = date.formatDate(timeStamp, 'YYYYMMDD_HHmmss')
+const formattedTimeStamp = useFormattedTimeStamp();
 
 export const useRecorderStore = defineStore({
   id: "recorder",

@@ -67,10 +67,9 @@ import { onMounted, ref, watch } from "vue";
 import { useRecorderStore } from "../stores/recorder";
 import { FilesystemBasePath, StoragePath } from "../types/Filesystem";
 import PathSelector from "../components/files/PathSelector.vue";
-import { date } from 'quasar'
+import { useFormattedTimeStamp } from '../helpers/Time'
 
-const timeStamp = Date.now()
-const formattedTimeStamp = date.formatDate(timeStamp, 'YYYYMMDD_HHmmss')
+const formattedTimeStamp = useFormattedTimeStamp();
 
 const recorderStore = useRecorderStore();
 const storagePath = ref<StoragePath>({
