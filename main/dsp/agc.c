@@ -25,6 +25,11 @@ void AGC_Init(AGC_t *agc, uint8_t initial_gain)
     agc->current_gain = initial_gain;
     agc->samples_count = 0;
     agc->max_input_value = 0;
+
+    //default values (can be overwritten later)
+    agc->target_value = DSP_AGC_TARGET_VALUE;
+    agc->samples_per_step = DSP_AGC_SAMPLES_PER_STEP;
+    agc->gain_step = DSP_AGC_STEP;
 }
 
 // AGC calculate and apply gain
@@ -38,19 +43,19 @@ int16_t AGC_Update(AGC_t *agc, int16_t value)
     if (amplified_value > agc->max_input_value)
         agc->max_input_value = amplified_value;
 
-    if (agc->samples_count < DSP_AGC_SAMPLES_PER_STEP)
+    if (agc->samples_count < agc->samples_per_step)
     {
         agc->samples_count++;
     }
     else
     {
-        int16_t error = DSP_AGC_TARGET_VALUE - agc->max_input_value;
+        int16_t error = agc->target_value - agc->max_input_value;
 
         if (error > 0)
         {
-            if (agc->current_gain <= DSP_AGC_MAX_GAIN - DSP_AGC_STEP)
+            if (agc->current_gain <= DSP_AGC_MAX_GAIN - agc->gain_step)
             {
-                agc->current_gain += DSP_AGC_STEP;
+                agc->current_gain += agc->gain_step;
             }
             else
             {
@@ -59,9 +64,9 @@ int16_t AGC_Update(AGC_t *agc, int16_t value)
         }
         else
         {
-            if (agc->current_gain >= DSP_AGC_MIN_GAIN + DSP_AGC_STEP)
+            if (agc->current_gain >= DSP_AGC_MIN_GAIN + agc->gain_step)
             {
-                agc->current_gain -= DSP_AGC_STEP;
+                agc->current_gain -= agc->gain_step;
             }
             else
             {

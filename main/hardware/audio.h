@@ -59,7 +59,10 @@
 
 #define AUDIO_AFSK_SAMPLES_THRESHOLD (AUDIO_AFSK_SAMPLESPERBIT / 2)
 
-#define AUDIO_AFSK_SAMPLES_STEP (AUDIO_AFSK_SAMPLESPERBIT / 10)
+// #define AUDIO_AFSK_SAMPLES_STEP (AUDIO_AFSK_SAMPLESPERBIT / 10)
+// compare results with 20% step:
+#define AUDIO_AFSK_SAMPLES_STEP (AUDIO_AFSK_SAMPLESPERBIT / 5)
+
 // Due to this bug: https://github.com/espressif/esp-idf/issues/10586
 // continous ADC driver samples at 80% of the advertised frequency
 // this value increases the sample frequency by 25% to counter that issue

@@ -44,7 +44,7 @@ void app_main()
     xTaskCreate(AUDIO_Listen, "AUDIO_Listen", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
 
     // Demodulate AFSK
-    xTaskCreate(AUDIO_DemodulateAFSK, "AUDIO_DemodulateAFSK", 4096, NULL, RTOS_PRIORITY_HIGHEST, NULL);
+    xTaskCreate(AUDIO_DemodulateAFSK, "AUDIO_DemodulateAFSK", 4096, NULL, RTOS_PRIORITY_HIGH, NULL);
 
     // Audio empty ADC ring buffer task
     xTaskCreate(AUDIO_EmptyAdcRingBuffer, "AUDIO_EmptyAdcRingBuffer", 2048, NULL, RTOS_PRIORITY_IDLE, NULL);

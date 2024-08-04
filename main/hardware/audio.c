@@ -43,6 +43,8 @@
 #include "dsp/filter.h"
 // #endif
 
+#include "dsp/afsk.h"
+
 static const char *TAG = "HW/AUDIO";
 
 static TaskHandle_t audioListenTaskHandle;
@@ -68,6 +70,8 @@ SemaphoreHandle_t transmitSemaphore;
 SemaphoreHandle_t receiveSemaphore;
 // Auto Gain Control handle
 AGC_t agc;
+// AFSK demodulator
+AFSK_t afsk;
 
 // Apply settings like sample rate, volume, etc
 static void pwm_audio_apply_settings(void)
@@ -143,8 +147,6 @@ void AUDIO_DemodulateAFSK(void *pvParameters)
     int16_t mark_bit;
     int16_t space_bit;
 
-    int8_t current_bit;
-
     u_int8_t output[1024];
     u_int8_t output_byte = 0;
 
@@ -201,10 +203,15 @@ void AUDIO_DemodulateAFSK(void *pvParameters)
         }
 
         // Get ADC data from the ADC ring buffer
-        buffer = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(1000), samples_to_read * sizeof(AUDIO_ADC_DATA_TYPE));
+        buffer = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(1000), AUDIO_INPUT_CHUNK_SIZE);
 
         // Return item so it gets removed from the ring buffer
         vRingbufferReturnItem(adcRingBufferHandle, buffer);
+
+        // if (bytes_received != samples_to_read * sizeof(AUDIO_ADC_DATA_TYPE))
+        // {
+        //     ESP_LOGE(TAG, "Asked for %d samples, but received %d", samples_to_read, bytes_received * sizeof(AUDIO_ADC_DATA_TYPE));
+        // }
 
         // ESP_LOGI(TAG, "bytes rec: %d", bytes_received);
         // ESP_LOGI(TAG, "bytes received: %d free size: %d", bytes_received, current_free_size_b);
@@ -244,68 +251,10 @@ void AUDIO_DemodulateAFSK(void *pvParameters)
                 buffer[i] = FILTER_Update(&lp_baud, buffer[i]);
                 // Convert to ones and zeroes
                 buffer[i] = buffer[i] > 0 ? 1 : 0;
+
+                AFSK_Demodulate(&afsk, buffer[i]);
             }
 
-            // current bit is the first bit in the processing window
-            current_bit = buffer[0];
-
-            // set to default
-            samples_to_read = AUDIO_AFSK_SAMPLESPERBIT;
-
-            // find transition and adjust samples_to_read if needed
-            for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
-            {
-                if (buffer[i] != current_bit)
-                {
-                    if (i > AUDIO_AFSK_SAMPLES_THRESHOLD)
-                    {
-                        samples_to_read = AUDIO_AFSK_SAMPLESPERBIT + AUDIO_AFSK_SAMPLES_STEP;
-                        // ESP_LOGI(TAG, "slow");
-                    }
-                    else
-                    {
-                        samples_to_read = AUDIO_AFSK_SAMPLESPERBIT - AUDIO_AFSK_SAMPLES_STEP;
-                        // ESP_LOGI(TAG, "fast");
-                    }
-                    // exit loop since we found a transition already
-                    break;
-                }
-            }
-
-            // bitshift output_byte by 1 to make space for new bit
-            output_byte <<= 1;
-            // if current bit is 1 then set least significant bit of output_byte to 1 otherwise it will be 0
-            if (current_bit == 1)
-            {
-                output_byte |= 1;
-                ESP_LOGI(TAG, "1");
-            }
-            else
-            {
-                ESP_LOGI(TAG, "0");
-            }
-
-            if (bit_counter == 7)
-            {
-                output[byte_counter] = output_byte;
-                byte_counter++;
-
-                // ESP_LOGI(TAG, "D: %d", output_byte);
-
-                output_byte = 0;
-                bit_counter = 0;
-            }
-            else
-            {
-                bit_counter++;
-            }
-
-            if (byte_counter == 1024)
-            {
-                ESP_LOGI(TAG, "Byte counter reached 1024");
-                ESP_LOGI(TAG, "Byte array: %s\n", output);
-                byte_counter = 0;
-            }
         }
         xSemaphoreGive(receiveSemaphore);
     }
@@ -1189,4 +1138,6 @@ void AUDIO_Init(void)
     initialize_pwm_audio();
     // Init AGC
     AGC_Init(&agc, AUDIO_INPUT_AGC_INITIAL_GAIN);
+
+    AFSK_Init(&afsk);
 }
