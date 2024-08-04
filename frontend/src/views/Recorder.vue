@@ -67,9 +67,9 @@ import { onMounted, ref, watch } from "vue";
 import { useRecorderStore } from "../stores/recorder";
 import { FilesystemBasePath, StoragePath } from "../types/Filesystem";
 import PathSelector from "../components/files/PathSelector.vue";
-import { useFormattedTimeStamp } from '../helpers/Time'
+import { formatTimestamp  } from '../helpers/Time'
 
-const formattedTimeStamp = useFormattedTimeStamp();
+const formattedTimeStamp = formatTimestamp(new Date(Date.now()));
 
 const recorderStore = useRecorderStore();
 const storagePath = ref<StoragePath>({
