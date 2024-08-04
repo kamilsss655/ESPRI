@@ -34,7 +34,6 @@
                   :max="600"
                   :step="10"
                   snap
-                  label
                   color="blue"
                   :hint="'Define record length in seconds'"  
               ></q-slider>
