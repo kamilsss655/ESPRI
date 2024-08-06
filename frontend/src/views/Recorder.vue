@@ -9,39 +9,43 @@
         <q-form class="q-gutter-md" @submit="recorderStore.scheduleRecording">
           <PathSelector v-model="storagePath" filepath />
 
-          <q-field borderless label="Duration">
-            <template v-slot:control>
-              
+          <!-- Duration Label and Sliders -->
+          <q-card-section>
+            <div class="text-subtitle1">Duration</div>
+            <!-- Seconds Slider -->
+            <div class="slider-group q-mt-md">
               <q-slider
                 v-model="seconds"
-                :min="1"
+                :min="0"
                 :max="59"
                 :step="1"
                 markers
                 snap
                 label
                 color="blue"
-                @input="updateDuration"
+                @change="updateDuration"
                 :hint="'Define record length in seconds'"
               ></q-slider>
-              <q-badge color="secondary"> Seconds </q-badge>
-
-              
+              <q-badge class="q-ml-sm" color="secondary">Seconds</q-badge>
+            </div>
+            <!-- Minutes Slider -->
+            <div class="slider-group q-mt-md">
               <q-slider
                 v-model="minutes"
-                :min="1"
+                :min="0"
                 :max="59"
                 :step="1"
                 markers
                 snap
                 label
                 color="blue"
-                @input="updateDuration"
+                @change="updateDuration"
                 :hint="'Define record length in minutes'"
               ></q-slider>
-              <q-badge color="secondary"> Minutes </q-badge>
-
-              
+              <q-badge class="q-ml-sm" color="secondary">Minutes</q-badge>
+            </div>
+            <!-- Hours Slider -->
+            <div class="slider-group q-mt-md">
               <q-slider
                 v-model="hours"
                 :min="0"
@@ -51,13 +55,12 @@
                 snap
                 label
                 color="blue"
-                @input="updateDuration"
+                @change="updateDuration"
                 :hint="'Define record length in hours'"
               ></q-slider>
-              <q-badge color="secondary"> Hours </q-badge>
-              
-            </template>
-          </q-field>
+              <q-badge class="q-ml-sm" color="secondary">Hours</q-badge>
+            </div>
+          </q-card-section>
 
           <!-- Total Duration Display -->
           <div class="row items-center q-mt-md justify-end">
@@ -88,12 +91,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useRecorderStore } from "../stores/recorder";
 import { FilesystemBasePath, StoragePath } from "../types/Filesystem";
 import PathSelector from "../components/files/PathSelector.vue";
 import { formatTimestamp } from "../helpers/Time";
 
+// Store setup
+const recorderStore = useRecorderStore();
+
+// Timestamp formatting
 const formattedTimeStamp = formatTimestamp(new Date(Date.now()));
 
 // Refs for duration in seconds, minutes, and hours
@@ -101,7 +108,11 @@ const seconds = ref(0);
 const minutes = ref(0);
 const hours = ref(0);
 
-const recorderStore = useRecorderStore();
+// Storage path
+const storagePath = ref<StoragePath>({
+  prefix: FilesystemBasePath.SdCard,
+  path: "/sample_" + formattedTimeStamp + ".wav",
+});
 
 // Function to update the total duration in seconds
 const updateDuration = () => {
@@ -109,24 +120,29 @@ const updateDuration = () => {
   recorderStore.duration_sec = Math.min(total, 32767); // Clamp to max 32767 seconds
 };
 
-const storagePath = ref<StoragePath>({
-  prefix: FilesystemBasePath.SdCard,
-  path: "/sample_" + formattedTimeStamp + ".wav"
-});
-
-// sync changes to store
+// Sync changes to store
 function updateRecorderStore() {
   recorderStore.filepath = storagePath.value.prefix + storagePath.value.path;
 }
 
+// On component mount, update store path
 onMounted(() => {
   updateRecorderStore();
 });
 
+// Watch for changes in the storage path and update the store
 watch(
   () => [storagePath.value.prefix, storagePath.value.path],
-  ([_prefix, _path]) => {
+  () => {
     updateRecorderStore();
   }
 );
 </script>
+
+<style scoped>
+.slider-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+</style>
