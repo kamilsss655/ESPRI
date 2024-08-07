@@ -62,13 +62,6 @@
             </div>
           </q-card-section>
 
-          <!-- Total Duration Display -->
-          <div class="row items-center q-mt-md justify-end">
-            <div class="col-auto text-right">
-              <div>Total Duration: {{ recorderStore.duration_sec }} sec</div>
-            </div>
-          </div>
-
           <div class="text-right q-pa-md">
             <q-btn
               icon="ion-play"
