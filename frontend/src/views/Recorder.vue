@@ -22,7 +22,7 @@
                 markers
                 snap
                 label-always
-                color="blue"
+                color="primary"
                 :hint="'Define record length in seconds'"
               ></q-slider>
               <q-badge class="q-ml-sm" color="secondary">Seconds</q-badge>
@@ -37,7 +37,7 @@
                 markers
                 snap
                 label-always
-                color="blue"
+                color="primary"
                 :hint="'Define record length in minutes'"
               ></q-slider>
               <q-badge class="q-ml-sm" color="secondary">Minutes</q-badge>
@@ -52,7 +52,7 @@
                 markers
                 snap
                 label-always
-                color="blue"
+                color="primary"
                 :hint="'Define record length in hours'"
               ></q-slider>
               <q-badge class="q-ml-sm" color="secondary">Hours</q-badge>
