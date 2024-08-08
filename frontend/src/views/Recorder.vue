@@ -124,11 +124,3 @@ watch(
   }
 );
 </script>
-
-<style scoped>
-.slider-group {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-</style>
