@@ -2,8 +2,8 @@ import { defineStore } from "pinia";
 import { ApiPaths, ApiResponse } from "../types/Api";
 import { Notify } from "quasar";
 import axios from "axios";
-import { Recorder } from "../types/Recorder";
-import { formatTimestamp } from '../helpers/Time'
+import { Recorder, RecordParam } from "../types/Recorder";
+import { formatTimestamp } from "../helpers/Time";
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.timeout = 600;
@@ -14,11 +14,17 @@ export const useRecorderStore = defineStore({
   id: "recorder",
   state: (): Recorder => ({
     filepath: "sample_" + formattedTimeStamp + "wav",
-    duration_sec: 10
+    duration_seconds: 10,
+    duration_minutes: 0,
+    duration_hours: 0
   }),
   actions: {
     async scheduleRecording() {
-      const jsonData = JSON.stringify(this.$state);
+      const recordParam: RecordParam = {
+        filepath: this.filepath,
+        duration_sec: this.durationTotalInSeconds
+      }
+      const jsonData = JSON.stringify(recordParam);
       axiosInstance
         .put(ApiPaths.Record, jsonData, {
           headers: {
@@ -37,7 +43,7 @@ export const useRecorderStore = defineStore({
           console.error(error);
           if (error.response) {
             let response: ApiResponse = error.response;
-      
+
             Notify.create({
               message: response.data.response,
               color: "negative"
@@ -46,5 +52,8 @@ export const useRecorderStore = defineStore({
         });
     }
   },
-  getters: {}
+  getters: {
+    durationTotalInSeconds: (state): number =>
+      state.duration_seconds + state.duration_minutes * 60 + state.duration_hours * 3600
+  }
 });

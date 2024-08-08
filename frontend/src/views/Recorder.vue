@@ -15,7 +15,7 @@
             <!-- Seconds Slider -->
             <div class="slider-group q-mt-md">
               <q-slider
-                v-model="durationStore.seconds"
+                v-model="recorderStore.duration_seconds"
                 :min="0"
                 :max="59"
                 :step="1"
@@ -23,7 +23,6 @@
                 snap
                 label-always
                 color="blue"
-                @input="updateDuration"
                 :hint="'Define record length in seconds'"
               ></q-slider>
               <q-badge class="q-ml-sm" color="secondary">Seconds</q-badge>
@@ -31,7 +30,7 @@
             <!-- Minutes Slider -->
             <div class="slider-group q-mt-md">
               <q-slider
-                v-model="durationStore.minutes"
+                v-model="recorderStore.duration_minutes"
                 :min="0"
                 :max="59"
                 :step="1"
@@ -39,7 +38,6 @@
                 snap
                 label-always
                 color="blue"
-                @input="updateDuration"
                 :hint="'Define record length in minutes'"
               ></q-slider>
               <q-badge class="q-ml-sm" color="secondary">Minutes</q-badge>
@@ -47,7 +45,7 @@
             <!-- Hours Slider -->
             <div class="slider-group q-mt-md">
               <q-slider
-                v-model="durationStore.hours"
+                v-model="recorderStore.duration_hours"
                 :min="0"
                 :max="9"
                 :step="1"
@@ -55,7 +53,6 @@
                 snap
                 label-always
                 color="blue"
-                @input="updateDuration"
                 :hint="'Define record length in hours'"
               ></q-slider>
               <q-badge class="q-ml-sm" color="secondary">Hours</q-badge>
@@ -86,14 +83,12 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { useRecorderStore } from "../stores/recorder";
-import { useDurationStore } from '../stores/duration';
 import { FilesystemBasePath, StoragePath } from "../types/Filesystem";
 import PathSelector from "../components/files/PathSelector.vue";
 import { formatTimestamp } from "../helpers/Time";
 
 // Store setup
 const recorderStore = useRecorderStore();
-const durationStore = useDurationStore();
 
 // Timestamp formatting
 const formattedTimeStamp = formatTimestamp(new Date(Date.now()));
@@ -104,30 +99,14 @@ const storagePath = ref<StoragePath>({
   path: "/sample_" + formattedTimeStamp + ".wav",
 });
 
-// Function to update the total duration in seconds
-const updateDuration = () => {
-  const total = durationStore.seconds + durationStore.minutes * 60 + durationStore.hours * 3600;
-  recorderStore.duration_sec = Math.min(total, 32767); // Clamp to max 32767 seconds
-};
-
 // Sync changes to store
 function updateRecorderStore() {
   recorderStore.filepath = storagePath.value.prefix + storagePath.value.path;
 }
 
-// Watch for changes in slider values and update the total duration
-watch(
-  () => [durationStore.seconds, durationStore.minutes, durationStore.hours],
-  () => {
-    updateDuration();
-  }
-);
-
 // On component mount, update store path
 onMounted(() => {
   updateRecorderStore();
-  durationStore.loadState(); // Load stored duration values from localStorage
-  updateDuration(); // Ensure that the recorderStore is updated with the loaded values
 });
 
 // Watch for changes in the storage path and update the store
