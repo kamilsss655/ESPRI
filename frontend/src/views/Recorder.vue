@@ -9,55 +9,62 @@
         <q-form class="q-gutter-md" @submit="recorderStore.scheduleRecording">
           <PathSelector v-model="storagePath" filepath />
 
-          <!-- Duration Label and Sliders -->
-          <q-card-section>
-            <div class="text-subtitle1">Duration</div>
-            <!-- Seconds Slider -->
-            <div class="slider-group q-mt-md">
-              <q-slider
-                v-model="recorderStore.duration_seconds"
-                :min="0"
-                :max="59"
-                :step="1"
-                markers
-                snap
-                label-always
-                color="primary"
-                :hint="'Define record length in seconds'"
-              ></q-slider>
-              <q-badge class="q-ml-sm" color="secondary">Seconds</q-badge>
-            </div>
-            <!-- Minutes Slider -->
-            <div class="slider-group q-mt-md">
-              <q-slider
-                v-model="recorderStore.duration_minutes"
-                :min="0"
-                :max="59"
-                :step="1"
-                markers
-                snap
-                label-always
-                color="primary"
-                :hint="'Define record length in minutes'"
-              ></q-slider>
-              <q-badge class="q-ml-sm" color="secondary">Minutes</q-badge>
-            </div>
-            <!-- Hours Slider -->
-            <div class="slider-group q-mt-md">
-              <q-slider
-                v-model="recorderStore.duration_hours"
-                :min="0"
-                :max="9"
-                :step="1"
-                markers
-                snap
-                label-always
-                color="primary"
-                :hint="'Define record length in hours'"
-              ></q-slider>
-              <q-badge class="q-ml-sm" color="secondary">Hours</q-badge>
-            </div>
-          </q-card-section>
+          <q-list bordered>
+            <q-item>
+              <div class="text-subtitle1">Duration</div>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-slider
+                  v-model="recorderStore.duration_seconds"
+                  :min="0"
+                  :max="59"
+                  :step="1"
+                  markers
+                  snap
+                  label-always
+                  color="primary"
+                  :hint="'Define record length in seconds'"
+                ></q-slider>
+              </q-item-section>
+              <q-item-section avatar> Seconds </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-slider
+                  v-model="recorderStore.duration_minutes"
+                  :min="0"
+                  :max="59"
+                  :step="1"
+                  markers
+                  snap
+                  label-always
+                  color="primary"
+                  :hint="'Define record length in minutes'"
+                ></q-slider>
+              </q-item-section>
+              <q-item-section avatar> Minutes </q-item-section>
+            </q-item>
+
+            <q-item>
+              <q-item-section>
+                <q-slider
+                  v-model="recorderStore.duration_hours"
+                  :min="0"
+                  :max="9"
+                  :step="1"
+                  markers
+                  snap
+                  label-always
+                  color="primary"
+                  :hint="'Define record length in hours'"
+                ></q-slider>
+              </q-item-section>
+              <q-item-section avatar> Hours </q-item-section>
+            </q-item>
+          </q-list>
 
           <div class="text-right q-pa-md">
             <q-btn
@@ -96,7 +103,7 @@ const formattedTimeStamp = formatTimestamp(new Date(Date.now()));
 // Storage path
 const storagePath = ref<StoragePath>({
   prefix: FilesystemBasePath.SdCard,
-  path: "/sample_" + formattedTimeStamp + ".wav",
+  path: "/sample_" + formattedTimeStamp + ".wav"
 });
 
 // Sync changes to store
