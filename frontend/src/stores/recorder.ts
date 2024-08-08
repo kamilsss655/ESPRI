@@ -3,17 +3,14 @@ import { ApiPaths, ApiResponse } from "../types/Api";
 import { Notify } from "quasar";
 import axios from "axios";
 import { Recorder, RecordParam } from "../types/Recorder";
-import { formatTimestamp } from "../helpers/Time";
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.timeout = 600;
 
-const formattedTimeStamp = formatTimestamp(new Date(Date.now()));
-
 export const useRecorderStore = defineStore({
   id: "recorder",
   state: (): Recorder => ({
-    filepath: "sample_" + formattedTimeStamp + "wav",
+    filepath: "sample.wav",
     duration_seconds: 10,
     duration_minutes: 0,
     duration_hours: 0
