@@ -20,10 +20,11 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-#define WEBSOCKET_MESSAGE_MAX_LENGTH 200
+#define WEBSOCKET_MESSAGE_MAX_LENGTH  5120
 
 esp_err_t WEBSOCKET_Handle(httpd_req_t *req);
 void WEBSOCKET_Send(const char *tag, const char *format, ...);
+void WEBSOCKET_Binary_Send(uint8_t *data, size_t len);
 void WEBSOCKET_Ping(void *pvParameters);
 
 #endif

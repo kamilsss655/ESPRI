@@ -26,7 +26,7 @@
 // Define audio ADC data type representing single audio sample
 #define AUDIO_ADC_DATA_TYPE uint16_t
 // Define chunk size for audio input we process at a time
-#define AUDIO_INPUT_CHUNK_SIZE 2048
+#define AUDIO_INPUT_CHUNK_SIZE 1024 // TODO LESN
 // Define audio input max buffer size
 #define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
 // Define ADC ring buffer size
@@ -150,5 +150,6 @@ void AUDIO_EmptyAdcRingBuffer(void *pvParameters);
 void AUDIO_SquelchControl(void *pvParameters);
 void AUDIO_Watchdog(void *pvParameters);
 void AUDIO_Record(void *pvParameters);
+void AUDIO_To_Web(void *pvParameters);
 
 #endif

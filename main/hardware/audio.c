@@ -169,6 +169,106 @@ void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
     }
 }
 
+
+// This should not go here but for now...
+// Base64 character set
+static const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const int mod_table[] = {0, 2, 1};
+
+// Function to encode bytes to base64
+char* base64_encode(const unsigned char* input, int length) {
+    int output_length = 4 * ((length + 2) / 3);
+    char* encoded_data = (char*)malloc(output_length + 1);
+    if (encoded_data == NULL) return NULL;
+
+    int i, j;
+    for (i = 0, j = 0; i < length;) {
+        uint32_t octet_a = i < length ? input[i++] : 0;
+        uint32_t octet_b = i < length ? input[i++] : 0;
+        uint32_t octet_c = i < length ? input[i++] : 0;
+
+        uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
+
+        encoded_data[j++] = base64_chars[(triple >> 3 * 6) & 0x3F];
+        encoded_data[j++] = base64_chars[(triple >> 2 * 6) & 0x3F];
+        encoded_data[j++] = base64_chars[(triple >> 1 * 6) & 0x3F];
+        encoded_data[j++] = base64_chars[(triple >> 0 * 6) & 0x3F];
+    }
+
+    for (int k = 0; k < mod_table[length % 3]; k++)
+        encoded_data[output_length - 1 - k] = '=';
+
+    encoded_data[output_length] = '\0';
+    return encoded_data;
+}
+
+// Audio sending task
+void AUDIO_To_Web(void *pvParameters)
+{   
+    int16_t *buffersigned = NULL;
+
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    size_t bytes_received = 0;
+
+    ESP_LOGI(TAG, "Waiting for squelch to open");
+
+    while (1)
+    {
+        // Wait until squelch opens
+        while (gAudioState != AUDIO_RECEIVING)
+        {
+            vTaskDelay(1);
+        }
+
+        // If ADC ring buffer is being used by some other task wait indefinitely
+        while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+        {
+            ESP_LOGW(TAG, "Send waiting for ADC ring buffer to be released..");
+        }
+
+        // Wait until the buffer has enough data, to avoid writing to filesystem in small chunks
+        while (xRingbufferGetCurFreeSize(adcRingBufferHandle) >= AUDIO_INPUT_CHUNK_SIZE)
+        {
+            vTaskDelay(1 / portTICK_PERIOD_MS);
+        }
+
+        // Get ADC data from the ADC ring buffer
+        buffersigned = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), AUDIO_INPUT_CHUNK_SIZE * sizeof(AUDIO_ADC_DATA_TYPE));
+
+        ESP_LOGI(TAG, "bytes received: %d", bytes_received);
+
+        // Check received data
+        if (buffersigned != NULL)
+        {
+            // iterate over samples
+            for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
+            {
+                // Remove DC bias (center signal)
+                buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
+                // Amplify signal using AGC (clipping prevention built-in)
+                buffersigned[i] = AGC_Update(&agc, buffersigned[i]);
+            }
+            // Return item so it gets removed from the ring buffer
+            vRingbufferReturnItem(adcRingBufferHandle, buffersigned);
+            // Give semaphore so other tasks can access ADC ring buffer
+            xSemaphoreGive(receiveSemaphore);
+            WEBSOCKET_Binary_Send(buffersigned, bytes_received);
+        }
+        else
+        {
+            // Likely the buffer is empty
+            ESP_LOGI(TAG, "ADC ring buffer empty");
+            goto Done;
+        }
+    }
+
+Done:
+
+    // Delete self
+    vTaskDelete(NULL);
+}
+
 // Audio record task
 void AUDIO_Record(void *pvParameters)
 {
