@@ -253,7 +253,7 @@ void AUDIO_To_Web(void *pvParameters)
             vRingbufferReturnItem(adcRingBufferHandle, buffersigned);
             // Give semaphore so other tasks can access ADC ring buffer
             xSemaphoreGive(receiveSemaphore);
-            WEBSOCKET_Binary_Send(buffersigned, bytes_received);
+            WEBSOCKET_Binary_Send((uint8_t*)buffersigned, bytes_received);
         }
         else
         {
