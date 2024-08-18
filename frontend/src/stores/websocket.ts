@@ -23,15 +23,58 @@ export const useWebsocketStore = defineStore({
           "/websocket"
       );
 
+      connection.binaryType = 'arraybuffer';
+
       connection.onmessage = (event) => {
-        if (this.messageCountMaxLimitReached) {
-          this.shiftMessages();
+        if (typeof event.data === 'string' || event.data[0]=='{') {
+          if (this.messageCountMaxLimitReached) {
+            this.shiftMessages();
+          }
+
+          let jsonMessage = JSON.parse(event.data);
+          const systemStore = useSystemStore();
+          systemStore.handle(jsonMessage);
+          this.storeMessage(jsonMessage);
+          this.updateLastSeenTimestamp();
+        } else {
+          // TODO: process binary (audio) data
+          // If we have a processor, send the data to it
+          if (window.pcmProcessor==null) return;
+          const dataView = new DataView(event.data);
+          const newBuffer = new Float32Array(event.data.byteLength / 2);
+
+          let sumOfSquares=0;
+          // Transform to -1/1 float audio
+          // Assuming 16-bit PCM, little-endian
+          for (let i = 0; i < newBuffer.length; i++) {
+            newBuffer[i] = dataView.getInt16(i * 2, true) / 32768;
+            sumOfSquares+=newBuffer[i] ** 2;
+          }
+
+          // This disabled for now... its vanilla JS
+          // Calculate the avg power to show on the meter
+          //const avgPowerDecibels = 10 * Math.log10(sumOfSquares / newBuffer.length);
+          //if (isFinite(avgPowerDecibels)) setTimeout(()=>{document.getElementById('avg-level').value=avgPowerDecibels;},0);
+          
+          /*
+          if (recordActive) {
+            let tempBuffer = new Int16Array(completeAudioBuffer.length + newBuffer.length);
+            tempBuffer.set(completeAudioBuffer, 0);
+            tempBuffer.set(newBuffer, completeAudioBuffer.length);
+            // Used for local audio recording TODO
+            //completeAudioBuffer = tempBuffer;
+          }
+          */
+
+          window.pcmBuffer.push(newBuffer);
+          if (window.pcmProcessor!=null) {
+            window.pcmProcessor.port.postMessage('dataAvailable');
+          } else {
+            console.error('pcmProcessor is null');
+          }
         }
-        let jsonMessage = JSON.parse(event.data);
-        const systemStore = useSystemStore();
-        systemStore.handle(jsonMessage);
-        this.storeMessage(jsonMessage);
-        this.updateLastSeenTimestamp();
+
+
       };
 
       connection.onerror = (event) => {

@@ -17,6 +17,9 @@
       <q-space />
 
       <div class="q-gutter-sm row items-center no-wrap">
+        <q-btn round dense flat to="/audio" icon="ion-volume-high">
+          <q-tooltip>Listen to radio</q-tooltip>
+        </q-btn>
         <q-btn round dense flat to="/beacon" icon="ion-flag">
           <q-tooltip>Beacon</q-tooltip>
         </q-btn>

@@ -19,6 +19,17 @@ import App from "./App.vue";
 
 const pinia = createPinia();
 
+// Global vars for audio processing...
+// I don't know how to use Vue so for now...
+declare global {
+  interface Window {
+    pcmBuffer: any[];
+    pcmProcessor: any;
+  }
+}
+window.pcmBuffer=[];
+window.pcmProcessor=null;
+
 const myApp = createApp(App).use(router).use(pinia);
 
 myApp.use(Quasar, {
