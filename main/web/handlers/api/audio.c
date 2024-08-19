@@ -64,7 +64,10 @@ esp_err_t API_AUDIO_To_Web(httpd_req_t *req)
     }
     else
     {
-        httpd_json_resp_send(req, HTTPD_500, "Sending task is already running.");
+        // TODO this is not the way...
+        vTaskDelete(audioToWebTaskHandle);
+        httpd_json_resp_send(req, HTTPD_200, "Task killed successfully.");
+        //httpd_json_resp_send(req, HTTPD_500, "Sending task is already running.");
     }
 
     return ESP_OK;

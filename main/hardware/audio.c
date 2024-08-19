@@ -206,6 +206,7 @@ char* base64_encode(const unsigned char* input, int length) {
 void AUDIO_To_Web(void *pvParameters)
 {   
     int16_t *buffersigned = NULL;
+    int8_t *buffersignedtosend = NULL;
 
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
@@ -234,13 +235,14 @@ void AUDIO_To_Web(void *pvParameters)
         }
 
         // Get ADC data from the ADC ring buffer
-        buffersigned = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), AUDIO_INPUT_CHUNK_SIZE * sizeof(AUDIO_ADC_DATA_TYPE));
-
+        buffersigned = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(250), AUDIO_INPUT_CHUNK_SIZE * sizeof(AUDIO_ADC_DATA_TYPE));          
+        
         ESP_LOGI(TAG, "bytes received: %d", bytes_received);
 
         // Check received data
         if (buffersigned != NULL)
         {
+            buffersignedtosend = (int8_t*)malloc(AUDIO_INPUT_CHUNK_SIZE);
             // iterate over samples
             for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
             {
@@ -248,12 +250,16 @@ void AUDIO_To_Web(void *pvParameters)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify signal using AGC (clipping prevention built-in)
                 buffersigned[i] = AGC_Update(&agc, buffersigned[i]);
+                buffersignedtosend[i] = buffersigned[i] >> 8;
             }
+
             // Return item so it gets removed from the ring buffer
             vRingbufferReturnItem(adcRingBufferHandle, buffersigned);
             // Give semaphore so other tasks can access ADC ring buffer
             xSemaphoreGive(receiveSemaphore);
-            WEBSOCKET_Binary_Send((uint8_t*)buffersigned, bytes_received);
+            // TODO This function relies on buffer not dissapearing, there is some bug probably here
+            WEBSOCKET_Binary_Send((uint8_t*)buffersignedtosend, AUDIO_INPUT_CHUNK_SIZE);
+            free(buffersignedtosend);
         }
         else
         {

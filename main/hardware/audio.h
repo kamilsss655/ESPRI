@@ -26,7 +26,7 @@
 // Define audio ADC data type representing single audio sample
 #define AUDIO_ADC_DATA_TYPE uint16_t
 // Define chunk size for audio input we process at a time
-#define AUDIO_INPUT_CHUNK_SIZE 1024 // TODO LESN
+#define AUDIO_INPUT_CHUNK_SIZE 2048 // TODO LESN
 // Define audio input max buffer size
 #define AUDIO_INPUT_MAX_BUFF_SIZE AUDIO_INPUT_CHUNK_SIZE * 1
 // Define ADC ring buffer size
@@ -34,7 +34,7 @@
 // Define ADC ring buffer type
 #define AUDIO_ADC_RING_BUFFER_TYPE RINGBUF_TYPE_BYTEBUF
 // Define audio input sampling frequency in Hz
-#define AUDIO_INPUT_SAMPLE_FREQ 32000
+#define AUDIO_INPUT_SAMPLE_FREQ 8000
 // Defines how many ADC measurements will be taken per single sample (sample is mean value of all the measurements)
 #define AUDIO_INPUT_UPSAMPLE_FACTOR 2
 // Determine whether to digitally filter the audio input recorded
