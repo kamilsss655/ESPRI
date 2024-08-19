@@ -12,6 +12,8 @@ export const useSystemStore = defineStore({
   state: (): System => ({
     rebootRequired: false,
     audioState: AudioState.LISTENING,
+    audioSending: false,
+    audioRecordingActive: false,
     info: {
       "heap.total": 160000,
       "heap.free": 80241,
@@ -31,6 +33,12 @@ export const useSystemStore = defineStore({
     },
     resetRebootRequiredFlag() {
       this.$state.rebootRequired = false;
+    },
+    setAudioSending(value: boolean) {
+      this.$state.audioSending = value;
+    },
+    setAudioRecordingActive(value: boolean) {
+      this.$state.audioRecordingActive = value;
     },
     setRebootRequiredFlag() {
       this.$state.rebootRequired = true;
