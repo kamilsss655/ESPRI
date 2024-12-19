@@ -23,6 +23,10 @@ Features:
   - implemented:
     - SPA web app served from the ESP web server
     - JSON API served from the ESP
+    - beacon mode
+      - AFSK
+      - morse code
+      - wav audio recording
     - wireless UART connection to the radio
     - record .wav files onto uSD card or device memory
     - broadcast .wav files onto uSD card or device memory
