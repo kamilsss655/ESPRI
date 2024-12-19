@@ -19,16 +19,19 @@ High level diagram:
 
 The main goal of this project is to extend functionalities of ham radios with addition of a small PCB board that contains ESP32 microcontroller.
 
-As such following features would be enabled:
-- custom digital modes (modulated and demodulated by the ESP chip)
-  - more advanced messaging
-    - could be served as webpage by the esp chip itself
-    - or have a mobile client as Meshtastic 
-- wireless UART connection to the radio
-- record .wav files
-- broadcast .wav files
-- turning any radio into IoT device via JSON API served from the ESP
-- turning radios into wireless modems
+Features:
+  - implemented:
+    - SPA web app served from the ESP web server
+    - JSON API served from the ESP
+    - wireless UART connection to the radio
+    - record .wav files onto uSD card or device memory
+    - broadcast .wav files onto uSD card or device memory
+  - roadmap/in progress:
+    - custom digital modes (modulated and demodulated by the ESP chip)
+      - more advanced messaging
+      - could be served as webpage by the esp chip itself
+      - or have a mobile client as Meshtastic
+      - turn any radio into wireless modem
 
 The physicial inteface layer between the ESPRI and the host radio will be through the Kenwood connector.
 
