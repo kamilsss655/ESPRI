@@ -39,9 +39,11 @@
 #include "web/handlers/websocket.h"
 #include "helper/filesystem.h"
 #include <dsp/agc.h>
-#ifdef AUDIO_RECORDER_FILTER_ENABLED
+// #ifdef AUDIO_RECORDER_FILTER_ENABLED
 #include "dsp/filter.h"
-#endif
+// #endif
+
+#include "dsp/afsk.h"
 
 static const char *TAG = "HW/AUDIO";
 
@@ -68,6 +70,8 @@ SemaphoreHandle_t transmitSemaphore;
 SemaphoreHandle_t receiveSemaphore;
 // Auto Gain Control handle
 AGC_t agc;
+// AFSK demodulator
+AFSK_t afsk;
 
 // Apply settings like sample rate, volume, etc
 static void pwm_audio_apply_settings(void)
@@ -133,6 +137,129 @@ Done:
     vTaskDelete(NULL);
 }
 
+// Calibrate ADC by calculating mean value of the samples
+void AUDIO_DemodulateAFSK(void *pvParameters)
+{
+    // audio samples from ADC buffer
+    int16_t *buffer = NULL;
+    size_t bytes_received = 0;
+
+    int16_t mark_bit;
+    int16_t space_bit;
+
+    u_int8_t output[1024];
+    u_int8_t output_byte = 0;
+
+    u_int8_t bit_counter = 0;
+    u_int16_t byte_counter = 0;
+
+    u_int16_t samples_to_read = AUDIO_AFSK_SAMPLESPERBIT;
+
+    FILTER_BiquadFilter_t hp_1200;
+    FILTER_BiquadFilter_t lp_1200;
+    FILTER_BiquadFilter_t lp_1000;
+    FILTER_BiquadFilter_t lp_2000;
+    FILTER_BiquadFilter_t hp_2200;
+    FILTER_BiquadFilter_t lp_2200;
+    FILTER_BiquadFilter_t lp_baud;
+
+    FILTER_Init(&hp_1200, 1200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
+    FILTER_Init(&lp_1200, 1200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&hp_2200, 2200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
+    FILTER_Init(&lp_2200, 2200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&lp_1000, 1000, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+    FILTER_Init(&lp_2000, 2000, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&lp_baud, AUDIO_AFSK_BAUD, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    ESP_LOGI(TAG, "Demodulate AFSK task started.");
+
+    while (1)
+    {
+        // Wait until squelch opens
+        while (gAudioState != AUDIO_RECEIVING)
+        {
+            vTaskDelay(1);
+        }
+
+        // If ADC ring buffer is being used by some other task wait indefinitely
+        while (xSemaphoreTake(receiveSemaphore, 1000 / portTICK_PERIOD_MS) == pdFALSE)
+        {
+            ESP_LOGW(TAG, "Demodulate AFSK waiting for ADC ring buffer to be released..");
+        }
+
+        // current_free_size_b = xRingbufferGetCurFreeSize(adcRingBufferHandle);
+        // // Wait until the buffer has enough data, to avoid writing to filesystem in small chunks
+        // while (current_free_size_b >= AUDIO_INPUT_CHUNK_SIZE)
+        // {
+        //     vTaskDelay(1 / portTICK_PERIOD_MS);
+        // }
+
+        while (xRingbufferGetCurFreeSize(adcRingBufferHandle) >= AUDIO_INPUT_CHUNK_SIZE)
+        {
+            vTaskDelay(1 / portTICK_PERIOD_MS);
+        }
+
+        // Get ADC data from the ADC ring buffer
+        buffer = xRingbufferReceiveUpTo(adcRingBufferHandle, &bytes_received, pdMS_TO_TICKS(1000), AUDIO_INPUT_CHUNK_SIZE);
+
+        // Return item so it gets removed from the ring buffer
+        vRingbufferReturnItem(adcRingBufferHandle, buffer);
+
+        // if (bytes_received != samples_to_read * sizeof(AUDIO_ADC_DATA_TYPE))
+        // {
+        //     ESP_LOGE(TAG, "Asked for %d samples, but received %d", samples_to_read, bytes_received * sizeof(AUDIO_ADC_DATA_TYPE));
+        // }
+
+        // ESP_LOGI(TAG, "bytes rec: %d", bytes_received);
+        // ESP_LOGI(TAG, "bytes received: %d free size: %d", bytes_received, current_free_size_b);
+
+        // Check received data
+        if (buffer != NULL)
+        {
+            // amplification, filtering, envelope detection
+            for (size_t i = 0; i < bytes_received / sizeof(AUDIO_ADC_DATA_TYPE); i += 1)
+            {
+                // Remove DC bias (center signal)
+                buffer[i] = buffer[i] - gSettings.calibration.adc.value;
+                // Amplify signal using AGC (clipping prevention built-in)
+                buffer[i] = AGC_Update(&agc, buffer[i]);
+
+                // Filter through high-pass filter
+                mark_bit = FILTER_Update(&hp_1200, buffer[i]);
+                // Filter through low-pass filter
+                mark_bit = FILTER_Update(&lp_1200, mark_bit);
+                // Mark envelope detection, first get absolute value
+                mark_bit = abs(mark_bit);
+                // Then filter through low-pass filter
+                mark_bit = FILTER_Update(&lp_1000, mark_bit);
+
+                // Filter through high-pass filter
+                space_bit = FILTER_Update(&hp_2200, buffer[i]);
+                // Filter through low-pass filter
+                space_bit = FILTER_Update(&lp_2200, space_bit);
+                // Space envelope detection, first get absolute value
+                space_bit = abs(space_bit);
+                // Then filter through low-pass filter
+                space_bit = FILTER_Update(&lp_2000, space_bit);
+
+                // Substract mark from bit as part of decision tree
+                buffer[i] = mark_bit - space_bit;
+                // Remove distortions and noise by filtering through LPF at the baud rate
+                buffer[i] = FILTER_Update(&lp_baud, buffer[i]);
+                // Convert to ones and zeroes
+                buffer[i] = buffer[i] > 0 ? 1 : 0;
+
+                AFSK_Demodulate(&afsk, buffer[i]);
+            }
+
+        }
+        xSemaphoreGive(receiveSemaphore);
+    }
+}
+
 // Low priority task that will consume ADC samples from the ADC ring buffer if no other tasks need them
 // to prevent ADC ring buffer overflow
 void AUDIO_EmptyAdcRingBuffer(void *pvParameters)
@@ -185,6 +312,25 @@ void AUDIO_Record(void *pvParameters)
     FILTER_Init(&lp_filter_3, AUDIO_INPUT_LPF_3_FREQ, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 0.40);
 #endif
 
+    FILTER_BiquadFilter_t hp_1200;
+    FILTER_BiquadFilter_t lp_1200;
+    FILTER_BiquadFilter_t lp_1000;
+    FILTER_BiquadFilter_t lp_2000;
+    FILTER_BiquadFilter_t hp_2200;
+    FILTER_BiquadFilter_t lp_2200;
+    FILTER_BiquadFilter_t lp_baud;
+
+    FILTER_Init(&hp_1200, 1200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
+    FILTER_Init(&lp_1200, 1200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&hp_2200, 2200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_HIGHPASS, 1);
+    FILTER_Init(&lp_2200, 2200, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&lp_1000, 1000, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+    FILTER_Init(&lp_2000, 2000, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
+    FILTER_Init(&lp_baud, AUDIO_AFSK_BAUD, AUDIO_INPUT_SAMPLE_FREQ, FILTER_LOWPASS, 1);
+
     // Retrieve params
     AUDIO_RecordParam_t *param = (AUDIO_RecordParam_t *)pvParameters;
 
@@ -227,6 +373,9 @@ void AUDIO_Record(void *pvParameters)
     }
 
     ESP_LOGI(TAG, "File opened");
+
+    int16_t mark_bit;
+    int16_t space_bit;
 
     // Determines how many samples we want to save
     const size_t target_samples_written = param->duration_sec * AUDIO_INPUT_SAMPLE_FREQ;
@@ -293,6 +442,28 @@ void AUDIO_Record(void *pvParameters)
                 buffersigned[i] = buffersigned[i] - gSettings.calibration.adc.value;
                 // Amplify signal using AGC (clipping prevention built-in)
                 buffersigned[i] = AGC_Update(&agc, buffersigned[i]);
+
+                // Filter through high-pass filter
+                mark_bit = FILTER_Update(&hp_1200, buffersigned[i]);
+                // Filter through low-pass filter
+                mark_bit = FILTER_Update(&lp_1200, mark_bit);
+                // Mark envelope detection, first get absolute value
+                mark_bit = abs(mark_bit);
+                // Then filter through low-pass filter
+                mark_bit = FILTER_Update(&lp_1000, mark_bit);
+
+                // Filter through high-pass filter
+                space_bit = FILTER_Update(&hp_2200, buffersigned[i]);
+                // Filter through low-pass filter
+                space_bit = FILTER_Update(&lp_2200, space_bit);
+                // Space envelope detection, first get absolute value
+                space_bit = abs(space_bit);
+                // Then filter through low-pass filter
+                space_bit = FILTER_Update(&lp_2000, space_bit);
+                // Substract mark from bit as part of decision tree
+                buffersigned[i] = mark_bit - space_bit;
+                // Remove distortions and noise by filtering through LPF at the baud rate
+                buffersigned[i] = FILTER_Update(&lp_baud, buffersigned[i]);
 #ifdef AUDIO_RECORDER_FILTER_ENABLED
                 // Filter through high-pass filter
                 buffersigned[i] = FILTER_Update(&hp_filter, buffersigned[i]);
@@ -507,7 +678,7 @@ void AUDIO_SquelchControl(void *pvParameters)
             over_squelch_windows = 0;
         }
         // Squelch off delay based on the under the squelch time window count (200*10ms = 2000ms)
-        if (under_squelch_windows >= 200 && (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING))
+        if (under_squelch_windows >= 10 && (gAudioState != AUDIO_LISTENING && gAudioState != AUDIO_TRANSMITTING))
         {
             ESP_LOGI(TAG, "LISTENING");
             AUDIO_SetAudioState(AUDIO_LISTENING);
@@ -967,4 +1138,6 @@ void AUDIO_Init(void)
     initialize_pwm_audio();
     // Init AGC
     AGC_Init(&agc, AUDIO_INPUT_AGC_INITIAL_GAIN);
+
+    AFSK_Init(&afsk);
 }

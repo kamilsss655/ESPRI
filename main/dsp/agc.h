@@ -32,9 +32,12 @@
 
 typedef struct
 {
-    uint8_t current_gain;    // current gain
-    uint16_t samples_count;  // samples counter
-    int16_t max_input_value; // max value from a series of samples
+    uint8_t current_gain;     // current gain
+    uint16_t samples_count;   // samples counter
+    uint16_t gain_step;       // gain step
+    int16_t max_input_value;  // max value from a series of samples
+    int16_t samples_per_step; // determine how many samples to take before changing gain
+    int16_t target_value;     // determine target sample value for the gain function
 } AGC_t;
 
 void AGC_Init(AGC_t *agc, uint8_t initial_gain);
