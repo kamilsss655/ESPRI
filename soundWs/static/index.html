@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- command to activate audio sending: curl -X PUT http://192.168.1.242/api/audio/send -->
+  <style>
+  </style>
+  <title>PCM Audio Player</title>
+</head>
+<body>
+  <h1>PCM Audio Player</h1>
+  <button onclick="setupAudio()">Start Audio</button>
+  <button onclick="downloadAudio()">Download Audio</button>
+  <label for="switch">Record audio</label>
+  <input type="checkbox" id="switch" onchange="toggleBufferActivation()">
+  <meter id="avg-level" min="-100" max="0" value="-100"></meter>
+  <script>
+    let socket = null;
+    let started=false
+    let pcmBuffer = [], pcmProcessor=null;
+    let completeAudioBuffer = new Float32Array(0);
+    let recordActive = false;
+
+    configWS();
+
+    function configWS() {
+      socket=new WebSocket("ws://192.168.1.246/websocket");
+      socket.binaryType = 'arraybuffer';
+      socket.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
+      socket.onmessage = (event) => {
+        if (typeof pcmData === 'string' || event.data[0]=='{') {
+          console.log('Received string data', JSON.parse(event.data));
+        } else {
+          appendToBuffer(event.data);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      socket.onclose = () => {
+        console.log('WebSocket connection closed');
+        setTimeout(() => { configWS();}, 0);
+      };
+    }
+
+    async function setupAudio() {
+      const sampleRate = 8000; // Adjust the sample rate as needed
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)({sampleRate:sampleRate});
+      
+      try {
+        await audioContext.audioWorklet.addModule('./pcm-processor.js');
+      } catch (error) {
+        console.error('Error adding audio worklet module:', error);
+        return;
+      }
+
+      pcmProcessor = new AudioWorkletNode(audioContext, 'pcm-processor');
+      pcmProcessor.port.onmessage = (event) => {
+        if (event.data === 'request') {
+          if (pcmBuffer.length > 0) {
+            pcmProcessor.port.postMessage(pcmBuffer.shift());
+          }
+        }
+      };
+
+      pcmProcessor.connect(audioContext.destination); 
+      started=true;     
+    }
+
+    function appendToBuffer(arrayBuffer) {
+      if (!started) return;
+
+      const dataView = new DataView(arrayBuffer);
+      const newBuffer = new Float32Array(arrayBuffer.byteLength);
+
+      let sumOfSquares=0;
+      // Transform to -1/1 float audio
+      // Assuming 16-bit PCM, little-endian
+      for (let i = 0; i < newBuffer.length; i++) {
+        newBuffer[i] = dataView.getInt8(i) / 128;
+        sumOfSquares+=newBuffer[i] ** 2;
+      }
+
+      // Calculate the avg power to show on the meter
+      const avgPowerDecibels = 10 * Math.log10(sumOfSquares / newBuffer.length);
+      if (isFinite(avgPowerDecibels)) setTimeout(()=>{document.getElementById('avg-level').value=avgPowerDecibels;},0);
+      
+      if (recordActive) {
+        let tempBuffer = new Int16Array(completeAudioBuffer.length + newBuffer.length);
+        tempBuffer.set(completeAudioBuffer, 0);
+        tempBuffer.set(newBuffer, completeAudioBuffer.length);
+        completeAudioBuffer = tempBuffer;
+      }
+
+      pcmBuffer.push(newBuffer);
+      if (pcmProcessor!=null) {
+        pcmProcessor.port.postMessage('dataAvailable');
+      } else {
+        console.error('pcmProcessor is null');
+      }
+    }
+
+    function downloadAudio() {
+      const blob = new Blob([completeAudioBuffer.buffer], {type: 'audio/wav'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'audio.wav';
+      a.click();
+    }
+
+    function toggleBufferActivation() {
+      recordActive = !recordActive;
+    }
+  </script>
+</body>
+</html>

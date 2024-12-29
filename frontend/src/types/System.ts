@@ -18,6 +18,8 @@ export interface SystemInfo {
 export interface System {
   rebootRequired: Boolean,
   audioState: AudioState,
+  audioSending: Boolean,
+  audioRecordingActive: Boolean,
   info: SystemInfo,
   systemInfoLiveUpdate: Boolean
 }
