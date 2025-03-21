@@ -30,6 +30,8 @@ Features:
     - wireless UART connection to the radio
     - record .wav files onto uSD card or device memory
     - broadcast .wav files from uSD card or device memory
+    - AGC (Auto Gain Control) algorithm
+    - DSP Filters
   - roadmap/in progress:
     - custom digital modes (modulated and demodulated by the ESP chip)
       - more advanced messaging
