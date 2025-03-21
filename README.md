@@ -60,6 +60,10 @@ Morse code beacon config:
 
 ![morse](https://github.com/kamilsss655/ESPRI/assets/8842065/c34a8f98-b447-408b-ab64-517cab04be98)
 
+AFSK beacon config:
+
+![afsk](https://github.com/user-attachments/assets/c641a67c-a880-4802-8d00-0ee8e61a8ce3)
+
 Notifications (real-time communication via Websocket):
 
 ![notifications](https://github.com/kamilsss655/ESPRI/assets/8842065/48d81130-c0fc-4a62-a131-9cc244b71f9f)
