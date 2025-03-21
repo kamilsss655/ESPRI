@@ -62,7 +62,7 @@ Morse code beacon config:
 
 AFSK beacon config:
 
-![afsk](https://github.com/user-attachments/assets/c641a67c-a880-4802-8d00-0ee8e61a8ce3)
+![afsk](https://github.com/user-attachments/assets/a01e1bf6-8e0c-453f-9319-b831d0d97aac)
 
 Notifications (real-time communication via Websocket):
 
