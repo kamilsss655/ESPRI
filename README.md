@@ -64,6 +64,10 @@ Notifications (real-time communication via Websocket):
 
 ![notifications](https://github.com/kamilsss655/ESPRI/assets/8842065/48d81130-c0fc-4a62-a131-9cc244b71f9f)
 
+File browser (can transmit, download, delete files from SD or internal flash)
+
+![files](https://github.com/user-attachments/assets/fe749a2e-a9b2-47b2-a9f9-9e3f4739b7ab)
+
 System info:
 
 ![system_info](https://github.com/kamilsss655/ESPRI/assets/8842065/6999a073-0c38-4b09-bf68-9d1092bb59dd)
