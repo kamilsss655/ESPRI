@@ -36,6 +36,40 @@ esp_err_t WEBSOCKET_Handle(httpd_req_t *req)
     return ESP_OK;
 }
 
+void WEBSOCKET_Binary_Send(uint8_t *data, size_t len)
+{
+    if (len==0) return;
+    httpd_ws_frame_t ws_pkt;
+
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.payload = data;
+    ws_pkt.len = len;
+    ws_pkt.type = HTTPD_WS_TYPE_BINARY;
+    ws_pkt.final = true;
+
+    static size_t max_clients = CONFIG_LWIP_MAX_LISTENING_TCP;
+    size_t fds = max_clients;
+    int client_fds[max_clients];
+
+    esp_err_t ret = httpd_get_client_list(gHttpServerHandle, &fds, client_fds);
+
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Got no clients");
+        return;
+    }
+
+    for (int i = 0; i < fds; i++)
+    {
+        int client_info = httpd_ws_get_fd_info(gHttpServerHandle, client_fds[i]);
+        if (client_info == HTTPD_WS_CLIENT_WEBSOCKET)
+        {
+            httpd_ws_send_frame_async(gHttpServerHandle, client_fds[i], &ws_pkt);
+            ESP_LOGI(TAG, "Sending binary to client %d", i);
+        }
+    }
+}
+
 void WEBSOCKET_Send(const char *tag, const char *format, ...)
 {
     va_list va;

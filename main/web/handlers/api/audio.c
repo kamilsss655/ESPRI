@@ -30,6 +30,8 @@ static const char *TAG = "WEB/API/AUDIO";
 static const char *audioRecordTaskName = "AUDIO_Record";
 static const char *audioTransmitWAVTaskName = "TRANSMIT_Wav";
 
+static const char *audioToWebTaskName = "AUDIO_To_Web";
+
 // Default values
 AUDIO_RecordParam_t record_param = {
     .filepath = AUDIO_DEFAULT_WAV_SAMPLE_FILEPATH,
@@ -46,6 +48,30 @@ ApiAttr_t record_attributes[] = {
 // List of audio transmit WAV attributes
 ApiAttr_t transmit_wav_attributes[] = {
     {"filepath", &transmit_wav_param.filepath, 0}};
+
+// Schedule audio to web task
+esp_err_t API_AUDIO_To_Web(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "Received audio sending request");
+
+    // Check if there is other instance of the task running
+    TaskHandle_t audioToWebTaskHandle = xTaskGetHandle(audioToWebTaskName);
+
+    if (audioToWebTaskHandle == NULL)
+    {
+        xTaskCreate(AUDIO_To_Web, audioToWebTaskName, 4096, NULL, RTOS_PRIORITY_MEDIUM, NULL);
+        httpd_json_resp_send(req, HTTPD_200, "OK. Sending will start once the squelch opens.");
+    }
+    else
+    {
+        // TODO this is not the way...
+        vTaskDelete(audioToWebTaskHandle);
+        httpd_json_resp_send(req, HTTPD_200, "Task killed successfully.");
+        //httpd_json_resp_send(req, HTTPD_500, "Sending task is already running.");
+    }
+
+    return ESP_OK;
+}
 
 // Schedule audio record task
 esp_err_t API_AUDIO_Record(httpd_req_t *req)

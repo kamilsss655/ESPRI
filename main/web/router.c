@@ -98,6 +98,13 @@ void ROUTER_Init(file_server_data *server_data, httpd_handle_t *server)
     httpd_register_uri_handler(server, &api_settings_create_uri);
 
     // API Audio
+    httpd_uri_t api_audio_send_uri = {
+        .uri = "/api/audio/send",
+        .method = HTTP_PUT,
+        .handler = API_AUDIO_To_Web,
+        .user_ctx = server_data};
+    httpd_register_uri_handler(server, &api_audio_send_uri);
+
     httpd_uri_t api_audio_record_uri = {
         .uri = "/api/audio/record",
         .method = HTTP_PUT,

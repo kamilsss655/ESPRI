@@ -22,5 +22,6 @@
 
 esp_err_t API_AUDIO_Record(httpd_req_t *req);
 esp_err_t API_AUDIO_TransmitWAV(httpd_req_t *req);
+esp_err_t API_AUDIO_To_Web(httpd_req_t *req);
 
 #endif
